@@ -31,6 +31,7 @@
 #include <DataFormats/PatCandidates/interface/CompositeCandidate.h>
 #include <DataFormats/PatCandidates/interface/Muon.h>
 #include <DataFormats/PatCandidates/interface/Electron.h>
+#include <DataFormats/PatCandidates/interface/Tau.h>
 #include <DataFormats/PatCandidates/interface/Photon.h>
 #include <DataFormats/PatCandidates/interface/Jet.h>
 #include <DataFormats/PatCandidates/interface/MET.h>
@@ -51,9 +52,8 @@
 #include <HTauTau-HMuMu/AnalysisStep/interface/DaughterDataHelpers.h>
 #include <HTauTau-HMuMu/AnalysisStep/interface/FinalStates.h>
 #include <HTauTau-HMuMu/AnalysisStep/interface/MCHistoryTools.h>
-//#include <HTauTau-HMuMu/AnalysisStep/interface/PileUpWeight.h>
 #include <HTauTau-HMuMu/AnalysisStep/interface/PileUpWeight.h>
-#include "SimDataFormats/HTXS/interface/HiggsTemplateCrossSections.h"
+//#include "SimDataFormats/HTXS/interface/HiggsTemplateCrossSections.h"
 
 
 #include "HTauTau-HMuMu/AnalysisStep/interface/EwkCorrections.h"
@@ -68,8 +68,8 @@
 #include <HTauTau-HMuMu/AnalysisStep/interface/ggF_qcd_uncertainty_2017.h>
 #include <HTauTau-HMuMu/AnalysisStep/interface/LeptonSFHelper.h>
 
-#include <MelaAnalytics/CandidateLOCaster/interface/MELACandidateRecaster.h>
-#include <CommonLHETools/LHEHandler/interface/LHEHandler.h>
+//#include <MelaAnalytics/CandidateLOCaster/interface/MELACandidateRecaster.h>
+//#include <CommonLHETools/LHEHandler/interface/LHEHandler.h>
 
 #include "ZZ4lConfigHelper.h"
 #include "HZZ4lNtupleFactory.h"
@@ -343,37 +343,6 @@ namespace {
   Int_t genProcessId  = 0;
   Float_t genHEPMCweight  = 0;
   Float_t genHEPMCweight_NNLO  = 0;
-  Float_t genHEPMCweight_POWHEGonly = 0;
-	
-
-  std::vector<float> LHEMotherPz;
-  std::vector<float> LHEMotherE;
-  std::vector<short> LHEMotherId;
-  std::vector<float> LHEDaughterPt;
-  std::vector<float> LHEDaughterEta;
-  std::vector<float> LHEDaughterPhi;
-  std::vector<float> LHEDaughterMass;
-  std::vector<short> LHEDaughterId;
-  std::vector<float> LHEAssociatedParticlePt;
-  std::vector<float> LHEAssociatedParticleEta;
-  std::vector<float> LHEAssociatedParticlePhi;
-  std::vector<float> LHEAssociatedParticleMass;
-  std::vector<short> LHEAssociatedParticleId;
-
-  Float_t LHEPDFScale = 0;
-  Float_t LHEweight_QCDscale_muR1_muF1  = 0;
-  Float_t LHEweight_QCDscale_muR1_muF2  = 0;
-  Float_t LHEweight_QCDscale_muR1_muF0p5  = 0;
-  Float_t LHEweight_QCDscale_muR2_muF1  = 0;
-  Float_t LHEweight_QCDscale_muR2_muF2  = 0;
-  Float_t LHEweight_QCDscale_muR2_muF0p5  = 0;
-  Float_t LHEweight_QCDscale_muR0p5_muF1  = 0;
-  Float_t LHEweight_QCDscale_muR0p5_muF2  = 0;
-  Float_t LHEweight_QCDscale_muR0p5_muF0p5  = 0;
-  Float_t LHEweight_PDFVariation_Up = 0;
-  Float_t LHEweight_PDFVariation_Dn = 0;
-  Float_t LHEweight_AsMZ_Up = 0;
-  Float_t LHEweight_AsMZ_Dn = 0;
 
   Float_t PythiaWeight_isr_muRoneoversqrt2 = 0;
   Float_t PythiaWeight_fsr_muRoneoversqrt2 = 0;
@@ -438,18 +407,6 @@ namespace {
   Float_t GenAssocLep2Eta  = 0;
   Float_t GenAssocLep2Phi  = 0;
   Short_t GenAssocLep2Id  = 0;
-	
-  Int_t   htxsNJets = -1;
-  Float_t htxsHPt = 0;
-  Int_t   htxs_errorCode=-1;
-  Int_t   htxs_prodMode=-1;
-  Int_t   htxs_stage0_cat = -1;
-  Int_t   htxs_stage1p1_cat = -1;
-  Int_t   htxs_stage1p0_cat = -1;
-  Int_t   htxs_stage1p2_cat = -1;
-  Float_t ggH_NNLOPS_weight = 0;
-  Float_t ggH_NNLOPS_weight_unc = 0;
-  std::vector<float> qcd_ggF_uncertSF;
 
 
 //FIXME: temporary fix to the mismatch of charge() and sign(pdgId()) for muons with BTT=4
@@ -486,9 +443,7 @@ private:
   virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
 
-  void BookAllBranches();
   virtual void FillKFactors(edm::Handle<GenEventInfoProduct>& genInfo, std::vector<const reco::Candidate *>& genZLeps);
-  virtual void FillLHECandidate();
   virtual void FillCandidate(const pat::CompositeCandidate& higgs, bool evtPass, const edm::Event&, const Int_t CRflag);
   virtual void FillJet(const pat::Jet& jet);
   virtual void FillPhoton(int year, const pat::Photon& photon);
@@ -508,22 +463,6 @@ private:
   Int_t FindBinValue(TGraphErrors *tgraph, double value);
 
   void getCheckedUserFloat(const pat::CompositeCandidate& cand, const std::string& strval, Float_t& setval, Float_t defaultval=0);
-
-  void buildMELABranches();
-  void computeMELABranches(MELACandidate* cand);
-  void updateMELAClusters_Common(const string clustertype);
-  void updateMELAClusters_NoInitialQ(const string clustertype);
-  void updateMELAClusters_NoInitialG(const string clustertype);
-  void updateMELAClusters_NoAssociatedG(const string clustertype);
-  void updateMELAClusters_NoInitialGNoAssociatedG(const string clustertype);
-  void updateMELAClusters_BestLOAssociatedZ(const string clustertype);
-  void updateMELAClusters_BestLOAssociatedW(const string clustertype);
-  void updateMELAClusters_BestLOAssociatedVBF(const string clustertype);
-  void updateMELAClusters_BestNLOVHApproximation(const string clustertype);
-  void updateMELAClusters_BestNLOVBFApproximation(const string clustertype);
-  void pushRecoMELABranches(const pat::CompositeCandidate& cand);
-  void pushLHEMELABranches();
-  void clearMELABranches();
 	
 	
 
@@ -551,19 +490,6 @@ private:
   double sqrts;
   double Hmass;
 
-  Mela mela;
-  std::vector<std::string> recoMElist;
-  std::vector<MELAOptionParser*> recome_originalopts;
-  std::vector<MELAOptionParser*> recome_copyopts;
-  std::vector<std::string> lheMElist;
-  //std::vector<MELAOptionParser*> lheme_originalopts;
-  std::vector<MELAOptionParser*> lheme_copyopts;
-  std::vector<MELAHypothesis*> lheme_units;
-  std::vector<MELAHypothesis*> lheme_aliased_units;
-  std::vector<MELAComputation*> lheme_computers;
-  std::vector<MELACluster*> lheme_clusters;
-
-  bool addLHEKinematics;
   LHEHandler* lheHandler;
   METCorrectionHandler* metCorrHandler;
   int apply_K_NNLOQCD_ZZGG; // 0: Do not; 1: NNLO/LO; 2: NNLO/NLO; 3: NLO/LO
@@ -575,7 +501,6 @@ private:
   edm::Handle<edm::View<reco::Candidate> > genParticles;
   edm::EDGetTokenT<GenEventInfoProduct> genInfoToken;
   edm::EDGetTokenT<edm::View<pat::CompositeCandidate> > candToken;
-  edm::EDGetTokenT<edm::View<pat::CompositeCandidate> > lhecandToken;
   edm::EDGetTokenT<edm::TriggerResults> triggerResultToken;
   edm::EDGetTokenT<vector<reco::Vertex> > vtxToken;
   edm::EDGetTokenT<edm::View<pat::Jet> > jetToken;
@@ -584,9 +509,7 @@ private:
   //edm::EDGetTokenT<pat::METCollection> metNoHFToken;
   edm::EDGetTokenT<pat::MuonCollection> muonToken;
   edm::EDGetTokenT<pat::ElectronCollection> electronToken;
-  edm::EDGetTokenT<HTXS::HiggsClassification> htxsToken;
   edm::EDGetTokenT<edm::MergeableCounter> preSkimToken;
-  edm::EDGetTokenT<LHERunInfoProduct> lheRunInfoToken;
    
   edm::EDGetTokenT< double > prefweight_token;
   edm::EDGetTokenT< double > prefweightup_token;
@@ -637,7 +560,6 @@ private:
   TGraphErrors *gr_NNLOPSratio_pt_powheg_2jet;
   TGraphErrors *gr_NNLOPSratio_pt_powheg_3jet;
 
-  bool printedLHEweightwarning;
 };
 
 //
@@ -659,12 +581,8 @@ HZZ4lNtupleMaker::HZZ4lNtupleMaker(const edm::ParameterSet& pset) :
   genbr(pset.getParameter<double>("GenBR")),
   year(pset.getParameter<int>("setup")),
   sqrts(SetupToSqrts(year)),
-  Hmass(pset.getParameter<double>("superMelaMass")),
-  mela(sqrts, Hmass, TVar::ERROR),
   recoMElist(pset.getParameter<std::vector<std::string>>("recoProbabilities")),
 
-  lheMElist(pset.getParameter<std::vector<std::string>>("lheProbabilities")),
-  addLHEKinematics(pset.getParameter<bool>("AddLHEKinematics")),
   lheHandler(nullptr),
   metCorrHandler(nullptr),
   apply_K_NNLOQCD_ZZGG(pset.getParameter<int>("Apply_K_NNLOQCD_ZZGG")),
@@ -676,7 +594,6 @@ HZZ4lNtupleMaker::HZZ4lNtupleMaker(const edm::ParameterSet& pset) :
   sampleName(pset.getParameter<string>("sampleName")),
   h_weight(0),
 
-  printedLHEweightwarning(false)
 {
   //cout<< "Beginning Constructor\n\n\n" <<endl;
   consumesMany<std::vector< PileupSummaryInfo > >();
@@ -698,7 +615,6 @@ HZZ4lNtupleMaker::HZZ4lNtupleMaker(const edm::ParameterSet& pset) :
   muonToken = consumes<pat::MuonCollection>(edm::InputTag("slimmedMuons"));
   electronToken = consumes<pat::ElectronCollection>(edm::InputTag("slimmedElectrons"));
   preSkimToken = consumes<edm::MergeableCounter,edm::InLumi>(edm::InputTag("preSkimCounter"));
-  lheRunInfoToken = consumes<LHERunInfoProduct,edm::InRun>(edm::InputTag("externalLHEProducer"));
    
   if (skipEmptyEvents) {
     applySkim=true;
@@ -722,16 +638,15 @@ HZZ4lNtupleMaker::HZZ4lNtupleMaker(const edm::ParameterSet& pset) :
   }
    
    
-  addLHEKinematics = addLHEKinematics || !lheMElist.empty();
   if (isMC){
-    lheHandler = new LHEHandler(
-      ((MELAEvent::CandidateVVMode)(pset.getParameter<int>("VVMode")+1)), // FIXME: Need to pass strings and interpret them instead!
-      pset.getParameter<int>("VVDecayMode"),
-      (addLHEKinematics ? LHEHandler::doHiggsKinematics : LHEHandler::noKinematics),
-      year, LHEHandler::tryNNPDF30, LHEHandler::tryNLO
-    );
+    //    lheHandler = new LHEHandler(
+    //      ((MELAEvent::CandidateVVMode)(pset.getParameter<int>("VVMode")+1)), // FIXME: Need to pass strings and interpret them instead!
+    //      pset.getParameter<int>("VVDecayMode"),
+    //      (addLHEKinematics ? LHEHandler::doHiggsKinematics : LHEHandler::noKinematics),
+    //      year, LHEHandler::tryNNPDF30, LHEHandler::tryNLO
+    //    );
     metCorrHandler = new METCorrectionHandler(Form("%i", year));
-    htxsToken = consumes<HTXS::HiggsClassification>(edm::InputTag("rivetProducerHTXS","HiggsClassification"));
+    //    htxsToken = consumes<HTXS::HiggsClassification>(edm::InputTag("rivetProducerHTXS","HiggsClassification"));
     pileUpReweight = new PileUpWeight(myHelper.sampleType(), myHelper.setup());
   }
 
@@ -1555,146 +1470,6 @@ void HZZ4lNtupleMaker::FillKFactors(edm::Handle<GenEventInfoProduct>& genInfo, s
 }
 
 
-void HZZ4lNtupleMaker::FillLHECandidate(){
-  LHEMotherPz.clear();
-  LHEMotherE.clear();
-  LHEMotherId.clear();
-  LHEDaughterPt.clear();
-  LHEDaughterEta.clear();
-  LHEDaughterPhi.clear();
-  LHEDaughterMass.clear();
-  LHEDaughterId.clear();
-  LHEAssociatedParticlePt.clear();
-  LHEAssociatedParticleEta.clear();
-  LHEAssociatedParticlePhi.clear();
-  LHEAssociatedParticleMass.clear();
-  LHEAssociatedParticleId.clear();
-
-  LHEPDFScale = 0;
-  genHEPMCweight_POWHEGonly = 0;
-  LHEweight_QCDscale_muR1_muF1=0;
-  LHEweight_QCDscale_muR1_muF2=0;
-  LHEweight_QCDscale_muR1_muF0p5=0;
-  LHEweight_QCDscale_muR2_muF1=0;
-  LHEweight_QCDscale_muR2_muF2=0;
-  LHEweight_QCDscale_muR2_muF0p5=0;
-  LHEweight_QCDscale_muR0p5_muF1=0;
-  LHEweight_QCDscale_muR0p5_muF2=0;
-  LHEweight_QCDscale_muR0p5_muF0p5=0;
-
-  MELACandidate* cand = lheHandler->getBestCandidate();
-  if (cand!=0 && addLHEKinematics){
-    for (int imot=0; imot<cand->getNMothers(); imot++){
-      MELAParticle* apart = cand->getMother(imot);
-      if (apart==0){ LHEMotherPz.clear(); LHEMotherE.clear(); LHEMotherId.clear(); break; } // Something went wrong
-      LHEMotherPz.push_back(apart->z());
-      LHEMotherE.push_back(apart->t());
-      LHEMotherId.push_back((short)apart->id);
-    }
-
-    for (int iV=0; iV<min(2, cand->getNSortedVs()); iV++){
-      MELAParticle* Vi = cand->getSortedV(iV);
-      if (Vi!=0){
-        for (int iVj=0; iVj<Vi->getNDaughters(); iVj++){
-          MELAParticle* Vij = Vi->getDaughter(iVj);
-          if (Vij!=0){
-            LHEDaughterPt.push_back(Vij->pt());
-            if (abs(Vij->pt() / Vij->z()) > 2e-8) {
-              LHEDaughterEta.push_back(Vij->eta());
-            } else {
-              edm::LogWarning("ZeroPt") << "pt = 0!  Using eta = +/-1e10\n" << Vij->id << " " << Vij->x() << " " << Vij->y() << " " << Vij->z() << " " << Vij->t();
-              LHEDaughterEta.push_back(copysign(1e10, Vij->z()));
-            }
-            LHEDaughterPhi.push_back(Vij->phi());
-            LHEDaughterMass.push_back(Vij->m());
-            LHEDaughterId.push_back((short)Vij->id);
-          }
-        }
-      }
-    }
-
-    vector<MELAParticle*> AssociatedParticle;
-    vector<MELAParticle*> tmpAssociatedParticle;
-    for (int aa=0; aa<cand->getNAssociatedJets(); aa++){
-      MELAParticle* apart = cand->getAssociatedJet(aa);
-      tmpAssociatedParticle.push_back(apart);
-    }
-    for (int aa=0; aa<cand->getNAssociatedLeptons(); aa++){
-      MELAParticle* apart = cand->getAssociatedLepton(aa);
-      if (!PDGHelpers::isANeutrino(apart->id)) tmpAssociatedParticle.push_back(apart);
-    }
-    for (int aa=0; aa<cand->getNAssociatedNeutrinos(); aa++){
-      MELAParticle* apart = cand->getAssociatedNeutrino(aa);
-      tmpAssociatedParticle.push_back(apart);
-    }
-    while (!tmpAssociatedParticle.empty()){ // Re-sort all associated particles by leading pT (categories are individually sorted, but mixing categories loses this sorting)
-      MELAParticle* tmpPart=0;
-      int pos=0;
-      for (unsigned int el=0; el<tmpAssociatedParticle.size(); el++){
-        if (tmpPart==0){ tmpPart = tmpAssociatedParticle.at(el); pos=el; }
-        else if (tmpPart->pt()<tmpAssociatedParticle.at(el)->pt()){ tmpPart = tmpAssociatedParticle.at(el); pos=el; } // Safer to do in two steps
-      }
-      AssociatedParticle.push_back(tmpPart);
-      tmpAssociatedParticle.erase(tmpAssociatedParticle.begin()+pos);
-    }
-    for (unsigned int aa=0; aa<AssociatedParticle.size(); aa++){
-      MELAParticle* apart = AssociatedParticle.at(aa);
-      if (apart!=0){
-        LHEAssociatedParticlePt.push_back(apart->pt());
-        if (abs(apart->pt() / apart->z()) > 2e-8) {
-          LHEAssociatedParticleEta.push_back(apart->eta());
-        } else {
-          edm::LogWarning("ZeroPt") << "pt = 0!  Using eta = +/-1e10\n" << apart->id << " " << apart->x() << " " << apart->y() << " " << apart->z() << " " << apart->t();
-          LHEAssociatedParticleEta.push_back(copysign(1e10, apart->z()));
-        }
-        LHEAssociatedParticlePhi.push_back(apart->phi());
-        LHEAssociatedParticleMass.push_back(apart->m());
-        LHEAssociatedParticleId.push_back((short)apart->id);
-      }
-    }
-
-    /*
-    cout << "NEW EVENT:" << endl;
-    cout << "Mothers:" << endl;
-    for (unsigned int ipart=0; ipart<LHEMotherId.size(); ipart++) cout << "\t Mot" << ipart << " (pz, E, id) = " << LHEMotherPz.at(ipart) << " " << LHEMotherE.at(ipart) << " " << LHEMotherId.at(ipart) << endl;
-    cout << "Daughters:" << endl;
-    for (unsigned int ipart=0; ipart<LHEDaughterId.size(); ipart++) cout << "\t Dau" << ipart << " (pt, eta, phi, m, id) = " << LHEDaughterPt.at(ipart) << " " << LHEDaughterEta.at(ipart) << " " << LHEDaughterPhi.at(ipart) << " " << LHEDaughterMass.at(ipart) << " " << LHEDaughterId.at(ipart) << endl;
-    cout << "Associated:" << endl;
-    for (unsigned int ipart=0; ipart<LHEAssociatedParticleId.size(); ipart++) cout << "\t APart" << ipart << " (pt, eta, phi, m, id) = " << LHEAssociatedParticlePt.at(ipart) << " " << LHEAssociatedParticleEta.at(ipart) << " " << LHEAssociatedParticlePhi.at(ipart) << " " << LHEAssociatedParticleMass.at(ipart) << " " << LHEAssociatedParticleId.at(ipart) << endl;
-    cout << endl;
-    */
-
-    computeMELABranches(cand);
-    pushLHEMELABranches();
-  }
-
-  LHEPDFScale = lheHandler->getPDFScale();
-  if (genHEPMCweight==1.){
-    genHEPMCweight_NNLO = genHEPMCweight = lheHandler->getLHEOriginalWeight();
-    if (!printedLHEweightwarning && genHEPMCweight!=1.) {
-      printedLHEweightwarning = true;
-      edm::LogWarning("InconsistentWeights") << "Gen weight is 1, LHE weight is " << genHEPMCweight;
-    }
-  }
-  genHEPMCweight *= lheHandler->getWeightRescale();
-
-  genHEPMCweight_POWHEGonly = lheHandler->getMemberZeroWeight();
-  LHEweight_QCDscale_muR1_muF1 = lheHandler->getLHEWeight(0, 1.);
-  LHEweight_QCDscale_muR1_muF2 = lheHandler->getLHEWeight(1, 1.);
-  LHEweight_QCDscale_muR1_muF0p5 = lheHandler->getLHEWeight(2, 1.);
-  LHEweight_QCDscale_muR2_muF1 = lheHandler->getLHEWeight(3, 1.);
-  LHEweight_QCDscale_muR2_muF2 = lheHandler->getLHEWeight(4, 1.);
-  LHEweight_QCDscale_muR2_muF0p5 = lheHandler->getLHEWeight(5, 1.);
-  LHEweight_QCDscale_muR0p5_muF1 = lheHandler->getLHEWeight(6, 1.);
-  LHEweight_QCDscale_muR0p5_muF2 = lheHandler->getLHEWeight(7, 1.);
-  LHEweight_QCDscale_muR0p5_muF0p5 = lheHandler->getLHEWeight(8, 1.);
-  LHEweight_PDFVariation_Up = lheHandler->getLHEWeight_PDFVariationUpDn(1, 1.);
-  LHEweight_PDFVariation_Dn = lheHandler->getLHEWeight_PDFVariationUpDn(-1, 1.);
-  LHEweight_AsMZ_Up = lheHandler->getLHEWeigh_AsMZUpDn(1, 1.);
-  LHEweight_AsMZ_Dn = lheHandler->getLHEWeigh_AsMZUpDn(-1, 1.);
-}
-
-
 void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool evtPass, const edm::Event& event, Int_t CRFLAG)
 {
   //Initialize a new candidate into the tree
@@ -1825,9 +1600,6 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
     //phistarZ2      = cand.userFloat("phistar2");
     xi            = cand.userFloat("xi");
     xistar        = cand.userFloat("xistar");
-
-    // Get MELA probabilities
-    pushRecoMELABranches(cand);
 
   }
 
@@ -2145,8 +1917,6 @@ void HZZ4lNtupleMaker::beginJob()
   myTree = new HZZ4lNtupleFactory(candTree, candTree_failed);
   const int nbins = 45;
   hCounter = fs->make<TH1F>("Counters", "Counters", nbins, 0., nbins);
-  BookAllBranches();
-  buildMELABranches();
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
@@ -2847,557 +2617,6 @@ void HZZ4lNtupleMaker::addweight(float &weight, float weighttoadd) {
   weight += weighttoadd;
 }
 
-
-void HZZ4lNtupleMaker::buildMELABranches(){
-  /***********************/
-  /***********************/
-  /**   Reco branches   **/
-  /***********************/
-  /***********************/
-  for (unsigned int it=0; it<recoMElist.size(); it++){
-    MELAOptionParser* me_opt = new MELAOptionParser(recoMElist.at(it));
-    if (recoMElist.at(it).find("Copy")!=string::npos) recome_copyopts.push_back(me_opt);
-    else recome_originalopts.push_back(me_opt);
-  }
-  // Resolve original options
-  for (unsigned int it=0; it<recome_originalopts.size(); it++){
-    MELAOptionParser* me_opt = recome_originalopts.at(it);
-    myTree->BookMELABranches(me_opt, false, 0);
-  }
-  // Resolve copy options
-  for (unsigned int it=0; it<recome_copyopts.size(); it++){
-    MELAOptionParser* me_opt = recome_copyopts.at(it);
-    MELAOptionParser* original_opt=0;
-    // Find the original options
-    for (unsigned int ih=0; ih<recome_originalopts.size(); ih++){
-      if (me_opt->testCopyAlias(recome_originalopts.at(ih)->getAlias())){
-        original_opt = recome_originalopts.at(ih);
-        break;
-      }
-    }
-    if (original_opt==0) continue;
-    else me_opt->pickOriginalOptions(original_opt);
-    myTree->BookMELABranches(me_opt, false, 0);
-  }
-
-  /**********************/
-  /**********************/
-  /**   LHE branches   **/
-  /**********************/
-  /**********************/
-  for (unsigned int it=0; it<lheMElist.size(); it++){
-    MELAOptionParser* lheme_opt;
-    // First find out if the option has a copy specification
-    // These copy options will be evaulated in a separate loop
-    if (lheMElist.at(it).find("Copy")!=string::npos){
-      lheme_opt = new MELAOptionParser(lheMElist.at(it));
-      lheme_copyopts.push_back(lheme_opt);
-      continue;
-    }
-
-    // Create a hypothesis for each option
-    MELAHypothesis* lheme_hypo = new MELAHypothesis(&mela, lheMElist.at(it));
-    lheme_units.push_back(lheme_hypo);
-
-    lheme_opt = lheme_hypo->getOption();
-    if (lheme_opt->isAliased()) lheme_aliased_units.push_back(lheme_hypo);
-
-    // Create a computation for each hypothesis
-    MELAComputation* lheme_computer = new MELAComputation(lheme_hypo);
-    lheme_computers.push_back(lheme_computer);
-
-    // Add the computation to a named cluster to keep track of JECUp/JECDn, or for best-pWH_SM Lep_WH computations
-    GMECHelperFunctions::addToMELACluster(lheme_computer, lheme_clusters);
-
-    // Create the necessary branches for each computation
-    myTree->BookMELABranches(lheme_opt, true, lheme_computer);
-  }
-  // Resolve copy options
-  for (unsigned int it=0; it<lheme_copyopts.size(); it++){
-    MELAOptionParser* lheme_opt = lheme_copyopts.at(it);
-    MELAHypothesis* original_hypo=0;
-    MELAOptionParser* original_opt=0;
-    // Find the original options
-    for (unsigned int ih=0; ih<lheme_aliased_units.size(); ih++){
-      if (lheme_opt->testCopyAlias(lheme_aliased_units.at(ih)->getOption()->getAlias())){
-        original_hypo = lheme_aliased_units.at(ih);
-        original_opt = original_hypo->getOption();
-        break;
-      }
-    }
-    if (original_opt==0) continue;
-    else lheme_opt->pickOriginalOptions(original_opt);
-    // Create a new computation for the copy options
-    MELAComputation* lheme_computer = new MELAComputation(original_hypo);
-    lheme_computer->setOption(lheme_opt);
-    lheme_computers.push_back(lheme_computer);
-
-    // The rest is the same story...
-    // Add the computation to a named cluster to keep track of JECUp/JECDn, or for best-pWH_SM Lep_WH computations
-    GMECHelperFunctions::addToMELACluster(lheme_computer, lheme_clusters);
-
-    // Create the necessary branches for each computation
-    myTree->BookMELABranches(lheme_opt, true, lheme_computer);
-  }
-  // Loop over the computations to add any contingencies to aliased hypotheses
-  for (unsigned int it=0; it<lheme_computers.size(); it++) lheme_computers.at(it)->addContingencies(lheme_aliased_units);
-
-  if (DEBUG_MB){
-    std::vector<MELABranch*>* lheme_branches = myTree->getLHEMELABranches();
-    for (unsigned int ib=0; ib<lheme_branches->size(); ib++) lheme_branches->at(ib)->Print();
-    for (unsigned int icl=0; icl<lheme_clusters.size(); icl++) cout << "LHE ME cluster " << lheme_clusters.at(icl)->getName() << " is present in " << lheme_clusters.size() << " clusters with #Computations = " << lheme_clusters.at(icl)->getComputations()->size() << endl;
-  }
-}
-
-void HZZ4lNtupleMaker::computeMELABranches(MELACandidate* cand){
-  mela.setCurrentCandidate(cand);
-  // Sequantial computation
-  updateMELAClusters_Common("Common");
-  updateMELAClusters_NoInitialQ("NoInitialQ");
-  updateMELAClusters_NoInitialG("NoInitialG");
-  updateMELAClusters_BestLOAssociatedZ("BestLOAssociatedZ");
-  updateMELAClusters_BestLOAssociatedW("BestLOAssociatedW");
-  updateMELAClusters_BestLOAssociatedVBF("BestLOAssociatedVBF");
-  updateMELAClusters_BestNLOVHApproximation("BestNLOZHApproximation");
-  updateMELAClusters_BestNLOVHApproximation("BestNLOWHApproximation");
-  updateMELAClusters_BestNLOVBFApproximation("BestNLOVBFApproximation");
-  updateMELAClusters_NoAssociatedG("NoAssociatedG");
-  updateMELAClusters_NoInitialGNoAssociatedG("NoInitialGNoAssociatedG");
-  // Reverse sequence
-  updateMELAClusters_NoInitialGNoAssociatedG("NoInitialGNoAssociatedGLast");
-  updateMELAClusters_NoAssociatedG("NoAssociatedGLast");
-  updateMELAClusters_BestNLOVBFApproximation("BestNLOVBFApproximationLast");
-  updateMELAClusters_BestNLOVHApproximation("BestNLOWHApproximationLast");
-  updateMELAClusters_BestNLOVHApproximation("BestNLOZHApproximationLast");
-  updateMELAClusters_BestLOAssociatedVBF("BestLOAssociatedVBFLast");
-  updateMELAClusters_BestLOAssociatedW("BestLOAssociatedWLast");
-  updateMELAClusters_BestLOAssociatedZ("BestLOAssociatedZLast");
-  updateMELAClusters_NoInitialG("NoInitialGLast");
-  updateMELAClusters_NoInitialQ("NoInitialQLast");
-  updateMELAClusters_Common("CommonLast");
-  // Reset mela
-  mela.resetInputEvent();
-}
-// Common ME computations that do not manipulate the LHE candidate
-void HZZ4lNtupleMaker::updateMELAClusters_Common(const string clustertype){
-  MELACandidate* melaCand = mela.getCurrentCandidate();
-  if (melaCand==0) return;
-
-  for (unsigned int ic=0; ic<lheme_clusters.size(); ic++){
-    MELACluster* theCluster = lheme_clusters.at(ic);
-    if (theCluster->getName()==clustertype){
-      // Re-compute all related hypotheses first...
-      theCluster->computeAll();
-      // ...then update the cluster
-      theCluster->update();
-    }
-  }
-}
-// ME computations that require no quark initial state
-void HZZ4lNtupleMaker::updateMELAClusters_NoInitialQ(const string clustertype){
-  MELACandidate* melaCand = mela.getCurrentCandidate();
-  if (melaCand==0) return;
-
-  // Manipulate the candidate
-  // Assign 0 to the id of quark mothers
-  std::vector<int> motherIds;
-  for (int imot=0; imot<melaCand->getNMothers(); imot++){
-    motherIds.push_back(melaCand->getMother(imot)->id);
-    if (PDGHelpers::isAQuark(melaCand->getMother(imot)->id)) melaCand->getMother(imot)->id = 0;
-  }
-
-  for (unsigned int ic=0; ic<lheme_clusters.size(); ic++){
-    MELACluster* theCluster = lheme_clusters.at(ic);
-    if (theCluster->getName()==clustertype){
-      // Re-compute all related hypotheses first...
-      theCluster->computeAll();
-      // ...then update the cluster
-      theCluster->update();
-    }
-  }
-
-  // Restore the candidate properties
-  for (int imot=0; imot<melaCand->getNMothers(); imot++) melaCand->getMother(imot)->id = motherIds.at(imot); // Restore all mother ids
-}
-// ME computations that require no gluon initial state
-void HZZ4lNtupleMaker::updateMELAClusters_NoInitialG(const string clustertype){
-  MELACandidate* melaCand = mela.getCurrentCandidate();
-  if (melaCand==0) return;
-
-  // Manipulate the candidate
-  // Assign 0 to the id of gluon mothers
-  std::vector<int> motherIds;
-  for (int imot=0; imot<melaCand->getNMothers(); imot++){
-    motherIds.push_back(melaCand->getMother(imot)->id);
-    if (PDGHelpers::isAGluon(melaCand->getMother(imot)->id)) melaCand->getMother(imot)->id = 0;
-  }
-
-  for (unsigned int ic=0; ic<lheme_clusters.size(); ic++){
-    MELACluster* theCluster = lheme_clusters.at(ic);
-    if (theCluster->getName()==clustertype){
-      // Re-compute all related hypotheses first...
-      theCluster->computeAll();
-      // ...then update the cluster
-      theCluster->update();
-    }
-  }
-
-  // Restore the candidate properties
-  for (int imot=0; imot<melaCand->getNMothers(); imot++) melaCand->getMother(imot)->id = motherIds.at(imot); // Restore all mother ids
-}
-// ME computations that require no gluons as associated particles
-void HZZ4lNtupleMaker::updateMELAClusters_NoAssociatedG(const string clustertype){
-  MELACandidate* melaCand = mela.getCurrentCandidate();
-  if (melaCand==0) return;
-
-  // Manipulate the candidate
-  // Assign 0 to the id of gluon mothers
-  std::vector<int> ajetIds;
-  for (int ijet=0; ijet<melaCand->getNAssociatedJets(); ijet++){
-    ajetIds.push_back(melaCand->getAssociatedJet(ijet)->id);
-    if (PDGHelpers::isAGluon(melaCand->getAssociatedJet(ijet)->id)) melaCand->getAssociatedJet(ijet)->id = 0;
-  }
-
-  for (unsigned int ic=0; ic<lheme_clusters.size(); ic++){
-    MELACluster* theCluster = lheme_clusters.at(ic);
-    if (theCluster->getName()==clustertype){
-      // Re-compute all related hypotheses first...
-      theCluster->computeAll();
-      // ...then update the cluster
-      theCluster->update();
-    }
-  }
-
-  // Restore the candidate properties
-  for (int ijet=0; ijet<melaCand->getNAssociatedJets(); ijet++) melaCand->getAssociatedJet(ijet)->id = ajetIds.at(ijet); // Restore all jets
-}
-// ME computations that require no gluon initial state and no gluons as associated particles
-void HZZ4lNtupleMaker::updateMELAClusters_NoInitialGNoAssociatedG(const string clustertype){
-  MELACandidate* melaCand = mela.getCurrentCandidate();
-  if (melaCand==0) return;
-
-  // Manipulate the candidate
-  // Assign 0 to the id of gluon mothers
-  std::vector<int> motherIds;
-  std::vector<int> ajetIds;
-  for (int imot=0; imot<melaCand->getNMothers(); imot++){
-    motherIds.push_back(melaCand->getMother(imot)->id);
-    if (PDGHelpers::isAGluon(melaCand->getMother(imot)->id)) melaCand->getMother(imot)->id = 0;
-  }
-  for (int ijet=0; ijet<melaCand->getNAssociatedJets(); ijet++){
-    ajetIds.push_back(melaCand->getAssociatedJet(ijet)->id);
-    if (PDGHelpers::isAGluon(melaCand->getAssociatedJet(ijet)->id)) melaCand->getAssociatedJet(ijet)->id = 0;
-  }
-
-  for (unsigned int ic=0; ic<lheme_clusters.size(); ic++){
-    MELACluster* theCluster = lheme_clusters.at(ic);
-    if (theCluster->getName()==clustertype){
-      // Re-compute all related hypotheses first...
-      theCluster->computeAll();
-      // ...then update the cluster
-      theCluster->update();
-    }
-  }
-
-  // Restore the candidate properties
-  for (int imot=0; imot<melaCand->getNMothers(); imot++) melaCand->getMother(imot)->id = motherIds.at(imot); // Restore all mother ids
-  for (int ijet=0; ijet<melaCand->getNAssociatedJets(); ijet++) melaCand->getAssociatedJet(ijet)->id = ajetIds.at(ijet); // Restore all jets
-}
-// ME computations that require best Z, W or VBF topology at LO (no gluons)
-void HZZ4lNtupleMaker::updateMELAClusters_BestLOAssociatedZ(const string clustertype){
-  MELACandidate* melaCand = mela.getCurrentCandidate();
-  if (melaCand==0) return;
-
-  // Manipulate the candidate
-  // Assign 0 to the id of gluon mothers
-  std::vector<int> motherIds;
-  std::vector<int> ajetIds;
-  for (int imot=0; imot<melaCand->getNMothers(); imot++){
-    motherIds.push_back(melaCand->getMother(imot)->id);
-    if (PDGHelpers::isAGluon(melaCand->getMother(imot)->id)) melaCand->getMother(imot)->id = 0;
-  }
-  for (int ijet=0; ijet<melaCand->getNAssociatedJets(); ijet++){
-    ajetIds.push_back(melaCand->getAssociatedJet(ijet)->id);
-    if (PDGHelpers::isAGluon(melaCand->getAssociatedJet(ijet)->id)) melaCand->getAssociatedJet(ijet)->id = 0;
-  }
-  // Give precedence to leptonic V decays
-  bool hasALepV=false;
-  for (int iv=2; iv<melaCand->getNSortedVs(); iv++){
-    MELAParticle* Vtmp = melaCand->getSortedV(iv);
-    if (Vtmp!=0 && PDGHelpers::isAZBoson(Vtmp->id) && Vtmp->getNDaughters()>=1){
-      if (
-        PDGHelpers::isALepton(Vtmp->getDaughter(0)->id)
-        ||
-        PDGHelpers::isANeutrino(Vtmp->getDaughter(0)->id)
-        ){
-        hasALepV=true;
-      }
-    }
-  }
-  int bestVbyMass=-1;
-  float bestVMassDiff=1e5;
-  for (int iv=2; iv<melaCand->getNSortedVs(); iv++){
-    MELAParticle* Vtmp = melaCand->getSortedV(iv);
-    if (Vtmp!=0 && PDGHelpers::isAZBoson(Vtmp->id) && Vtmp->getNDaughters()>=1){
-      if (
-        PDGHelpers::isAJet(Vtmp->getDaughter(0)->id)
-        && hasALepV
-        ){
-        for (int idau=0; idau<Vtmp->getNDaughters(); idau++) Vtmp->getDaughter(idau)->setSelected(false);
-      }
-      else if (fabs(Vtmp->m()-PDGHelpers::Zmass)<bestVMassDiff){
-        bestVMassDiff=fabs(Vtmp->m()-PDGHelpers::Zmass);
-        bestVbyMass = iv;
-      }
-    }
-  }
-  for (int iv=2; iv<melaCand->getNSortedVs(); iv++){
-    MELAParticle* Vtmp = melaCand->getSortedV(iv);
-    if (Vtmp!=0 && PDGHelpers::isAZBoson(Vtmp->id) && Vtmp->getNDaughters()>=1){
-      for (int idau=0; idau<Vtmp->getNDaughters(); idau++) Vtmp->getDaughter(idau)->setSelected((iv==bestVbyMass));
-    }
-  }
-
-  for (unsigned int ic=0; ic<lheme_clusters.size(); ic++){
-    MELACluster* theCluster = lheme_clusters.at(ic);
-    if (theCluster->getName()==clustertype){
-      // Re-compute all related hypotheses first...
-      theCluster->computeAll();
-      // ...then update the cluster
-      theCluster->update();
-    }
-  }
-
-  // Restore the candidate properties
-  for (int imot=0; imot<melaCand->getNMothers(); imot++) melaCand->getMother(imot)->id = motherIds.at(imot); // Restore all mother ids
-  for (int ijet=0; ijet<melaCand->getNAssociatedJets(); ijet++) melaCand->getAssociatedJet(ijet)->id = ajetIds.at(ijet); // Restore all jets
-  for (int iv=2; iv<melaCand->getNSortedVs(); iv++){
-    MELAParticle* Vtmp = melaCand->getSortedV(iv);
-    if (Vtmp!=0 && PDGHelpers::isAZBoson(Vtmp->id) && Vtmp->getNDaughters()>=1){
-      for (int idau=0; idau<Vtmp->getNDaughters(); idau++) Vtmp->getDaughter(idau)->setSelected(true);
-    }
-  }
-}
-void HZZ4lNtupleMaker::updateMELAClusters_BestLOAssociatedW(const string clustertype){
-  MELACandidate* melaCand = mela.getCurrentCandidate();
-  if (melaCand==0) return;
-
-  // Manipulate the candidate
-  // Assign 0 to the id of gluon mothers
-  std::vector<int> motherIds;
-  std::vector<int> ajetIds;
-  for (int imot=0; imot<melaCand->getNMothers(); imot++){
-    motherIds.push_back(melaCand->getMother(imot)->id);
-    if (PDGHelpers::isAGluon(melaCand->getMother(imot)->id)) melaCand->getMother(imot)->id = 0;
-  }
-  for (int ijet=0; ijet<melaCand->getNAssociatedJets(); ijet++){
-    ajetIds.push_back(melaCand->getAssociatedJet(ijet)->id);
-    if (PDGHelpers::isAGluon(melaCand->getAssociatedJet(ijet)->id)) melaCand->getAssociatedJet(ijet)->id = 0;
-  }
-  // Give precedence to leptonic V decays
-  bool hasALepV=false;
-  for (int iv=2; iv<melaCand->getNSortedVs(); iv++){
-    MELAParticle* Vtmp = melaCand->getSortedV(iv);
-    if (Vtmp!=0 && PDGHelpers::isAWBoson(Vtmp->id) && Vtmp->getNDaughters()>=1){
-      if (
-        PDGHelpers::isALepton(Vtmp->getDaughter(0)->id)
-        ||
-        PDGHelpers::isANeutrino(Vtmp->getDaughter(0)->id)
-        ){
-        hasALepV=true;
-      }
-    }
-  }
-  int bestVbyMass=-1;
-  float bestVMassDiff=1e5;
-  for (int iv=2; iv<melaCand->getNSortedVs(); iv++){
-    MELAParticle* Vtmp = melaCand->getSortedV(iv);
-    if (Vtmp!=0 && PDGHelpers::isAWBoson(Vtmp->id) && Vtmp->getNDaughters()>=1){
-      if (
-        PDGHelpers::isAJet(Vtmp->getDaughter(0)->id)
-        && hasALepV
-        ){
-        for (int idau=0; idau<Vtmp->getNDaughters(); idau++) Vtmp->getDaughter(idau)->setSelected(false);
-      }
-      else if (fabs(Vtmp->m()-PDGHelpers::Wmass)<bestVMassDiff){
-        bestVMassDiff=fabs(Vtmp->m()-PDGHelpers::Wmass);
-        bestVbyMass = iv;
-      }
-    }
-  }
-  for (int iv=2; iv<melaCand->getNSortedVs(); iv++){
-    MELAParticle* Vtmp = melaCand->getSortedV(iv);
-    if (Vtmp!=0 && PDGHelpers::isAWBoson(Vtmp->id) && Vtmp->getNDaughters()>=1){
-      for (int idau=0; idau<Vtmp->getNDaughters(); idau++) Vtmp->getDaughter(idau)->setSelected((iv==bestVbyMass));
-    }
-  }
-
-  for (unsigned int ic=0; ic<lheme_clusters.size(); ic++){
-    MELACluster* theCluster = lheme_clusters.at(ic);
-    if (theCluster->getName()==clustertype){
-      // Re-compute all related hypotheses first...
-      theCluster->computeAll();
-      // ...then update the cluster
-      theCluster->update();
-    }
-  }
-
-  // Restore the candidate properties
-  for (int imot=0; imot<melaCand->getNMothers(); imot++) melaCand->getMother(imot)->id = motherIds.at(imot); // Restore all mother ids
-  for (int ijet=0; ijet<melaCand->getNAssociatedJets(); ijet++) melaCand->getAssociatedJet(ijet)->id = ajetIds.at(ijet); // Restore all jets
-  for (int iv=2; iv<melaCand->getNSortedVs(); iv++){
-    MELAParticle* Vtmp = melaCand->getSortedV(iv);
-    if (Vtmp!=0 && PDGHelpers::isAWBoson(Vtmp->id) && Vtmp->getNDaughters()>=1){
-      for (int idau=0; idau<Vtmp->getNDaughters(); idau++) Vtmp->getDaughter(idau)->setSelected(true);
-    }
-  }
-}
-void HZZ4lNtupleMaker::updateMELAClusters_BestLOAssociatedVBF(const string clustertype){
-  // Same as updateMELAClusters_NoInitialGNoAssociatedG, but keep a separate function for future studies
-  MELACandidate* melaCand = mela.getCurrentCandidate();
-  if (melaCand==0) return;
-
-  // Manipulate the candidate
-  // Assign 0 to the id of gluon mothers
-  std::vector<int> motherIds;
-  std::vector<int> ajetIds;
-  for (int imot=0; imot<melaCand->getNMothers(); imot++){
-    motherIds.push_back(melaCand->getMother(imot)->id);
-    if (PDGHelpers::isAGluon(melaCand->getMother(imot)->id)) melaCand->getMother(imot)->id = 0;
-  }
-  for (int ijet=0; ijet<melaCand->getNAssociatedJets(); ijet++){
-    ajetIds.push_back(melaCand->getAssociatedJet(ijet)->id);
-    if (PDGHelpers::isAGluon(melaCand->getAssociatedJet(ijet)->id)) melaCand->getAssociatedJet(ijet)->id = 0;
-  }
-
-  for (unsigned int ic=0; ic<lheme_clusters.size(); ic++){
-    MELACluster* theCluster = lheme_clusters.at(ic);
-    if (theCluster->getName()==clustertype){
-      // Re-compute all related hypotheses first...
-      theCluster->computeAll();
-      // ...then update the cluster
-      theCluster->update();
-    }
-  }
-
-  // Restore the candidate properties
-  for (int imot=0; imot<melaCand->getNMothers(); imot++) melaCand->getMother(imot)->id = motherIds.at(imot); // Restore all mother ids
-  for (int ijet=0; ijet<melaCand->getNAssociatedJets(); ijet++) melaCand->getAssociatedJet(ijet)->id = ajetIds.at(ijet); // Restore all jets
-}
-// ME computations that can approximate the NLO QCD (-/+ MiNLO extra jet) phase space to LO QCD in signal VBF or VH
-// Use these for POWHEG samples
-// MELACandidateRecaster has very specific use cases, so do not use these functions for other cases.
-void HZZ4lNtupleMaker::updateMELAClusters_BestNLOVHApproximation(const string clustertype){
-  MELACandidate* melaCand = mela.getCurrentCandidate();
-  if (melaCand==0) return;
-
-  // Check if any clusters request this computation
-  bool clustersRequest=false;
-  for (unsigned int ic=0; ic<lheme_clusters.size(); ic++){
-    MELACluster* theCluster = lheme_clusters.at(ic);
-    if (theCluster->getName()==clustertype){
-      clustersRequest=true;
-      break;
-    }
-  }
-  if (!clustersRequest) return;
-
-  // Need one recaster for each of ZH and WH, so distinguish by the cluster name
-  TVar::Production candScheme;
-  if (clustertype.find("BestNLOZHApproximation")!=string::npos) candScheme = TVar::Had_ZH;
-  else if (clustertype.find("BestNLOWHApproximation")!=string::npos) candScheme = TVar::Had_WH;
-  else return;
-
-  MELACandidateRecaster recaster(candScheme);
-  MELACandidate* candModified=nullptr;
-  MELAParticle* bestAV = MELACandidateRecaster::getBestAssociatedV(melaCand, candScheme);
-  if (bestAV){
-    recaster.copyCandidate(melaCand, candModified);
-    recaster.deduceLOVHTopology(candModified);
-    mela.setCurrentCandidate(candModified);
-  }
-  else return; // No associated Vs found. The algorithm won't work.
-
-  for (unsigned int ic=0; ic<lheme_clusters.size(); ic++){
-    MELACluster* theCluster = lheme_clusters.at(ic);
-    if (theCluster->getName()==clustertype){
-      // Re-compute all related hypotheses first...
-      theCluster->computeAll();
-      // ...then update the cluster
-      theCluster->update();
-    }
-  }
-
-  delete candModified;
-  mela.setCurrentCandidate(melaCand); // Go back to the original candidate
-}
-void HZZ4lNtupleMaker::updateMELAClusters_BestNLOVBFApproximation(const string clustertype){
-  MELACandidate* melaCand = mela.getCurrentCandidate();
-  if (melaCand==0) return;
-
-  // Check if any clusters request this computation
-  bool clustersRequest=false;
-  for (unsigned int ic=0; ic<lheme_clusters.size(); ic++){
-    MELACluster* theCluster = lheme_clusters.at(ic);
-    if (theCluster->getName()==clustertype){
-      clustersRequest=true;
-      break;
-    }
-  }
-  if (!clustersRequest) return;
-
-  // Need one recaster for VBF
-  TVar::Production candScheme;
-  if (clustertype.find("BestNLOVBFApproximation")!=string::npos) candScheme = TVar::JJVBF;
-  else return;
-
-  MELACandidateRecaster recaster(candScheme);
-  MELACandidate* candModified=nullptr;
-  recaster.copyCandidate(melaCand, candModified);
-  recaster.reduceJJtoQuarks(candModified);
-  mela.setCurrentCandidate(candModified);
-
-  for (unsigned int ic=0; ic<lheme_clusters.size(); ic++){
-    MELACluster* theCluster = lheme_clusters.at(ic);
-    if (theCluster->getName()==clustertype){
-      // Re-compute all related hypotheses first...
-      theCluster->computeAll();
-      // ...then update the cluster
-      theCluster->update();
-    }
-  }
-
-  delete candModified;
-  mela.setCurrentCandidate(melaCand); // Go back to the original candidate
-}
-
-
-void HZZ4lNtupleMaker::pushRecoMELABranches(const pat::CompositeCandidate& cand){
-  std::vector<MELABranch*>* recome_branches = myTree->getRecoMELABranches();
-  // Pull + push...
-  for (unsigned int ib=0; ib<recome_branches->size(); ib++){
-    std::string branchname = recome_branches->at(ib)->bname.Data();
-    if (cand.hasUserFloat(branchname)) recome_branches->at(ib)->setValue((Float_t)cand.userFloat(branchname));
-    else cerr << "HZZ4lNtupleMaker::pushRecoMELABranches: Candidate does not contain the reco ME " << branchname << " it should have calculated!" << endl;
-  }
-}
-void HZZ4lNtupleMaker::pushLHEMELABranches(){
-  std::vector<MELABranch*>* lheme_branches = myTree->getLHEMELABranches();
-  // Pull + push...
-  for (unsigned int ib=0; ib<lheme_branches->size(); ib++) lheme_branches->at(ib)->setVal();
-  // ...then reset
-  for (unsigned int ic=0; ic<lheme_clusters.size(); ic++) lheme_clusters.at(ic)->reset();
-}
-void HZZ4lNtupleMaker::clearMELABranches(){
-  for (unsigned int it=0; it<lheme_clusters.size(); it++) delete lheme_clusters.at(it);
-  for (unsigned int it=0; it<lheme_computers.size(); it++) delete lheme_computers.at(it);
-  for (unsigned int it=0; it<lheme_copyopts.size(); it++) delete lheme_copyopts.at(it);
-  //for (unsigned int it=0; it<lheme_aliased_units.size(); it++) delete lheme_aliased_units.at(it); // DO NOT DELETE THIS, WILL BE DELETED WITH lheme_units!
-  for (unsigned int it=0; it<lheme_units.size(); it++) delete lheme_units.at(it);
-
-  for (unsigned int it=0; it<recome_copyopts.size(); it++) delete recome_copyopts.at(it);
-  for (unsigned int it=0; it<recome_originalopts.size(); it++) delete recome_originalopts.at(it);
-}
 
 Int_t HZZ4lNtupleMaker::FindBinValue(TGraphErrors *tgraph, double value)
 {

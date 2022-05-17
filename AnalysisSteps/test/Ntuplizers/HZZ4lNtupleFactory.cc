@@ -143,57 +143,6 @@ void HZZ4lNtupleFactory::Book(TString name, std::vector<bool> &value, bool putin
   if (putinfailedtree && _failedTree)
     _failedTree->Branch(name.Data(), &value);
 }
-void HZZ4lNtupleFactory::BookMELABranches(MELAOptionParser* me_opt, bool isGen, MELAComputation* computer_){
-  MELAComputation* computer;
-  std::vector<MELABranch*>* me_branches;
-  if (!isGen){
-    me_branches = &recome_branches;
-    computer=(MELAComputation*)0; // No more computation for reco MEs
-  }
-  else{
-    me_branches = &lheme_branches;
-    computer=computer_;
-    if (computer==0){
-      cerr << "HZZ4lNtupleFactory::BookMELABranches: LHE ME computation for the LHE MELABranch " << me_opt->getName() << " is null. Something went wrong." << endl;
-      assert(0);
-    }
-  }
-
-  vector<TTree*> trees;
-  trees.push_back(_outTree);
-  if (isGen) trees.push_back(_failedTree);
-
-  if (me_opt->doBranch()){
-    for (auto tree:trees){
-      string basename = me_opt->getName();
-      if (me_opt->isGen()) basename = string("Gen_") + basename;
-      MELABranch* tmpbranch;
-      Float_t defVal=1.;
-      if (me_opt->hasPAux()){
-        tmpbranch = new MELABranch(
-          tree, TString((string("pAux_") + basename).c_str()),
-          defVal, computer
-          );
-        me_branches->push_back(tmpbranch);
-      }
-      if (me_opt->hasPConst()){
-        tmpbranch = new MELABranch(
-          tree, TString((string("pConst_") + basename).c_str()),
-          defVal, computer
-          );
-        me_branches->push_back(tmpbranch);
-      }
-      defVal = me_opt->getDefaultME();
-      tmpbranch = new MELABranch(
-        tree, TString((string("p_") + basename).c_str()),
-        defVal, computer
-        );
-      me_branches->push_back(tmpbranch);
-    }
-  }
-}
-std::vector<MELABranch*>* HZZ4lNtupleFactory::getRecoMELABranches(){ return &recome_branches; }
-std::vector<MELABranch*>* HZZ4lNtupleFactory::getLHEMELABranches(){ return &lheme_branches; }
 
 
 void HZZ4lNtupleFactory::InitializeVariables()

@@ -11,9 +11,10 @@
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/PatCandidates/interface/Tau.h"
 
 #include <HTauTau-HMuMu/AnalysisStep/interface/DaughterDataHelpers.h>
-#include <MelaAnalytics/GenericMEComputer/interface/GMECHelperFunctions.h>
+//#include <MelaAnalytics/GenericMEComputer/interface/GMECHelperFunctions.h>
 
 using namespace BranchHelpers;
 
@@ -45,7 +46,7 @@ class HZZ4lNtupleFactory{
   void Book(TString branchName, std::vector<short> &value, bool putinfailedtree=false);
   void Book(TString branchName, std::vector<char> &value, bool putinfailedtree=false);
   void Book(TString branchName, std::vector<bool> &value, bool putinfailedtree=false);
-  void BookMELABranches(MELAOptionParser* me_opt, bool isGen, MELAComputation* computer_);
+  //void BookMELABranches(MELAOptionParser* me_opt, bool isGen, MELAComputation* computer_);
   //void Book(TString branchName, float defaultValue=0,int varType=kFloat);
 
   //void Book(TString *names, int type, int nVarsToFill, float *defaultValues);
@@ -68,8 +69,8 @@ class HZZ4lNtupleFactory{
   //void FillZInfo(Float_t ZMass, Float_t ZPt, short ZFlav);
   //void FillExtraLepInfo(int extraLeptonIndex, bool extraLeptonExists, const reco::CandidatePtr ExtraLep);
 
-  std::vector<MELABranch*>* getRecoMELABranches();
-  std::vector<MELABranch*>* getLHEMELABranches();
+  //std::vector<MELABranch*>* getRecoMELABranches();
+  //std::vector<MELABranch*>* getLHEMELABranches();
 
 
  private:
@@ -77,8 +78,8 @@ class HZZ4lNtupleFactory{
   TTree* _outTree;
   TTree* _failedTree;
   // MELABranches: Only branches are owned. Every other related object is owned by HZZ4lNtupleMaker.
-  std::vector<MELABranch*> recome_branches;
-  std::vector<MELABranch*> lheme_branches;
+  //std::vector<MELABranch*> recome_branches;
+  //std::vector<MELABranch*> lheme_branches;
 
   /*
   int intVector[99];

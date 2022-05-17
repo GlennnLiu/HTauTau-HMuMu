@@ -713,7 +713,7 @@ process.softLeptons = cms.EDProducer("CandViewMerger",
 ### Dileptons: combine/merge leptons into intermediate (bare) collections;
 ###            Embed additional user variables into final collections
 ### ----------------------------------------------------------------------
-TWOGOODLEPTONS = "( userFloat('d0.isGood') && userFloat('d1.isGood') )" # Z made of 2 good leptons (ISO not yet applied)
+TWOGOODLEPTONS = "( userFloat('d0.isGood') && userFloat('d1.isGood') && userFloat('isGoodTau') )" # Z made of 2 good leptons (ISO not yet applied)
 TWOISOLEPTONS = "( userFloat('d0.passCombRelIsoPFFSRCorr') && userFloat('d1.passCombRelIsoPFFSRCorr') )"
 TWOSFLEPTONS = "( ( abs(daughter(0).pdgId())!=15 && abs(daughter(1).pdgId())!=15 && abs(daughter(0).pdgId())==abs(daughter(1).pdgId()) ) || abs(daughter(0).pdgId())==15 || abs(daughter(1).pdgId())==15 )"
 ### NOTE: Isolation cut has been moved to ZZ candidates as we now correct for FSR of all four photons.
@@ -815,14 +815,6 @@ process.SVZCand = cms.EDProducer("ClassicSVfitInterface",
                                   METdyDOWN_EES = cms.InputTag("ShiftMETforEES", "METdyDOWNEES")
 )
 
-
-#if KEEPLOOSECOMB:
-#    process.bareZCand.cut = cms.string('mass > 0 && abs(daughter(0).pdgId())==abs(daughter(1).pdgId())') # Propagate also combinations of loose leptons (for debugging)
-#else:
-#    if FSRMODE == "RunII" : # Just keep combinations of tight leptons (passing ID, SIP and ISO)
-#        process.bareZCand.cut = cms.string("mass > 0 && abs(daughter(0).pdgId())==abs(daughter(1).pdgId()) && daughter(0).masterClone.userFloat('isGood') && daughter(1).masterClone.userFloat('isGood') && daughter(0).masterClone.userFloat('passCombRelIsoPFFSRCorr') &&  daughter(1).masterClone.userFloat('passCombRelIsoPFFSRCorr')")
-#    else : # Just keep combinations of tight leptons (passing ID and SIP; iso cannot be required at this point, with the legacy FSR logic)
-#        process.bareZCand.cut = cms.string("mass > 0 && abs(daughter(0).pdgId())==abs(daughter(1).pdgId()) && daughter(0).masterClone.userFloat('isGood') && daughter(1).masterClone.userFloat('isGood')")
 
 ZLEPTONSEL     = TWOGOODLEPTONS # Note: this is without ISO
 

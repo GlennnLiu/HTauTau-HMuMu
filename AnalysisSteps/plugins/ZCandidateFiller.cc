@@ -269,6 +269,47 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     else
 	myCand.addUserFloat("goodMass",myCand.mass());
     
+    int id0 = myCand.daughter(0)->pdgId();
+    int id1 = myCand.daughter(1)->pdgId();
+
+    //In terms of etau, mutau, tautau, special good and iso requirements are needed
+    bool goodTau = true;
+    if (abs(id0)==15 && abs(id1)==11 && !myCand.userFloat("d0.isGood_Ele"))
+        goodTau=false;
+    if (abs(id0)==15 && abs(id1)==13 && !myCand.userFloat("d0.isGood_Mu"))
+        goodTau=false;
+    if (abs(id0)==15 && abs(id1)==15 && ( !myCand.userFloat("d0.isGood_Tau") || !myCand.userFloat("d1.isGood_Tau") ))
+        goodTau=false;
+    if (abs(id0)==11 && abs(id1)==15 && !myCand.userFloat("d1.isGood_Ele"))
+        goodTau=false;
+    if (abs(id0)==13 && abs(id1)==15 && !myCand.userFloat("d1.isGood_Mu"))
+        goodTau=false;
+    myCand.addUserFloat("isGoodTau",goodTau);
+
+    //HLTMatch
+    //The candidate passes HLTMatch if at least one lepton daughter matches the single trigger or both matches to the double trigger
+    bool muHLTMatch;
+    bool eleHLTMatch;
+    muHLTMatch=false;
+    eleHLTMatch=false;
+    if (abs(id0)==13 && abs(id1)==13) {
+        if (myCand.userFloat("d0.HLTMatch1") || myCand.userFloat("d1.HLTMatch1"))
+            muHLTMatch=true;
+        for (size_t j=0; j<muHLTPaths2_.size(); ++j)
+            if (myCand.userFloat("d0."+muHLTPaths2_[j]) && myCand.userFloat("d1."+muHLTPaths2_[j]))
+                muHLTMatch=true;
+    }
+    if (abs(id0)==11 && abs(id1)==11) {
+        if (myCand.userFloat("d0.HLTMatch1") || myCand.userFloat("d1.HLTMatch1"))
+            eleHLTMatch=true;
+        for (size_t j=0; j<eleHLTPaths2_.size(); ++j)
+            if (myCand.userFloat("d0."+eleHLTPaths2_[j]) && myCand.userFloat("d1."+eleHLTPaths2_[j]))
+                eleHLTMatch=true;
+    }
+    myCand.addUserFloat("muHLTMatch",muHLTMatch);
+    myCand.addUserFloat("eleHLTMatch",eleHLTMatch);
+
+
     myCand.addUserFloat("OSSF",OS && SF);
     //--- Find "best Z" (closest to mZ) among those passing the "bestZAmong" selection (2011 PRL logic), now deprecated!!!
     if (preBestZSelection(myCand)) {
@@ -317,47 +358,7 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     //    We do this here so that isBestZ is available within the cuts
     for(CutSet<pat::CompositeCandidate>::const_iterator cut = cuts.begin(); cut != cuts.end(); ++cut) {
       myCand.addUserFloat(cut->first,int((*(cut->second))(myCand)));
-    }
-    
-    int id0 = myCand.daughter(0)->pdgId();
-    int id1 = myCand.daughter(1)->pdgId();
-
-    //In terms of etau, mutau, tautau, special good and iso requirements are needed
-    bool goodTau = true;
-    if (abs(id0)==15 && abs(id1)==11 && !myCand.userFloat("d0.isGood_Ele"))
-	goodTau=false;
-    if (abs(id0)==15 && abs(id1)==13 && !myCand.userFloat("d0.isGood_Mu"))
-        goodTau=false;
-    if (abs(id0)==15 && abs(id1)==15 && ( !myCand.userFloat("d0.isGood_Tau") || !myCand.userFloat("d1.isGood_Tau") ))
-        goodTau=false;
-    if (abs(id0)==11 && abs(id1)==15 && !myCand.userFloat("d1.isGood_Ele"))
-        goodTau=false;
-    if (abs(id0)==13 && abs(id1)==15 && !myCand.userFloat("d1.isGood_Mu"))
-        goodTau=false;
-    myCand.addUserFloat("isGoodTau",goodTau);
-
-    //HLTMatch
-    //The candidate passes HLTMatch if at least one lepton daughter matches the single trigger or both matches to the double trigger
-    bool muHLTMatch;
-    bool eleHLTMatch;
-    muHLTMatch=false;
-    eleHLTMatch=false;
-    if (abs(id0)==13 && abs(id1)==13) {
-	if (myCand.userFloat("d0.HLTMatch1") || myCand.userFloat("d1.HLTMatch1"))
-	    muHLTMatch=true;
-	for (size_t j=0; j<muHLTPaths2_.size(); ++j)
-	    if (myCand.userFloat("d0."+muHLTPaths2_[j]) && myCand.userFloat("d1."+muHLTPaths2_[j]))
-		muHLTMatch=true;
-    }
-    if (abs(id0)==11 && abs(id1)==11) {
-        if (myCand.userFloat("d0.HLTMatch1") || myCand.userFloat("d1.HLTMatch1"))
-            eleHLTMatch=true;
-        for (size_t j=0; j<eleHLTPaths2_.size(); ++j)
-            if (myCand.userFloat("d0."+eleHLTPaths2_[j]) && myCand.userFloat("d1."+eleHLTPaths2_[j]))
-                eleHLTMatch=true;
-    }
-    myCand.addUserFloat("muHLTMatch",muHLTMatch);
-    myCand.addUserFloat("eleHLTMatch",eleHLTMatch);
+    }    
 
   }
   
