@@ -1,4 +1,4 @@
-# HTauTau-HMuMu
+# HTauTauHMuMu
 
 Measure Y(tautau)/Y(mumu) to constrain lepton universality violation. More is being developed.
 
@@ -57,6 +57,6 @@ source setup.sh
 cd ..
 
 # This package
-git clone git@github.com:GlennnLiu/HTauTau-HMuMu.git -b Run2_Legacy
+git clone git@github.com:GlennnLiu/HTauTauHMuMu.git -b Run2_Legacy
 ```
 
