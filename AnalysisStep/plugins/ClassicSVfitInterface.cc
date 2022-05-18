@@ -491,18 +491,22 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
     {
       measuredTauLeptons.push_back(classic_svFit::MeasuredTauLepton(l2Type, l2->pt(), l2->eta(), l2->phi(), mass2, decay2 ));
       measuredTauLeptons.push_back(classic_svFit::MeasuredTauLepton(l1Type, l1->pt(), l1->eta(), l1->phi(), mass1, decay1 ));
-
+      
+      if (l1shifted_tau && l2shifted_tau){
       measuredTauLeptonsTauUp.push_back(classic_svFit::MeasuredTauLepton(l2Type, l2_tauUP.Pt(), l2_tauUP.Eta(), l2_tauUP.Phi(), mass2_tauUP, decay2 ));
       measuredTauLeptonsTauUp.push_back(classic_svFit::MeasuredTauLepton(l1Type, l1_tauUP.Pt(), l1_tauUP.Eta(), l1_tauUP.Phi(), mass1_tauUP, decay1 ));
 
       measuredTauLeptonsTauDown.push_back(classic_svFit::MeasuredTauLepton(l2Type, l2_tauDOWN.Pt(), l2_tauDOWN.Eta(), l2_tauDOWN.Phi(), mass2_tauDOWN, decay2 ));
       measuredTauLeptonsTauDown.push_back(classic_svFit::MeasuredTauLepton(l1Type, l1_tauDOWN.Pt(), l1_tauDOWN.Eta(), l1_tauDOWN.Phi(), mass1_tauDOWN, decay1 ));
+      }
 
+      if (l1shifted_ele && l2shifted_ele){
       measuredTauLeptonsEleUp.push_back(classic_svFit::MeasuredTauLepton(l2Type, l2_eleUP.Pt(), l2_eleUP.Eta(), l2_eleUP.Phi(), mass2_eleUP, decay2 ));
       measuredTauLeptonsEleUp.push_back(classic_svFit::MeasuredTauLepton(l1Type, l1_eleUP.Pt(), l1_eleUP.Eta(), l1_eleUP.Phi(), mass1_eleUP, decay1 ));
 
       measuredTauLeptonsEleDown.push_back(classic_svFit::MeasuredTauLepton(l2Type, l2_eleDOWN.Pt(), l2_eleDOWN.Eta(), l2_eleDOWN.Phi(), mass2_eleDOWN, decay2 ));
       measuredTauLeptonsEleDown.push_back(classic_svFit::MeasuredTauLepton(l1Type, l1_eleDOWN.Pt(), l1_eleDOWN.Eta(), l1_eleDOWN.Phi(), mass1_eleDOWN, decay1 ));
+      }
     }
 
     else
@@ -510,17 +514,21 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
       measuredTauLeptons.push_back(classic_svFit::MeasuredTauLepton(l1Type, l1->pt(), l1->eta(), l1->phi(), mass1, decay1 ));
       measuredTauLeptons.push_back(classic_svFit::MeasuredTauLepton(l2Type, l2->pt(), l2->eta(), l2->phi(), mass2, decay2 ));
 
+      if (l1shifted_tau && l2shifted_tau){
       measuredTauLeptonsTauUp.push_back(classic_svFit::MeasuredTauLepton(l1Type, l1_tauUP.Pt(), l1_tauUP.Eta(), l1_tauUP.Phi(), mass1_tauUP, decay1 ));
       measuredTauLeptonsTauUp.push_back(classic_svFit::MeasuredTauLepton(l2Type, l2_tauUP.Pt(), l2_tauUP.Eta(), l2_tauUP.Phi(), mass2_tauUP, decay2 ));
 
       measuredTauLeptonsTauDown.push_back(classic_svFit::MeasuredTauLepton(l1Type, l1_tauDOWN.Pt(), l1_tauDOWN.Eta(), l1_tauDOWN.Phi(), mass1_tauDOWN, decay1 ));
       measuredTauLeptonsTauDown.push_back(classic_svFit::MeasuredTauLepton(l2Type, l2_tauDOWN.Pt(), l2_tauDOWN.Eta(), l2_tauDOWN.Phi(), mass2_tauDOWN, decay2 ));
+      }
 
+      if (l1shifted_ele && l2shifted_ele){
       measuredTauLeptonsEleUp.push_back(classic_svFit::MeasuredTauLepton(l1Type, l1_eleUP.Pt(), l1_eleUP.Eta(), l1_eleUP.Phi(), mass1_eleUP, decay1 ));
       measuredTauLeptonsEleUp.push_back(classic_svFit::MeasuredTauLepton(l2Type, l2_eleUP.Pt(), l2_eleUP.Eta(), l2_eleUP.Phi(), mass2_eleUP, decay2 ));
 
       measuredTauLeptonsEleDown.push_back(classic_svFit::MeasuredTauLepton(l1Type, l1_eleDOWN.Pt(), l1_eleDOWN.Eta(), l1_eleDOWN.Phi(), mass1_eleDOWN, decay1 ));
       measuredTauLeptonsEleDown.push_back(classic_svFit::MeasuredTauLepton(l2Type, l2_eleDOWN.Pt(), l2_eleDOWN.Eta(), l2_eleDOWN.Phi(), mass2_eleDOWN, decay2 ));
+      }
     }
 
     // define algorithm (set the debug level to 3 for testing)
@@ -714,13 +722,13 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
         SVptUnc                = static_cast<classic_svFit::DiTauSystemHistogramAdapter*>(algo.getHistogramAdapter())->getPtErr();
         SVetaUnc               = static_cast<classic_svFit::DiTauSystemHistogramAdapter*>(algo.getHistogramAdapter())->getEtaErr();
         SVphiUnc               = static_cast<classic_svFit::DiTauSystemHistogramAdapter*>(algo.getHistogramAdapter())->getPhiErr();
-        
-        /*cout << "--- SVFit Output Debug ---" << endl;
+     
+        cout << "--- SVFit Output Debug ---" << endl;
         cout << "SVfitMass           = " << SVfitMass << endl;
         cout << "SVfitTransverseMass = " << SVfitTransverseMass << endl;
         cout << "SVpt 	             = " << SVpt << endl;
         cout << "SVeta	             = " << SVeta << endl;
-        cout << "SVphi	             = " << SVphi << endl;*/
+        cout << "SVphi	             = " << SVphi << endl;
         
         ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double>> measuredTau1(l1->pt(), l1->eta(), l1->phi(), mass1);
         ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double>> measuredTau2(l2->pt(), l2->eta(), l2->phi(), mass2);

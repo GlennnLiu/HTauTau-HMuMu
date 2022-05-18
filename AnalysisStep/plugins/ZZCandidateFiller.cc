@@ -114,6 +114,8 @@ private:
   reco::CompositeCandidate::role_collection rolesZ2Z1;
   bool isMC;
   bool doKinFit,doKinFitOld;
+  bool debug;
+
   // float muon_iso_cut, electron_iso_cut;
   TH2F* corrSigmaMu;
   TH2F* corrSigmaEle;
@@ -139,6 +141,7 @@ ZZCandidateFiller::ZZCandidateFiller(const edm::ParameterSet& iConfig) :
   isMC(iConfig.getParameter<bool>("isMC")),
   doKinFit(iConfig.getParameter<bool>("doKinFit")),
   doKinFitOld(iConfig.getParameter<bool>("doKinFitOld")),
+  debug(iConfig.getParameter<bool>("debug")),
   corrSigmaMu(0),
   corrSigmaEle(0),
   kinZfitter(0)
@@ -202,14 +205,17 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
   const float ZmassValue = 91.1876;//PDGHelpers::Zmass;
 
   // Get LLLL candidates
+  if (debug) cout<<"Get LLLL candidates"<<endl;
   Handle<edm::View<CompositeCandidate> > LLLLCands;
   iEvent.getByToken(candidateToken, LLLLCands);
 
   // Get jets
+  if (debug) cout<<"Get jets"<<endl;
   Handle<edm::View<pat::Jet> > CleanJets;
   iEvent.getByToken(jetToken, CleanJets);
 
   // Get MET
+  if (debug) cout<<"Get MET"<<endl;
   float PFMET = 0.;
   float PFMETPhi = 0.;
   Handle<edm::View<pat::MET> > metHandle;
@@ -231,6 +237,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
   // FIXME: May need to correct MET in the MC and use the corrected MET to calculate the VH MEs
 
   // Get leptons (in order to store extra leptons)
+  if (debug) cout<<"Get leptons"<<endl;
   Handle<View<reco::Candidate> > softleptoncoll;
   iEvent.getByToken(softLeptonToken, softleptoncoll);
   vector<reco::CandidatePtr> goodisoleptonPtrs;
@@ -245,6 +252,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
   }
 
   // Get Z Candidates
+  if (debug) cout<<"Get Z Candidates"<<endl;
   Handle<View<CompositeCandidate> > ZCands;
   iEvent.getByToken(ZCandToken, ZCands);
 
@@ -254,6 +262,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 //   int processID = gen->signalProcessID();
 
   // to calculate mass resolution
+  if (debug) cout<<"Calculate mass resolution"<<endl;
   CompositeCandMassResolution errorBuilder;
   errorBuilder.init(iSetup);
 
@@ -262,6 +271,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
   vector< vector<int> > preSelCands(preBestCandSelection.size());
   //----------------------------------------------------------------------
   //--- Loop over input candidates
+  if (debug) cout<<"Loop over candidates"<<endl;
   for( View<CompositeCandidate>::const_iterator cand = LLLLCands->begin(); cand != LLLLCands->end(); ++ cand ) {
     int icand = distance(LLLLCands->begin(),cand);
 
@@ -273,6 +283,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 
     //--- Set id of the Z1 and "Z1"/"Z2" labels. This allows to call e.g. aHiggs->daughter("Z1").
     // if ZRolesByMass is true, 'Z1' and iZ1 refer to the  Z closest to mZ; otherwise Z1 = daughter(0). The latter is used for control regions.
+    if (debug) cout<<"Role Z by mass"<<endl;
     const reco::CompositeCandidate::role_collection* ZRoles = &rolesZ1Z2;
     int iZ1 = 0;
     int iZ2 = 1;
@@ -286,11 +297,13 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     myCand.applyRoles();
 
     //--- Z pointers
+    if (debug) cout<<"Z pointers"<<endl;
     const reco::Candidate* Z1= myCand.daughter(iZ1);
     const reco::Candidate* Z2= myCand.daughter(iZ2);
     vector<const reco::Candidate*> Zs = {Z1, Z2}; // in the original order
 
     //--- Lepton pointers in the original order
+    if (debug) cout<<"Lepton pointers"<<endl;
     const reco::Candidate* Z1L1= Z1->daughter(0);
     const reco::Candidate* Z1L2= Z1->daughter(1);
     const reco::Candidate* Z2L1= Z2->daughter(0);
@@ -302,6 +315,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     std::transform(ZZLeps.begin(), ZZLeps.end(),pij.begin(), [](const reco::Candidate* c){return c->p4();});
 
     //--- Collect FSR photons and map them to the corresponding leptons
+    if (debug) cout<<"FSR photons"<<endl;
     FSRToLepMap FSRMap;
     for (unsigned iZ=0; iZ<2; ++iZ) {
       for (unsigned ifsr=2; ifsr<Zs[iZ]->numberOfDaughters(); ++ifsr) {
@@ -332,6 +346,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 
 
     // Compute worst-lepton isolation
+    if (debug) cout<<"Worst lepton isolation"<<endl;
     for (int zIdx=0; zIdx<2; ++zIdx) {
       float worstMuIso=0;
       float worstEleIso=0;
@@ -352,6 +367,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     //--- Alternative lepton pairings: "smart cut" and QCD suppression and
 
     //--- Sign-ordered leptons and leptopn four-vectors (without FSR), to be used to compute mZa, mZb, mZalpha, mZbeta
+    if (debug) cout<<"Order by charge"<<endl;
     const reco::Candidate* Z1Lp(Z1L1);
     const reco::Candidate* Z1Lm(Z1L2);
     const reco::Candidate* Z2Lp(Z2L1);
@@ -370,6 +386,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     math::XYZTLorentzVector p2p(Z2Lp->p4());
     math::XYZTLorentzVector p2m(Z2Lm->p4());
 
+    if (debug) cout<<"Other combination options and smart cut"<<endl;
     // Build the other SF/OS combination
     float mZ1= userdatahelpers::getUserFloat(Z1,"goodMass");
     float mZa, mZb;
@@ -401,6 +418,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 
 
     //--- QCD suppression cut
+    if (debug) cout<<"QCD suppression cut"<<endl;
     vector<const reco::Candidate*> lep;
     lep.push_back(Z1Lm);
     lep.push_back(Z1Lp);
@@ -421,11 +439,13 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 
 
     //--- worst SIP value
+    if (debug) cout<<"Worst SIP"<<endl;
     vector<double> SIPS = {myCand.userFloat("d0.d0.SIP"), myCand.userFloat("d0.d1.SIP"), myCand.userFloat("d1.d0.SIP"), myCand.userFloat("d1.d1.SIP")};
     sort(SIPS.begin(),SIPS.end());
     float SIP4 = SIPS[3];
 
     //--- Sorted pTs
+    if (debug) cout<<"Sort pt"<<endl;
     vector<pair<double, int>> ptS;
     ptS.push_back(make_pair(Z1Lm->pt(), Z1Lm->pdgId()));
     ptS.push_back(make_pair(Z1Lp->pt(), Z1Lp->pdgId()));
@@ -434,6 +454,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     sort(ptS.begin(),ptS.end());
 
     //--- Mass and Lepton uncertainties
+    if (debug) cout<<"Mass and lepton uncertainties"<<endl;
     std::vector<double> errs;
     float massError;
     if (abs(Z1Lm->pdgId())==15 || abs(Z1Lp->pdgId())==15 || abs(Z2Lm->pdgId())==15 || abs(Z2Lp->pdgId())==15 ){
@@ -489,6 +510,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 
 
     //--- store good isolated leptons that are not involved in the current ZZ candidate
+    if (debug) cout<<"Extra leptons"<<endl;
     int nExtraLep = 0;
     SimpleParticleCollection_t associatedLeptons;
     for (vector<reco::CandidatePtr>::const_iterator lepPtr = goodisoleptonPtrs.begin(); lepPtr != goodisoleptonPtrs.end(); ++lepPtr){
@@ -520,6 +542,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     myCand.addUserFloat("nExtraLep",nExtraLep);
 
     // Leptonically decaying WH
+    if (debug) cout<<"Extra W"<<endl;
     if (nExtraLep>=1){
       // Take leading-pT lepton to compute fake neutrino
       int nuid = -associatedLeptons.at(0).first + (associatedLeptons.at(0).first>0 ? -1 : +1);
@@ -551,6 +574,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 
 
     //--- store Z candidates whose leptons are not involved in the current ZZ candidate
+    if (debug) cout<<"Extra Z"<<endl;
     int nExtraZ = 0;
     vector<const CompositeCandidate*> extraZs;
     for( View<CompositeCandidate>::const_iterator zcand = ZCands->begin(); zcand != ZCands->end(); ++ zcand ) {
@@ -580,6 +604,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     daughters.push_back(SimpleParticle_t(id21, TLorentzVector(p21.x(), p21.y(), p21.z(), p21.t())));
     daughters.push_back(SimpleParticle_t(id22, TLorentzVector(p22.x(), p22.y(), p22.z(), p22.t())));
 
+    if (debug) cout<<"Angles, not computed"<<endl;
     //--- Compute angles, better done here
     float costheta1=0, costheta2=0, phi=0, costhetastar=0, phistar1=0;
     //TUtil::computeAngles(
@@ -598,8 +623,10 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     // xistar is the angle between Z decay plane and x-axis
     Z14vec.Boost(-higgs.BoostVector());
     float xistar = Z14vec.Phi();
+
     // detaJJ, Mjj and Fisher. These are per-event variables in the SR, but not necessarily in the CR as we clean jets also
     // for loose-but-not-tight leptons.
+    if (debug) cout<<"Dijet stuff"<<endl;
     float DiJetMass  = -99;
     float DiJetDEta  = -99;
     float DiJetFisher  = -99;
@@ -610,6 +637,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     // Loop over following JEC variations:
     // JES
     // JER
+    if (debug) cout<<"JES, JER"<<endl;
     for (int jecnum = 0; jecnum < _num_of_JEC_variations; jecnum++){
       SimpleParticleCollection_t associated;
 
@@ -700,7 +728,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 
     //----------------------------------------------------------------------
     //--- kinematic fit for ZZ containing taus
-    
+    if (debug) cout<<"Kinematic fit"<<endl;
     float ZZKMass = -999;
     float ZZKChi2 = -999;
     if (doKinFit){
@@ -754,18 +782,19 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
         ZZKMass=-666.;
 	ZZKChi2=-666.;
     }
+    }
     myCand.addUserFloat("ZZKMass",ZZKMass);
     myCand.addUserFloat("ZZKChi2",ZZKChi2);
-    }
 
 
     //----------------------------------------------------------------------
     //--- Get the mass by combining l1l2 + SVFit momentum
+    if (debug) cout<<"SV fit propagation"<<endl;
     bool checkFlavor=false;
     float SVfitMass=-999., SVpt=-999., SVeta=-999., SVphi=-999.;
     TLorentzVector pZtt,pZll,pZZ;
     if ( (abs(id11)==15 or abs(id12)==15) && abs(id21)!=15 && abs(id22)!=15 ){
-	if (userdatahelpers::getUserFloat(Z1,"ComputeSV")){
+	if (userdatahelpers::hasUserFloat(Z1,"ComputeSV") && userdatahelpers::getUserFloat(Z1,"ComputeSV")){
 	    pZtt.SetPtEtaPhiM(userdatahelpers::getUserFloat(Z1,"SVpt"),userdatahelpers::getUserFloat(Z1,"SVeta"),userdatahelpers::getUserFloat(Z1,"SVphi"),userdatahelpers::getUserFloat(Z1,"SVfitMass"));
 	    pZll.SetPtEtaPhiM(Z2->pt(),Z2->eta(),Z2->phi(),Z2->mass());
 	    checkFlavor=true;
@@ -778,7 +807,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 	}
     }
     else if ( (abs(id21)==15 or abs(id22)==15) && abs(id11)!=15 && abs(id12)!=15 ){
-	if (userdatahelpers::getUserFloat(Z2,"ComputeSV")){
+	if (userdatahelpers::hasUserFloat(Z2,"ComputeSV") && userdatahelpers::getUserFloat(Z2,"ComputeSV")){
             pZtt.SetPtEtaPhiM(userdatahelpers::getUserFloat(Z2,"SVpt"),userdatahelpers::getUserFloat(Z2,"SVeta"),userdatahelpers::getUserFloat(Z2,"SVphi"),userdatahelpers::getUserFloat(Z2,"SVfitMass"));
 	    pZll.SetPtEtaPhiM(Z1->pt(),Z1->eta(),Z1->phi(),Z1->mass());
 	    checkFlavor=true;
@@ -812,16 +841,17 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 
     //----------------------------------------------------------------------
     //--- Decide which 4l mass to be used
+    if (debug) cout<<"Good mass"<<endl;
     float goodMass;
-    if (ZZKMass <= 0)
+    if (SVfitMass < 0)
 	goodMass=myCand.mass();
     else
-	goodMass=ZZKMass;
+	goodMass=SVfitMass;//ZZKMass;
     myCand.addUserFloat("goodMass",goodMass);
 	
     //----------------------------------------------------------------------
     //--- kinematic refitting using Z mass constraint
-
+    if (debug) cout<<"Kinamtic refitting"<<endl;
     float ZZMassRefit = 0.;
     float ZZMassRefitErr = 0.;
     float ZZMassUnrefitErr = 0.;
@@ -861,6 +891,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     //--- 4l vertex fits (experimental)
 
     //CandConstraintFit::fit(&myCand, iSetup);
+    if (debug) cout<<"Vertex fit"<<endl;
     if (doVtxFit && abs(id11)==13 && abs(id12)==13 && abs(id21)==13 && abs(id22)==13) {
 
       edm::ESHandle<TransientTrackBuilder> theTTBuilder;
@@ -940,6 +971,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
       }
     }
     
+    if (debug) cout<<"Good tau and HLT match"<<endl;
     bool goodTaus=false;
     if (myCand.userFloat("d0.isGoodTau") && myCand.userFloat("d1.isGoodTau"))
 	goodTaus=true;
@@ -954,6 +986,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     
     //----------------------------------------------------------------------
     //--- Embed variables
+    if (debug) cout<<"Embed variables"<<endl;
     myCand.addUserFloat("candChannel",    candChannel);
     myCand.addUserFloat("SIP4",           SIP4);
     myCand.addUserFloat("pt1",            ptS.at(3).first); // leading-pT
@@ -1019,8 +1052,10 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 
     //----------------------------------------------------------------------
     //--- Check if candedate passes the "bestCandAmong" selections (2011 PRL logic)
+    if (debug) cout<<"Best cand among"<<endl;
     int iCRname=0;
     for(CutSet<pat::CompositeCandidate>::const_iterator bca = preBestCandSelection.begin(); bca != preBestCandSelection.end(); ++bca){
+      if (debug) cout<<bca->first<<endl;
       int preBestCandResult= int((*(bca->second))(myCand));
 
       if (preBestCandResult){
@@ -1035,6 +1070,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 
 
   //--- For each of the bestCandAmong preselections, find the best candidate and store its index (bestCandIdx)
+  if (debug) cout<<"Best candidate"<<endl;
   Comparators::BestCandComparator myComp(*result, bestCandType);
   for (int iCRname=0; iCRname<(int)preSelCands.size(); ++iCRname) {
     if (preSelCands[iCRname].size() > 0) {
@@ -1043,6 +1079,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
   }
 
   //--- Embed best candidate flag (must be done in a separate loop)
+  if (debug) cout<<"Embed flags"<<endl;
   for (int i = 0; i< (int)result->size(); ++i) {
     pat::CompositeCandidate& myCand = (*result)[i];
 

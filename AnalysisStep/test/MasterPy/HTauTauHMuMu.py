@@ -906,7 +906,7 @@ process.ZlCand = cms.EDProducer("PATCandViewShallowCloneCombiner",
 ### ----------------------------------------------------------------------
 
 FOURGOODLEPTONS    =  ("( userFloat('d0.GoodLeptons') && userFloat('d1.GoodLeptons')" +
-		       "&& userFloat('d0.isGoodTau') && userFloat('d1.isGoodTau')" +
+		       #"&& userFloat('d0.isGoodTau') && userFloat('d1.isGoodTau')" +
                        "&& userFloat('d0.worstEleIso') <" + str(ELEISOCUT) +
                        "&& userFloat('d1.worstEleIso') <" + str(ELEISOCUT) +
                        "&& userFloat('d0.worstMuIso') <" + str(MUISOCUT) +
@@ -997,7 +997,7 @@ elif SELSETUP=="allCutsAtOncePlusSmart": # Apply smarter mZb cut
                       PT20_10         + "&&" +
 		      OSSF	      + "&&" +
                       "userFloat('goodMass')>70"       + "&&" +
-                      SMARTMALLCOMB   + "&&" +
+                      #SMARTMALLCOMB   + "&&" +
                       "daughter('Z2').masterClone.userFloat('goodMass')>12"
                       )
 
@@ -1049,8 +1049,9 @@ process.ZZCand = cms.EDProducer("ZZCandidateFiller",
     bestCandAmong = cms.PSet(isBestCand = cms.string(BESTCAND_AMONG)),
     bestCandComparator = cms.string(BESTCANDCOMPARATOR),
     ZRolesByMass = cms.bool(True),
-    doKinFit = cms.bool(KINFIT),
+    doKinFit = cms.bool(False),#KINFIT),
     doKinFitOld = cms.bool(KINFITOLD),
+    debug = cms.bool(True),
     flags = cms.PSet(
         GoodLeptons =  cms.string(FOURGOODLEPTONS),
         Z2Mass  = cms.string(Z2MASS),
@@ -1088,7 +1089,7 @@ Z2TT_OS = Z2TT + "&& daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdg
 Z2TT_SS = Z2TT + "&& daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()>0"		#Z2 = etau, mutau, tautau, SS
 Z2ID    = "userFloat('d1.d0.ID')     && userFloat('d1.d1.ID')"                    		#ID on LL leptons
 Z2SIP   = "userFloat('d1.d0.SIP')< 4 && userFloat('d1.d1.SIP')< 4"                		#SIP on LL leptons, probably need to be modified because taus don't have SIP.
-CR_Z2MASS = "daughter(1).userFloat('goodMass')>4  && daughter(1).userFloat('goodMass')<120"	#Mass on LL; cut at 4
+CR_Z2MASS = "daughter(1).masterClone().userFloat('goodMass')>4  && daughter(1).masterClone().userFloat('goodMass')<120"	#Mass on LL; cut at 4
 
 
 # Define cuts for selection of the candidates among which the best one is chosen.
@@ -1111,15 +1112,15 @@ elif SELSETUP == "allCutsAtOnce":
 elif SELSETUP == "allCutsAtOncePlusMZb":
     CR_BESTZLLss = CR_BESTCANDBASE_AA + "&&" + Z2LL_SS + "&&" +CR_Z2MASS + "&&" + MLLALLCOMB + "&&" + PT20_10 + "&&" + "mass>70" + "&&" + "daughter(1).mass>12" + "&&" + "userFloat('mZb')>12"
 elif SELSETUP == "allCutsAtOncePlusSmart":
-    CR_BESTZLLss = CR_BESTCANDBASE_AA + "&&" + Z2LL_SS + "&&" +CR_Z2MASS + "&&" + MLLALLCOMB + "&&" + PT20_10 + "&&" + "userFloat('goodMass')>70" + "&&" + "daughter(1).masterClone.userFloat('goodMass')>12" + "&&" + SMARTMALLCOMB
+    CR_BESTZLLss = CR_BESTCANDBASE_AA + "&& (" + Z2LL_SS + ") && (" +CR_Z2MASS + ") && (" + MLLALLCOMB + ") && (" + PT20_10 + ") &&" + "userFloat('goodMass')>70" + "&&" + "daughter(1).masterClone().userFloat('goodMass')>12" + "&&" + SMARTMALLCOMB
 
 
 # Base for the selection cut applied on the best candidate. This almost fully (except for M4l100) overlaps with the cuts defined above, except for startegies where the best candidate is chosen at the beginning (Legacy, allCutsAtOnceButMZ2).
 CR_BASESEL = (CR_Z2MASS + "&&" +              # mass cuts on LL
               MLLALLCOMB + "&&" +             # mass cut on all lepton pairs
               PT20_10    + "&&" +             # pT> 20/10 over all 4 l
-              "daughter(1).userFloat('goodMass')>12 &&" +      # mZ2 >12
-              "userFLoat('goodMass')>70" )                     # m4l cut
+              "daughter(1).masterClone().userFloat('goodMass')>12 &&" +      # mZ2 >12
+              "userFloat('goodMass')>70" )                     # m4l cut
 
 ##### CR based on Z+2 opposite sign leptons that pass the loose selection #####
 
@@ -1179,8 +1180,9 @@ process.ZLLCand = cms.EDProducer("ZZCandidateFiller",
 
     ),
     ZRolesByMass = cms.bool(False),  # daughter('Z1') = daughter(0)
-    doKinFit = cms.bool(KINFIT),
+    doKinFit = cms.bool(False),#KINFIT),
     doKinFitOld = cms.bool(KINFITOLD),
+    debug = cms.bool(False),
     flags = cms.PSet(
       SR = cms.string(SR),
       CRZLLss = cms.string(CR_BASESEL),             #combine with proper isBestCRZLLss for AA ss/os CRss
