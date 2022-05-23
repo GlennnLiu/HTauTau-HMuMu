@@ -39,6 +39,11 @@ namespace Comparators {
       float mZ1_i = cand_i.daughter("Z1")->mass();
       float mZ1_j = cand_j.daughter("Z1")->mass();
       if ( fabs(mZ1_i-mZ1_j) < 1e-04 ){ // same Z1: choose the candidate with highest-pT Z2 leptons
+      //const reco::Candidate* Z1_i = cand_i.daughter("Z1");
+      //const reco::Candidate* Z1_j = cand_j.daughter("Z1");
+      //double ptSumZ1_i = Z1_i->daughter(0)->pt() + Z1_i->daughter(1)->pt();
+      //double ptSumZ1_j = Z1_j->daughter(0)->pt() + Z1_j->daughter(1)->pt();
+      //if (fabs(ptSumZ1_i-ptSumZ1_j)<1e-04){
 	const reco::Candidate* Z2_i = cand_i.daughter("Z2");
 	const reco::Candidate* Z2_j = cand_j.daughter("Z2");
 	double ptSumZ2_i = Z2_i->daughter(0)->pt() + Z2_i->daughter(1)->pt();
@@ -50,6 +55,7 @@ namespace Comparators {
       else { // choose the candidate with Z1 closest to nominal mass 
 	// cout << "Comparator: compare Z1 masses: " << mZ1_i << " " << mZ1_j << endl;
 	return ( fabs(mZ1_i-ZmassValue)<fabs(mZ1_j-ZmassValue) );
+	//return (ptSumZ1_i > ptSumZ1_j );
       }      
       
     }

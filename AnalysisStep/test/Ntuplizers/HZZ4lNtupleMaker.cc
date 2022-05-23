@@ -1628,7 +1628,7 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
   Z1GoodMass = userdatahelpers::getUserFloat(Z1,"goodMass");
 
   if(addSVfit && userdatahelpers::hasUserFloat(Z1,"ComputeSV")){
-    if(userdatahelpers::getUserFloat(Z1,"ComputeSV")){
+    //if(userdatahelpers::getUserFloat(Z1,"ComputeSV")){
 	Z1SVMass	= userdatahelpers::getUserFloat(Z1,"SVfitMass");
 	Z1SVPt		= userdatahelpers::getUserFloat(Z1,"SVfit_pt");
 	Z1SVEta		= userdatahelpers::getUserFloat(Z1,"SVfit_eta");
@@ -1642,7 +1642,7 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
 	Z1SVPhiUnc	= userdatahelpers::getUserFloat(Z1,"SVfit_phiUnc");
 	Z1SVMETRho	= userdatahelpers::getUserFloat(Z1,"SVfit_METRho");
 	Z1SVMETPhi	= userdatahelpers::getUserFloat(Z1,"SVfit_METPhi");
-    }
+    //}
   }
  
   Z2Mass = Z2->mass();

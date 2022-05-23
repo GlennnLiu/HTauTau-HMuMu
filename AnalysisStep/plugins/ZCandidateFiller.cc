@@ -261,7 +261,7 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       myCand.addUserFloat("d1.combRelIsoPFFSRCorr",myCand.userFloat("d1.combRelIsoPF"));
     }
 
-    if (myCand.hasUserFloat("ComputeSV")){
+    if (false && myCand.hasUserFloat("ComputeSV")){
       if (myCand.userFloat("ComputeSV")){
 	myCand.addUserFloat("goodMass",myCand.userFloat("SVfitMass"));
       }
@@ -341,7 +341,6 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
         }
       }
     }
-
     result->push_back(myCand);
   }
 
@@ -361,7 +360,7 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     }    
 
   }
-  
+  cout<<result->size()<<" Z candidates"<<endl;
   iEvent.put(std::move(result));
 }
 

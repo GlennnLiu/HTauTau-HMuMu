@@ -276,6 +276,7 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
   std::unique_ptr<pat::CompositeCandidateCollection> result( new pat::CompositeCandidateCollection );
 
   // loop on all the pairs
+  cout<<pairNumber<<" bare Z candidates"<<endl;
   for (unsigned int i = 0; i < pairNumber; ++i)
   {    
     // Get the pair and the two leptons composing it
@@ -725,10 +726,10 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
      
         cout << "--- SVFit Output Debug ---" << endl;
         cout << "SVfitMass           = " << SVfitMass << endl;
-        cout << "SVfitTransverseMass = " << SVfitTransverseMass << endl;
-        cout << "SVpt 	             = " << SVpt << endl;
-        cout << "SVeta	             = " << SVeta << endl;
-        cout << "SVphi	             = " << SVphi << endl;
+        //cout << "SVfitTransverseMass = " << SVfitTransverseMass << endl;
+        //cout << "SVpt 	             = " << SVpt << endl;
+        //cout << "SVeta	             = " << SVeta << endl;
+        //cout << "SVphi	             = " << SVphi << endl;
         
         ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double>> measuredTau1(l1->pt(), l1->eta(), l1->phi(), mass1);
         ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double>> measuredTau2(l2->pt(), l2->eta(), l2->phi(), mass2);
@@ -1101,7 +1102,7 @@ void ClassicSVfitInterface::produce(edm::Event& iEvent, const edm::EventSetup& i
 
     result->push_back(pair);
   }
-  
+  cout<<result->size()<<" SVfit Z candidates"<<endl;
   iEvent.put(std::move(result));
 }
 
@@ -1181,8 +1182,8 @@ bool ClassicSVfitInterface::IsInteresting (const reco::Candidate *l1, const reco
   ///////
 
   // switch to apply different requirements to the objects
-  //if (deltaR(l1->p4(), l2->p4()) < 0.1)
-  if (deltaR(l1->p4(), l2->p4()) < 0.4)
+  if (deltaR(l1->p4(), l2->p4()) < 0.1)
+  //if (deltaR(l1->p4(), l2->p4()) < 0.4)
     return false; // for overlap removal
 
   ///////
@@ -1197,10 +1198,10 @@ bool ClassicSVfitInterface::IsInteresting (const reco::Candidate *l1, const reco
     dau2 = (apdg1 == 13 ? l2 : l1);
 
     //if (dau1->pt() < 17.)
-    if (dau1->pt() < 20.)
+    if (dau1->pt() < 10.)
       return false;
 
-    if (dau2->pt() < 20.)
+    if (dau2->pt() < 10.)
       return false;
 
     if (userdatahelpers::getUserInt(l2,"decayModeFindingNewDMs") != 1) // decayModeFinding == decayModeFindingOldDMs
@@ -1226,10 +1227,10 @@ bool ClassicSVfitInterface::IsInteresting (const reco::Candidate *l1, const reco
     dau2 = (apdg1 == 11 ? l2 : l1);
 
     //if (dau1->pt() < 19.)
-    if (dau1->pt() < 20.)
+    if (dau1->pt() < 10.)
       return false;
 
-    if (dau2->pt() < 20.)
+    if (dau2->pt() < 10.)
       return false;
 
     if (userdatahelpers::getUserInt(l2,"decayModeFindingNewDMs") != 1)  // decayModeFinding == decayModeFindingOldDMs
@@ -1255,11 +1256,11 @@ bool ClassicSVfitInterface::IsInteresting (const reco::Candidate *l1, const reco
     dau2 = ((l1->pt() > l2->pt()) ? l2 : l1);
 
     //if (dau1->pt() < 30.)
-    if (dau1->pt() < 20.)
+    if (dau1->pt() < 10.)
       return false;
     
     //if (dau2->pt() < 30.)
-    if (dau2->pt() < 20.)
+    if (dau2->pt() < 10.)
       return false;
     
     if (userdatahelpers::getUserInt(l1,"decayModeFindingNewDMs") != 1)  // decayModeFinding == decayModeFindingOldDMs

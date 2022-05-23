@@ -39,7 +39,7 @@ declareDefault("APPLY_K_NLOEW_ZZQQB", False, globals())
 
 #failed events
 declareDefault("SKIP_EMPTY_EVENTS", True, globals())
-declareDefault("FAILED_TREE_LEVEL", 0, globals())
+declareDefault("FAILED_TREE_LEVEL", 1, globals())
 
 #ggF uncertainties for HTXS
 declareDefault("APPLY_QCD_GGF_UNCERT", False, globals() )
