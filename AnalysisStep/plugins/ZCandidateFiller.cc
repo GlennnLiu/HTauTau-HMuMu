@@ -134,7 +134,7 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   iEvent.getByToken(candidateToken, LLCands);
 
   //--- Fill user info
-
+  cout<<"test"<<endl;
   const float ZmassValue = 91.1876;
 
   float closestZeeMassDiff = 99999.;
