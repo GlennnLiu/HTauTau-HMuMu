@@ -264,6 +264,9 @@ namespace {
   std::vector<float> LepSigma_Phi_Dn;
 
 //tau specified
+  std::vector<int> TauVSmu;
+  std::vector<int> TauVSe;
+  std::vector<int> TauVSjet;
   std::vector<float> TauDecayMode;
   std::vector<float> TauTES_p_Up;
   std::vector<float> TauTES_p_Dn;
@@ -399,6 +402,34 @@ namespace {
   Float_t GenLep4Eta  = 0;
   Float_t GenLep4Phi  = 0;
   Short_t GenLep4Id  = 0;
+  //Visible information
+  Float_t GenVisZ1Mass  = 0;
+  Float_t GenVisZ1Eta  = 0;
+  Float_t GenVisZ1Pt  = 0;
+  Float_t GenVisZ1Phi  = 0;
+  Float_t GenVisZ1Flav  = 0;
+  Float_t GenVisZ2Mass  = 0;
+  Float_t GenVisZ2Eta  = 0;
+  Float_t GenVisZ2Pt  = 0;
+  Float_t GenVisZ2Phi  = 0;
+  Float_t GenVisZ2Flav  = 0;
+  Float_t GenVisLep1Pt  = 0;
+  Float_t GenVisLep1Eta  = 0;
+  Float_t GenVisLep1Phi  = 0;
+  Short_t GenVisLep1Id  = 0;
+  Float_t GenVisLep2Pt  = 0;
+  Float_t GenVisLep2Eta  = 0;
+  Float_t GenVisLep2Phi  = 0;
+  Short_t GenVisLep2Id  = 0;
+  Float_t GenVisLep3Pt  = 0;
+  Float_t GenVisLep3Eta  = 0;
+  Float_t GenVisLep3Phi  = 0;
+  Short_t GenVisLep3Id  = 0;
+  Float_t GenVisLep4Pt  = 0;
+  Float_t GenVisLep4Eta  = 0;
+  Float_t GenVisLep4Phi  = 0;
+  Short_t GenVisLep4Id  = 0;
+
   Float_t GenAssocLep1Pt  = 0;
   Float_t GenAssocLep1Eta  = 0;
   Float_t GenAssocLep1Phi  = 0;
@@ -454,6 +485,10 @@ private:
   void FillZGenInfo(Short_t Z1Id, Short_t Z2Id,
                     const math::XYZTLorentzVector pZ1, const math::XYZTLorentzVector pZ2);
   void FillLepGenInfo(Short_t Lep1Id, Short_t Lep2Id, Short_t Lep3Id, Short_t Lep4Id,
+    const math::XYZTLorentzVector Lep1, const math::XYZTLorentzVector Lep2, const math::XYZTLorentzVector Lep3, const math::XYZTLorentzVector Lep4);
+  void FillVisZGenInfo(Short_t Z1Id, Short_t Z2Id,
+                    const math::XYZTLorentzVector pZ1, const math::XYZTLorentzVector pZ2);
+  void FillVisLepGenInfo(Short_t Lep1Id, Short_t Lep2Id, Short_t Lep3Id, Short_t Lep4Id,
     const math::XYZTLorentzVector Lep1, const math::XYZTLorentzVector Lep2, const math::XYZTLorentzVector Lep3, const math::XYZTLorentzVector Lep4);
   void FillAssocLepGenInfo(std::vector<const reco::Candidate *>& AssocLeps);
 
@@ -764,6 +799,8 @@ void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& e
   const reco::Candidate * genH = 0;
   std::vector<const reco::Candidate *> genZLeps;
   std::vector<const reco::Candidate *> genAssocLeps;
+  std::vector<const reco::Candidate *> genVisZLeps;
+  std::vector<const reco::Candidate *> genTauNus;
 
   edm::Handle<GenEventInfoProduct> genInfo;
 
@@ -873,6 +910,8 @@ void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& e
    genZLeps     = mch.sortedGenZZLeps();
    genAssocLeps = mch.genAssociatedLeps();
    genFSR       = mch.genFSR();
+   genVisZLeps	= mch.sortedVisGenZZLeps();
+   genTauNus	= mch.genTauNus();
 
 
 
@@ -893,19 +932,56 @@ void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& e
                      genZLeps.at(0)->p4()+genZLeps.at(1)->p4(),
                      genZLeps.at(2)->p4()+genZLeps.at(3)->p4());
 
+        math::XYZTLorentzVector genVisLep1p4,genVisLep2p4,genVisLep3p4,genVisLep4p4;
+	if (abs(genVisZLeps.at(0)->pdgId())!=15) { genVisLep1p4=genVisZLeps.at(0)->p4(); }
+	else { genVisLep1p4=genVisZLeps.at(0)->p4()-genTauNus.at(0)->p4(); }
+        if (abs(genVisZLeps.at(1)->pdgId())!=15) { genVisLep2p4=genVisZLeps.at(1)->p4(); }
+        else { genVisLep2p4=genVisZLeps.at(1)->p4()-genTauNus.at(1)->p4(); }
+        if (abs(genVisZLeps.at(2)->pdgId())!=15) { genVisLep3p4=genVisZLeps.at(2)->p4(); }
+        else { genVisLep3p4=genVisZLeps.at(2)->p4()-genTauNus.at(2)->p4(); }
+        if (abs(genVisZLeps.at(3)->pdgId())!=15) { genVisLep4p4=genVisZLeps.at(3)->p4(); }
+        else { genVisLep4p4=genVisZLeps.at(3)->p4()-genTauNus.at(3)->p4(); }
+
+	FillVisZGenInfo(genVisZLeps.at(0)->pdgId()*genVisZLeps.at(1)->pdgId(),
+		        genVisZLeps.at(2)->pdgId()*genVisZLeps.at(3)->pdgId(),
+		        genVisLep1p4+genVisLep2p4, 
+			genVisLep3p4+genVisLep4p4);
         // Gen leptons
         FillLepGenInfo(genZLeps.at(0)->pdgId(), genZLeps.at(1)->pdgId(), genZLeps.at(2)->pdgId(), genZLeps.at(3)->pdgId(),
            genZLeps.at(0)->p4(), genZLeps.at(1)->p4(), genZLeps.at(2)->p4(), genZLeps.at(3)->p4());
 
+	FillVisLepGenInfo(genVisZLeps.at(0)->pdgId(), genVisZLeps.at(1)->pdgId(), genVisZLeps.at(2)->pdgId(), genVisZLeps.at(3)->pdgId(),
+	   genVisLep1p4, genVisLep2p4, genVisLep3p4, genVisLep4p4);
+
       }
 
       if (genZLeps.size()==3) {
+
+        math::XYZTLorentzVector genVisLep1p4,genVisLep2p4,genVisLep3p4;
+        if (abs(genVisZLeps.at(0)->pdgId())!=15) { genVisLep1p4=genVisZLeps.at(0)->p4(); }
+        else { genVisLep1p4=genVisZLeps.at(0)->p4()-genTauNus.at(0)->p4(); }
+        if (abs(genVisZLeps.at(1)->pdgId())!=15) { genVisLep2p4=genVisZLeps.at(1)->p4(); }
+        else { genVisLep2p4=genVisZLeps.at(1)->p4()-genTauNus.at(1)->p4(); }
+        if (abs(genVisZLeps.at(2)->pdgId())!=15) { genVisLep3p4=genVisZLeps.at(2)->p4(); }
+        else { genVisLep3p4=genVisZLeps.at(2)->p4()-genTauNus.at(2)->p4(); }
+
         FillLepGenInfo(genZLeps.at(0)->pdgId(), genZLeps.at(1)->pdgId(), genZLeps.at(2)->pdgId(), 0,
                        genZLeps.at(0)->p4(), genZLeps.at(1)->p4(), genZLeps.at(2)->p4(), *(new math::XYZTLorentzVector));
+	FillVisLepGenInfo(genVisZLeps.at(0)->pdgId(), genVisZLeps.at(1)->pdgId(), genVisZLeps.at(2)->pdgId(), 0,
+           genVisLep1p4, genVisLep2p4, genVisLep3p4, *(new math::XYZTLorentzVector));
       }
       if (genZLeps.size()==2) {
+
+        math::XYZTLorentzVector genVisLep1p4,genVisLep2p4;
+        if (abs(genVisZLeps.at(0)->pdgId())!=15) { genVisLep1p4=genVisZLeps.at(0)->p4(); }
+        else { genVisLep1p4=genVisZLeps.at(0)->p4()-genTauNus.at(0)->p4(); }
+        if (abs(genVisZLeps.at(1)->pdgId())!=15) { genVisLep2p4=genVisZLeps.at(1)->p4(); }
+        else { genVisLep2p4=genVisZLeps.at(1)->p4()-genTauNus.at(1)->p4(); }
+
         FillLepGenInfo(genZLeps.at(0)->pdgId(), genZLeps.at(1)->pdgId(), 0, 0,
                        genZLeps.at(0)->p4(), genZLeps.at(1)->p4(), *(new math::XYZTLorentzVector), *(new math::XYZTLorentzVector));
+	FillVisLepGenInfo(genVisZLeps.at(0)->pdgId(), genVisZLeps.at(1)->pdgId(), 0, 0,
+           genVisLep1p4, genVisLep2p4, *(new math::XYZTLorentzVector), *(new math::XYZTLorentzVector));
       }
 
       if (genAssocLeps.size()==1 || genAssocLeps.size()==2) {
@@ -2153,6 +2229,25 @@ void HZZ4lNtupleMaker::FillZGenInfo(Short_t Z1Id, Short_t Z2Id,
   return;
 }
 
+void HZZ4lNtupleMaker::FillVisZGenInfo(Short_t Z1Id, Short_t Z2Id,
+                                    const math::XYZTLorentzVector pZ1, const math::XYZTLorentzVector pZ2)
+{
+  GenVisZ1Mass= pZ1.M();
+  GenVisZ1Pt= pZ1.Pt();
+  GenVisZ1Eta= pZ1.Eta();
+  GenVisZ1Phi= pZ1.Phi();
+  GenVisZ1Flav= Z1Id;
+
+  GenVisZ2Mass= pZ2.M();
+  GenVisZ2Pt= pZ2.Pt();
+  GenVisZ2Eta= pZ2.Eta();
+  GenVisZ2Phi= pZ2.Phi();
+  GenVisZ2Flav= Z2Id;
+
+  return;
+}
+
+
 void HZZ4lNtupleMaker::FillLepGenInfo(Short_t Lep1Id, Short_t Lep2Id, Short_t Lep3Id, Short_t Lep4Id,
                                       const math::XYZTLorentzVector Lep1, const math::XYZTLorentzVector Lep2,
                                       const math::XYZTLorentzVector Lep3, const math::XYZTLorentzVector Lep4)
@@ -2179,6 +2274,33 @@ void HZZ4lNtupleMaker::FillLepGenInfo(Short_t Lep1Id, Short_t Lep2Id, Short_t Le
 
   //can comment this back in if Gen angles are needed for any reason...
   //TUtil::computeAngles(zzanalysis::tlv(Lep1), Lep1Id, zzanalysis::tlv(Lep2), Lep2Id, zzanalysis::tlv(Lep3), Lep3Id, zzanalysis::tlv(Lep4), Lep4Id, Gencosthetastar, GenhelcosthetaZ1, GenhelcosthetaZ2, Genhelphi, GenphistarZ1);
+
+  return;
+}
+
+void HZZ4lNtupleMaker::FillVisLepGenInfo(Short_t Lep1Id, Short_t Lep2Id, Short_t Lep3Id, Short_t Lep4Id,
+                                      const math::XYZTLorentzVector Lep1, const math::XYZTLorentzVector Lep2,
+                                      const math::XYZTLorentzVector Lep3, const math::XYZTLorentzVector Lep4)
+{
+  GenVisLep1Pt=Lep1.Pt();
+  GenVisLep1Eta=Lep1.Eta();
+  GenVisLep1Phi=Lep1.Phi();
+  GenVisLep1Id=Lep1Id;
+
+  GenVisLep2Pt=Lep2.Pt();
+  GenVisLep2Eta=Lep2.Eta();
+  GenVisLep2Phi=Lep2.Phi();
+  GenVisLep2Id=Lep2Id;
+
+  GenVisLep3Pt=Lep3.Pt();
+  GenVisLep3Eta=Lep3.Eta();
+  GenVisLep3Phi=Lep3.Phi();
+  GenVisLep3Id=Lep3Id;
+
+  GenVisLep4Pt=Lep4.Pt();
+  GenVisLep4Eta=Lep4.Eta();
+  GenVisLep4Phi=Lep4.Phi();
+  GenVisLep4Id=Lep4Id;
 
   return;
 }

@@ -531,7 +531,7 @@ process.cleanSoftElectrons = cms.EDProducer("PATElectronCleaner",
 #------- TAU LEPTONS -------
 
 TAUCUT       = "pt>10 & abs(eta)<2.4"#"tauID('byCombinedIsolationDeltaBetaCorrRaw3Hits') < 1000.0 && pt>18"
-SOSOTAU      = "decayMode()!=5 && decayMode()!=6 && userFloat('dz') < 20"#"tauID('decayModeFindingNewDMs') == 1 && userFloat('dz') < 10"
+SOSOTAU      = "decayMode()!=5 && decayMode()!=6"# && userFloat('dz') < 20"#"tauID('decayModeFindingNewDMs') == 1 && userFloat('dz') < 10"
 GOODTAU      = SOSOTAU + " && tauID('byVVVLooseDeepTau2017v2p1VSjet') == 1 && tauID('byVVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byVLooseDeepTau2017v2p1VSmu') == 1"
 GOODTAU_MU   = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
 GOODTAU_ELE  = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
@@ -713,7 +713,7 @@ process.softLeptons = cms.EDProducer("CandViewMerger",
 ### Dileptons: combine/merge leptons into intermediate (bare) collections;
 ###            Embed additional user variables into final collections
 ### ----------------------------------------------------------------------
-TWOGOODLEPTONS = "( userFloat('d0.isGood') && userFloat('d1.isGood') && userFloat('isGoodTau') )" # Z made of 2 good leptons (ISO not yet applied)
+TWOGOODLEPTONS = "( userFloat('d0.isGood') && userFloat('d1.isGood'))"# && userFloat('isGoodTau') )" # Z made of 2 good leptons (ISO not yet applied)
 TWOISOLEPTONS = "( userFloat('d0.passCombRelIsoPFFSRCorr') && userFloat('d1.passCombRelIsoPFFSRCorr') )"
 TWOSFLEPTONS = "( ( abs(daughter(0).pdgId())!=15 && abs(daughter(1).pdgId())!=15 && abs(daughter(0).pdgId())==abs(daughter(1).pdgId()) ) || abs(daughter(0).pdgId())==15 || abs(daughter(1).pdgId())==15 )"
 ### NOTE: Isolation cut has been moved to ZZ candidates as we now correct for FSR of all four photons.
@@ -858,23 +858,23 @@ srcMETTag = cms.InputTag("ShiftMETcentral")
 ## SV fit
 ## ----------------------------------------------------------------------
 
-process.SVZCand = cms.EDProducer("ClassicSVfitInterface",
-                                  srcPairs   = cms.InputTag("bareZCand"),
-                                  srcSig     = cms.InputTag("METSignificance", "METSignificance"),
-                                  srcCov     = cms.InputTag("METSignificance", "METCovariance"),
-                                  usePairMET = cms.bool(False),
-                                  srcMET     = srcMETTag,
-                                  computeForUpDownTES = cms.bool(True if IsMC else False),
-                                  computeForUpDownMET = cms.bool(True if IsMC else False),
-                                  METdxUP    = cms.InputTag("ShiftMETforTES", "METdxUP"),
-                                  METdyUP    = cms.InputTag("ShiftMETforTES", "METdyUP"),
-                                  METdxDOWN  = cms.InputTag("ShiftMETforTES", "METdxDOWN"),
-                                  METdyDOWN  = cms.InputTag("ShiftMETforTES", "METdyDOWN"),
-                                  METdxUP_EES   = cms.InputTag("ShiftMETforEES", "METdxUPEES"),
-                                  METdyUP_EES   = cms.InputTag("ShiftMETforEES", "METdyUPEES"),
-                                  METdxDOWN_EES = cms.InputTag("ShiftMETforEES", "METdxDOWNEES"),
-                                  METdyDOWN_EES = cms.InputTag("ShiftMETforEES", "METdyDOWNEES")
-)
+#process.SVZCand = cms.EDProducer("ClassicSVfitInterface",
+#                                  srcPairs   = cms.InputTag("bareZCand"),
+#                                  srcSig     = cms.InputTag("METSignificance", "METSignificance"),
+#                                  srcCov     = cms.InputTag("METSignificance", "METCovariance"),
+#                                  usePairMET = cms.bool(False),
+#                                  srcMET     = srcMETTag,
+#                                  computeForUpDownTES = cms.bool(True if IsMC else False),
+#                                  computeForUpDownMET = cms.bool(True if IsMC else False),
+#                                  METdxUP    = cms.InputTag("ShiftMETforTES", "METdxUP"),
+#                                  METdyUP    = cms.InputTag("ShiftMETforTES", "METdyUP"),
+#                                  METdxDOWN  = cms.InputTag("ShiftMETforTES", "METdxDOWN"),
+#                                  METdyDOWN  = cms.InputTag("ShiftMETforTES", "METdyDOWN"),
+#                                  METdxUP_EES   = cms.InputTag("ShiftMETforEES", "METdxUPEES"),
+#                                  METdyUP_EES   = cms.InputTag("ShiftMETforEES", "METdyUPEES"),
+#                                  METdxDOWN_EES = cms.InputTag("ShiftMETforEES", "METdxDOWNEES"),
+#                                  METdyDOWN_EES = cms.InputTag("ShiftMETforEES", "METdyDOWNEES")
+#)
 
 
 ZLEPTONSEL     = TWOGOODLEPTONS # Note: this is without ISO
@@ -887,7 +887,23 @@ TWOGOODISOLEPTONS = ( TWOGOODLEPTONS + "&&" + TWOISOLEPTONS )
 
 
 process.ZCand = cms.EDProducer("ZCandidateFiller",
-    src = cms.InputTag("SVZCand"),
+    src	       = cms.InputTag("bareZCand"),
+
+    srcSig     = cms.InputTag("METSignificance", "METSignificance"),
+    srcCov     = cms.InputTag("METSignificance", "METCovariance"),
+    usePairMET = cms.bool(False),
+    srcMET     = srcMETTag,
+    computeForUpDownTES = cms.bool(True if IsMC else False),
+    computeForUpDownMET = cms.bool(True if IsMC else False),
+    METdxUP    = cms.InputTag("ShiftMETforTES", "METdxUP"),
+    METdyUP    = cms.InputTag("ShiftMETforTES", "METdyUP"),
+    METdxDOWN  = cms.InputTag("ShiftMETforTES", "METdxDOWN"),
+    METdyDOWN  = cms.InputTag("ShiftMETforTES", "METdyDOWN"),
+    METdxUP_EES   = cms.InputTag("ShiftMETforEES", "METdxUPEES"),
+    METdyUP_EES   = cms.InputTag("ShiftMETforEES", "METdyUPEES"),
+    METdxDOWN_EES = cms.InputTag("ShiftMETforEES", "METdxDOWNEES"),
+    METdyDOWN_EES = cms.InputTag("ShiftMETforEES", "METdyDOWNEES"),
+
     sampleType = cms.int32(SAMPLE_TYPE),
     setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
     bestZAmong = cms.string(BESTZ_AMONG),
@@ -898,6 +914,18 @@ process.ZCand = cms.EDProducer("ZCandidateFiller",
         Z1Presel = cms.string(Z1PRESEL),
     )
 )
+#process.ZCand = cms.EDProducer("ZCandidateFiller",
+#    src = cms.InputTag("SVZCand"),
+#    sampleType = cms.int32(SAMPLE_TYPE),
+#    setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
+#    bestZAmong = cms.string(BESTZ_AMONG),
+#    FSRMode = cms.string(FSRMODE), # "skip", "Legacy", "RunII"
+#    flags = cms.PSet(
+#        GoodLeptons = cms.string(ZLEPTONSEL),
+#        GoodIsoLeptons = cms.string(TWOGOODISOLEPTONS),
+#        Z1Presel = cms.string(Z1PRESEL),
+#    )
+#)
 
 
 # ll, same flavour/any charge, for control regions only
@@ -908,8 +936,32 @@ process.bareLLCand = cms.EDProducer("CandViewShallowCloneCombiner",
     checkCharge = cms.bool(False)
 )
 
-process.SVLLCand = cms.EDProducer("ClassicSVfitInterface",
-                                  srcPairs   = cms.InputTag("bareLLCand"),
+#process.SVLLCand = cms.EDProducer("ClassicSVfitInterface",
+#                                  srcPairs   = cms.InputTag("bareLLCand"),
+#                                  srcSig     = cms.InputTag("METSignificance", "METSignificance"),
+#                                  srcCov     = cms.InputTag("METSignificance", "METCovariance"),
+#                                  usePairMET = cms.bool(False),
+#                                  srcMET     = srcMETTag,
+#                                  computeForUpDownTES = cms.bool(True if IsMC else False),
+#                                  computeForUpDownMET = cms.bool(True if IsMC else False),
+#                                  METdxUP    = cms.InputTag("ShiftMETforTES", "METdxUP"),
+#                                  METdyUP    = cms.InputTag("ShiftMETforTES", "METdyUP"),
+#                                  METdxDOWN  = cms.InputTag("ShiftMETforTES", "METdxDOWN"),
+#                                  METdyDOWN  = cms.InputTag("ShiftMETforTES", "METdyDOWN"),
+#                                  METdxUP_EES   = cms.InputTag("ShiftMETforEES", "METdxUPEES"),
+#                                  METdyUP_EES   = cms.InputTag("ShiftMETforEES", "METdyUPEES"),
+#                                  METdxDOWN_EES = cms.InputTag("ShiftMETforEES", "METdxDOWNEES"),
+#                                  METdyDOWN_EES = cms.InputTag("ShiftMETforEES", "METdyDOWNEES")
+#)
+
+
+process.LLCand = cms.EDProducer("ZCandidateFiller",
+    src = cms.InputTag("bareLLCand"),
+    sampleType = cms.int32(SAMPLE_TYPE),
+    setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
+    bestZAmong = cms.string(BESTZ_AMONG),
+    FSRMode = cms.string(FSRMODE), # "skip", "Legacy", "RunII"
+
                                   srcSig     = cms.InputTag("METSignificance", "METSignificance"),
                                   srcCov     = cms.InputTag("METSignificance", "METCovariance"),
                                   usePairMET = cms.bool(False),
@@ -923,16 +975,8 @@ process.SVLLCand = cms.EDProducer("ClassicSVfitInterface",
                                   METdxUP_EES   = cms.InputTag("ShiftMETforEES", "METdxUPEES"),
                                   METdyUP_EES   = cms.InputTag("ShiftMETforEES", "METdyUPEES"),
                                   METdxDOWN_EES = cms.InputTag("ShiftMETforEES", "METdxDOWNEES"),
-                                  METdyDOWN_EES = cms.InputTag("ShiftMETforEES", "METdyDOWNEES")
-)
+                                  METdyDOWN_EES = cms.InputTag("ShiftMETforEES", "METdyDOWNEES"),
 
-
-process.LLCand = cms.EDProducer("ZCandidateFiller",
-    src = cms.InputTag("SVLLCand"),
-    sampleType = cms.int32(SAMPLE_TYPE),
-    setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
-    bestZAmong = cms.string(BESTZ_AMONG),
-    FSRMode = cms.string(FSRMODE), # "skip", "Legacy", "RunII"
     flags = cms.PSet(
         GoodLeptons = cms.string(ZLEPTONSEL),
         Z1Presel = cms.string(Z1PRESEL),
@@ -967,15 +1011,15 @@ process.ZlCand = cms.EDProducer("PATCandViewShallowCloneCombiner",
 ### ----------------------------------------------------------------------
 
 FOURGOODLEPTONS    =  ("( userFloat('d0.GoodLeptons') && userFloat('d1.GoodLeptons')" +
-		       "&& userFloat('d0.isGoodTau') && userFloat('d1.isGoodTau')" +
+		      # "&& userFloat('d0.isGoodTau') && userFloat('d1.isGoodTau')" +
                        "&& userFloat('d0.worstEleIso') <" + str(ELEISOCUT) +
                        "&& userFloat('d1.worstEleIso') <" + str(ELEISOCUT) +
                        "&& userFloat('d0.worstMuIso') <" + str(MUISOCUT) +
                        "&& userFloat('d1.worstMuIso') <" + str(MUISOCUT) + ")"
                        ) #ZZ made of 4 tight leptons passing SIP and ISO 
 
-Z1MASS            = "( daughter('Z1').masterClone.userFloat('goodMass')>30 && daughter('Z1').masterClone.userFloat('goodMass')<120 )"
-Z2MASS            = "( daughter('Z2').masterClone.userFloat('goodMass')>4  && daughter('Z2').masterClone.userFloat('goodMass')<120 )" # (was > 4 in Synch) to deal with m12 cut at gen level
+Z1MASS            = "( daughter('Z1').masterClone.userFloat('goodMass')>40 && daughter('Z1').masterClone.userFloat('goodMass')<140 )"
+Z2MASS            = "( daughter('Z2').masterClone.userFloat('goodMass')>4  && daughter('Z2').masterClone.userFloat('goodMass')<140 )" # (was > 4 in Synch) to deal with m12 cut at gen level
 #MLL3On4_12        = "userFloat('mZa')>12" # mll>12 on 3/4 pairs;
 #MLLALLCOMB        = "userFloat('mLL6')>4" # mll>4 on 6/6 AF/AS pairs;
 MLLALLCOMB        = "userFloat('mLL4')>4" # mll>4 on 4/4 AF/OS pairs;
@@ -1053,12 +1097,12 @@ elif SELSETUP=="allCutsAtOncePlusSmart": # Apply smarter mZb cut
 
     BESTCAND_AMONG = (FOURGOODLEPTONS + "&&" +
                       Z1MASS          + "&&" +
-                      Z2MASS#          + "&&" +
+                      Z2MASS          + "&&" +
                       #MLLALLCOMB      + "&&" +
-                      #PT20_10         + "&&" +
+                      PT20_10#         + "&&" +
 		      #OSSF	      + "&&" +
                       #"userFloat('goodMass')>70"       + "&&" +
-              #        SMARTMALLCOMB   + "&&" +
+                      #SMARTMALLCOMB#   + "&&" +
               #        "daughter('Z2').masterClone.userFloat('goodMass')>12"
                       )
 
@@ -1107,7 +1151,7 @@ process.ZZCand = cms.EDProducer("ZZCandidateFiller",
     setup = cms.int32(LEPTON_SETUP),
     #superMelaMass = cms.double(SUPERMELA_MASS),
     isMC = cms.bool(IsMC),
-    bestCandAmong = cms.PSet(isBestCand = cms.string("1")),#BESTCAND_AMONG)),
+    bestCandAmong = cms.PSet(isBestCand = cms.string(BESTCAND_AMONG)),
     bestCandComparator = cms.string(BESTCANDCOMPARATOR),
     ZRolesByMass = cms.bool(True),
     doKinFit = cms.bool(False),#KINFIT),
@@ -1842,7 +1886,8 @@ process.Candidates = cms.Path(
        process.cleanJets         +
        process.METSequence	 +
 # Build 4-lepton candidates
-       process.bareZCand         + process.SVZCand	 + process.ZCand     +
+       process.bareZCand	 + process.ZCand	+
+       #process.bareZCand         + process.SVZCand	 + process.ZCand     +
        process.bareZZCand        + process.ZZCand
     )
 
@@ -1852,13 +1897,16 @@ process.Candidates = cms.Path(
 #process.CRPath = cms.Path(process.CR)   # trilep+4lep CRs
 
 process.CRZl = cms.Sequence(
-       process.bareZCand         + process.SVZCand       + process.ZCand     +
+       process.bareZCand	 + process.ZCand	+
+       #process.bareZCand         + process.SVZCand       + process.ZCand     +
        process.ZlCand
    )
 
 process.CR = cms.Sequence(
-       process.bareZCand         + process.SVZCand       + process.ZCand     +
-       process.bareLLCand        + process.SVLLCand	 + process.LLCand    +
+       process.bareZCand	 + process.ZCand	+
+       #process.bareZCand         + process.SVZCand       + process.ZCand     +
+       process.bareLLCand	 + process.LLCand	+
+       #process.bareLLCand        + process.SVLLCand	 + process.LLCand    +
        process.bareZLLCand       + process.ZLLCand   +
        process.ZlCand
    )

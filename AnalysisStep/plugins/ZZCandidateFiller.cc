@@ -796,7 +796,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     TLorentzVector pZtt,pZll,pZZ;
     if ( (abs(id11)==15 or abs(id12)==15) && abs(id21)!=15 && abs(id22)!=15 ){
 	if (userdatahelpers::hasUserFloat(Z1,"ComputeSV") && userdatahelpers::getUserFloat(Z1,"ComputeSV")){
-	    pZtt.SetPtEtaPhiM(userdatahelpers::getUserFloat(Z1,"SVpt"),userdatahelpers::getUserFloat(Z1,"SVeta"),userdatahelpers::getUserFloat(Z1,"SVphi"),userdatahelpers::getUserFloat(Z1,"SVfitMass"));
+	    pZtt.SetPtEtaPhiM(userdatahelpers::getUserFloat(Z1,"SVfit_pt"),userdatahelpers::getUserFloat(Z1,"SVfit_eta"),userdatahelpers::getUserFloat(Z1,"SVfit_phi"),userdatahelpers::getUserFloat(Z1,"SVfitMass"));
 	    pZll.SetPtEtaPhiM(Z2->pt(),Z2->eta(),Z2->phi(),Z2->mass());
 	    checkFlavor=true;
 	}
@@ -809,7 +809,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     }
     else if ( (abs(id21)==15 or abs(id22)==15) && abs(id11)!=15 && abs(id12)!=15 ){
 	if (userdatahelpers::hasUserFloat(Z2,"ComputeSV") && userdatahelpers::getUserFloat(Z2,"ComputeSV")){
-            pZtt.SetPtEtaPhiM(userdatahelpers::getUserFloat(Z2,"SVpt"),userdatahelpers::getUserFloat(Z2,"SVeta"),userdatahelpers::getUserFloat(Z2,"SVphi"),userdatahelpers::getUserFloat(Z2,"SVfitMass"));
+            pZtt.SetPtEtaPhiM(userdatahelpers::getUserFloat(Z2,"SVfit_pt"),userdatahelpers::getUserFloat(Z2,"SVfit_eta"),userdatahelpers::getUserFloat(Z2,"SVfit_phi"),userdatahelpers::getUserFloat(Z2,"SVfitMass"));
 	    pZll.SetPtEtaPhiM(Z1->pt(),Z1->eta(),Z1->phi(),Z1->mass());
 	    checkFlavor=true;
         }

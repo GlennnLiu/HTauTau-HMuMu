@@ -185,7 +185,7 @@ process.ZZTree.channel = 'ZZ'
 process.CRZLLTree = TreeSetup.clone()
 process.CRZLLTree.channel = 'ZLL'
 process.CRZLLTree.CandCollection = 'ZLLCand'
-
+'''
 ### Trilepton CR, for fake rate
 process.CRZLTree = TreeSetup.clone()
 process.CRZLTree.channel = 'ZL'
@@ -254,7 +254,7 @@ process.ZTree = cms.EDAnalyzer("ZNtupleMaker",
                                sampleName = cms.string(SAMPLENAME),
                                xsec = cms.double(XSEC)
                                )
-
+'''
 
 
 # Debug
@@ -268,7 +268,7 @@ process.ZZSelection= cms.EDFilter("CandViewCountFilter",
                                   src = cms.InputTag("ZZFiltered"),
                                   minNumber = cms.uint32(1)
                                   )
-
+'''
 ### Select CR events
 process.CRFiltered = cms.EDFilter("PATCompositeCandidateRefSelector",
                                   src = cms.InputTag("ZLLCand"),
@@ -280,7 +280,7 @@ process.CRSelection= cms.EDFilter("CandViewCountFilter",
                                   minNumber = cms.uint32(1)
                                   )
 
-
+'''
 process.dumpUserData =  cms.EDAnalyzer("dumpUserData",
      dumpTrigger = cms.untracked.bool(True),
      muonSrcs =  cms.PSet(
@@ -290,7 +290,7 @@ process.dumpUserData =  cms.EDAnalyzer("dumpUserData",
         electrons = cms.InputTag("appendPhotons:electrons"),
      ),
      candidateSrcs = cms.PSet(
-        Z     = cms.InputTag("ZCand"),
+ #       Z     = cms.InputTag("ZCand"),
         ZZ  = cms.InputTag("ZZCand"),
         ZLL   =cms.InputTag("ZLLCand"),    # Starting point for all CRs
      ),
@@ -301,8 +301,8 @@ if (PROCESS_CR or not IsMC):
     process.CRPath = cms.Path(process.CR)
     if (not IsMC):
         process.dump = cms.Path(process.ZZFiltered + process.ZZSelection + process.dumpUserData)
-        process.dumpCR = cms.Path(process.CRFiltered + process.CRSelection + process.dumpUserData)
-    process.trees = cms.EndPath( process.ZZTree + process.CRZLLTree + process.CRZLTree)
+  #      process.dumpCR = cms.Path(process.CRFiltered + process.CRSelection + process.dumpUserData)
+    process.trees = cms.EndPath( process.ZZTree + process.CRZLLTree)# + process.CRZLTree)
 else:
 #    process.CRPath = cms.Path(process.CRZl) #still needed by the plotter
     process.trees = cms.EndPath(process.ZZTree)
@@ -320,5 +320,5 @@ if (ADDLOOSEELE) :
         process.trees += cms.Sequence(process.ZZTreelooseEle)
         #process.trees += cms.Sequence(process.ZZTreetle)
 
-if (ADDZTREE) :
-     process.trees += cms.Sequence(process.ZTree)
+#if (ADDZTREE) :
+#     process.trees += cms.Sequence(process.ZTree)

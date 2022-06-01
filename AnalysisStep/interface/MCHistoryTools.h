@@ -56,6 +56,10 @@ class MCHistoryTools {
   /// The leptons coming from associated W, Z, or ttbar
   const std::vector<const reco::Candidate *>& genAssociatedLeps() {init(); return theAssociatedLeps;}
 
+  /// The visible leptons, due to the fact about tau leptons
+  const std::vector<const reco::Candidate *>& sortedVisGenZZLeps() {init(); return theSortedVisGenLeps;}
+
+  const std::vector<const reco::Candidate *>& genTauNus() {init(); return theGenTauNus;}
   /// The FSR photons
   const std::vector<const reco::Candidate *>& genFSR() {init(); return theGenFSR;}
 
@@ -100,7 +104,10 @@ class MCHistoryTools {
   std::vector<const reco::Candidate *> theGenLeps;
   std::vector<const reco::Candidate *> theSortedGenLepts;
   std::vector<const reco::Candidate *> theAssociatedLeps;
+  //std::vector<const reco::Candidate *> theVisGenLeps;
+  std::vector<const reco::Candidate *> theSortedVisGenLeps;
   std::vector<const reco::Candidate *> theGenFSR;
+  std::vector<const reco::Candidate *> theGenTauNus;
   
   void init();
 
