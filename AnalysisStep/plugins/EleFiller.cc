@@ -147,7 +147,8 @@ EleFiller::EleFiller(const edm::ParameterSet& iConfig) :
 	};
 	eleHLTFilters1_ =
 	{
-	"hltEle32noerWPTightGsfTrackIsoFilter",
+	"hltEle32WPTightGsfTrackIsoFilter",
+	//"hltEle32noerWPTightGsfTrackIsoFilter",
         };
   }
 
@@ -273,8 +274,13 @@ EleFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
        eachPath2.push_back(false);
 
     pat::TriggerObjectStandAloneCollection obj= l.triggerObjectMatches();
+    cout<<obj.size()<<endl;
     for ( size_t iTrigObj = 0; iTrigObj < obj.size(); ++iTrigObj ) {
        obj.at( iTrigObj ).unpackFilterLabels(iEvent,*triggerResults );
+       for (size_t test=0;test<obj.at( iTrigObj ).filterLabels().size();test++) {
+	  cout<<obj.at( iTrigObj ).filterLabels()[test].c_str()<<", ";
+       }
+       cout<<endl;
     }
     for ( size_t i = 0; i < obj.size(); ++i ) {
 	 for (size_t j = 0; j < eleHLTPaths1_.size(); ++j) {

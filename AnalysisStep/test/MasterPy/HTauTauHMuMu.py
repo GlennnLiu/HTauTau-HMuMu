@@ -85,6 +85,7 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 
 if (SAMPLE_TYPE == 2016):
     if IsMC:
+	#process.GlobalTag = GlobalTag(process.GlobalTag, '80X_mcRun2_asymptotic_2016_TrancheIV_v8','')
         process.GlobalTag = GlobalTag(process.GlobalTag, '94X_mcRun2_asymptotic_v3', '')
     else:
         process.GlobalTag = GlobalTag(process.GlobalTag, '94X_dataRun2_v10', '')
@@ -531,7 +532,7 @@ process.cleanSoftElectrons = cms.EDProducer("PATElectronCleaner",
 #------- TAU LEPTONS -------
 
 TAUCUT       = "pt>10 & abs(eta)<2.4"#"tauID('byCombinedIsolationDeltaBetaCorrRaw3Hits') < 1000.0 && pt>18"
-SOSOTAU      = "decayMode()!=5 && decayMode()!=6"# && userFloat('dz') < 20"#"tauID('decayModeFindingNewDMs') == 1 && userFloat('dz') < 10"
+SOSOTAU      = "decayMode()!=5 && decayMode()!=6 && tauID('decayModeFindingNewDMs') == 1 && userFloat('dz') < 10"
 GOODTAU      = SOSOTAU + " && tauID('byVVVLooseDeepTau2017v2p1VSjet') == 1 && tauID('byVVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byVLooseDeepTau2017v2p1VSmu') == 1"
 GOODTAU_MU   = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
 GOODTAU_ELE  = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
@@ -759,6 +760,10 @@ if YEAR == 2016:
     PFMetName = "slimmedMETs"
     uncorrPFMetTag = cms.InputTag(PFMetName, "", "ZZ")
 
+    #if not IsMC:
+    #    process.patJetsReapplyJEC.userData.userFloats.src += ['pileupJetIdUpdated:fullDiscriminant']
+    #    process.patJetsReapplyJEC.userData.userInts.src += ['pileupJetIdUpdated:fullId']
+
 if YEAR == 2017:
     from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
     runMetCorAndUncFromMiniAOD(
@@ -774,9 +779,20 @@ if YEAR == 2017:
     PFMetName = "slimmedMETsModifiedMET"
     uncorrPFMetTag = cms.InputTag(PFMetName, "", "ZZ")
 
+    #process.patJetsReapplyJEC.userData.userFloats.src += ['pileupJetIdUpdated:fullDiscriminant']
+    #process.patJetsReapplyJEC.userData.userInts.src += ['pileupJetIdUpdated:fullId']
+
 if YEAR == 2018:
+    from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+    runMetCorAndUncFromMiniAOD(process,
+                               isData=(not IsMC),
+                               )
     PFMetName = "slimmedMETs"
-    uncorrPFMetTag = cms.InputTag(PFMetName)
+    uncorrPFMetTag = cms.InputTag(PFMetName, "", "ZZ")
+
+    #process.patJetsReapplyJEC.userData.userFloats.src += ['pileupJetIdUpdated:fullDiscriminant']
+    #process.patJetsReapplyJEC.userData.userInts.src += ['pileupJetIdUpdated:fullId']
+
 
 
 process.METSignificance = cms.EDProducer ("ExtractMETSignificance", 
@@ -1018,7 +1034,7 @@ FOURGOODLEPTONS    =  ("( userFloat('d0.GoodLeptons') && userFloat('d1.GoodLepto
                        "&& userFloat('d1.worstMuIso') <" + str(MUISOCUT) + ")"
                        ) #ZZ made of 4 tight leptons passing SIP and ISO 
 
-Z1MASS            = "( daughter('Z1').masterClone.userFloat('goodMass')>40 && daughter('Z1').masterClone.userFloat('goodMass')<140 )"
+Z1MASS            = "( daughter('Z1').masterClone.userFloat('goodMass')>4 && daughter('Z1').masterClone.userFloat('goodMass')<200 )"
 Z2MASS            = "( daughter('Z2').masterClone.userFloat('goodMass')>4  && daughter('Z2').masterClone.userFloat('goodMass')<140 )" # (was > 4 in Synch) to deal with m12 cut at gen level
 #MLL3On4_12        = "userFloat('mZa')>12" # mll>12 on 3/4 pairs;
 #MLLALLCOMB        = "userFloat('mLL6')>4" # mll>4 on 6/6 AF/AS pairs;
@@ -1098,11 +1114,11 @@ elif SELSETUP=="allCutsAtOncePlusSmart": # Apply smarter mZb cut
     BESTCAND_AMONG = (FOURGOODLEPTONS + "&&" +
                       Z1MASS          + "&&" +
                       Z2MASS          + "&&" +
-                      #MLLALLCOMB      + "&&" +
-                      PT20_10#         + "&&" +
+                      MLLALLCOMB      + "&&" +
+                      PT20_10         + "&&" +
 		      #OSSF	      + "&&" +
                       #"userFloat('goodMass')>70"       + "&&" +
-                      #SMARTMALLCOMB#   + "&&" +
+                      SMARTMALLCOMB#   + "&&" +
               #        "daughter('Z2').masterClone.userFloat('goodMass')>12"
                       )
 
@@ -1758,7 +1774,7 @@ if FSRMODE=="Legacy" :
 #metTag = cms.InputTag("slimmedMETs")
 
 # NB: b tag UPDATE DOES NOT WORK including this part related to MET => Updated info in jets get lost
-#if (RECORRECTMET and SAMPLE_TYPE == 2016):
+if (RECORRECTMET and SAMPLE_TYPE == 2016):
 
 #    from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
 #    runMetCorAndUncFromMiniAOD(process,
@@ -1768,14 +1784,14 @@ if FSRMODE=="Legacy" :
 
     # NB: removed to use properly update jet collection to include DeepCSV in 2016 ntuples
     ### somehow MET recorrection gets this lost again...                          
-#    if not IsMC:
-#        process.patJetsReapplyJEC.userData.userFloats.src += ['pileupJetIdUpdated:fullDiscriminant']
-#        process.patJetsReapplyJEC.userData.userInts.src += ['pileupJetIdUpdated:fullId']
+    if not IsMC:
+        process.patJetsReapplyJEC.userData.userFloats.src += ['pileupJetIdUpdated:fullDiscriminant']
+        process.patJetsReapplyJEC.userData.userInts.src += ['pileupJetIdUpdated:fullId']
 
 #[FIXME] Does not work in CMSSW_10_3_1 currently                                                                                                                                      
 ### Recorrect MET, cf. https://indico.cern.ch/event/759372/contributions/3149378/attachments/1721436/2779341/metreport.pdf slide 10                                        
 ###                and https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETUncertaintyPrescription#Instructions_for_9_4_X_X_9_for_2 
-#if (RECORRECTMET and SAMPLE_TYPE == 2017):                                                                                                                   
+if (RECORRECTMET and SAMPLE_TYPE == 2017):                                                                                                                   
 #                                                                                                                                                                          
 #    from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD                                                        
 #                                                                                                                                                                         
@@ -1788,8 +1804,8 @@ if FSRMODE=="Legacy" :
 #    metTag = cms.InputTag("slimmedMETsModifiedMET","","ZZ")                                                                                                                 
 #                                                                                                                                                                      
 #    ### somehow MET recorrection gets this lost again...                                                                                                                 
-#    process.patJetsReapplyJEC.userData.userFloats.src += ['pileupJetIdUpdated:fullDiscriminant']                                                                       
-#    process.patJetsReapplyJEC.userData.userInts.src += ['pileupJetIdUpdated:fullId']                                                                                
+    process.patJetsReapplyJEC.userData.userFloats.src += ['pileupJetIdUpdated:fullDiscriminant']                                                                       
+    process.patJetsReapplyJEC.userData.userInts.src += ['pileupJetIdUpdated:fullId']                                                                                
 
 #if (RECORRECTMET and SAMPLE_TYPE == 2017):
 
@@ -1803,7 +1819,7 @@ if FSRMODE=="Legacy" :
 #    process.patJetsReapplyJEC.userData.userFloats.src += ['pileupJetIdUpdated:fullDiscriminant']
 #    process.patJetsReapplyJEC.userData.userInts.src += ['pileupJetIdUpdated:fullId']
 
-#if (RECORRECTMET and SAMPLE_TYPE == 2018):
+if (RECORRECTMET and SAMPLE_TYPE == 2018):
 
 #    from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
 #    runMetCorAndUncFromMiniAOD(process,
@@ -1812,8 +1828,8 @@ if FSRMODE=="Legacy" :
 #    metTag = cms.InputTag("slimmedMETs","","ZZ")
 
     ### somehow MET recorrection gets this lost again...                                                                                                             
-#    process.patJetsReapplyJEC.userData.userFloats.src += ['pileupJetIdUpdated:fullDiscriminant']
-#    process.patJetsReapplyJEC.userData.userInts.src += ['pileupJetIdUpdated:fullId']
+    process.patJetsReapplyJEC.userData.userFloats.src += ['pileupJetIdUpdated:fullDiscriminant']
+    process.patJetsReapplyJEC.userData.userInts.src += ['pileupJetIdUpdated:fullId']
 
 
 
@@ -1849,9 +1865,9 @@ if (RECORRECTMET and SAMPLE_TYPE == 2016):
 
 if (RECORRECTMET and SAMPLE_TYPE == 2017):
     if IsMC:
-        process.MET = cms.Path(process.fullPatMetSequence)
+        process.MET = cms.Path(process.fullPatMetSequenceModifiedMET)
     else:
-        process.MET = cms.Path(process.fullPatMetSequence)
+        process.MET = cms.Path(process.fullPatMetSequenceModifiedMET)
 
 if (RECORRECTMET and SAMPLE_TYPE == 2018):
     if IsMC:

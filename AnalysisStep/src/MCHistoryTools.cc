@@ -279,6 +279,7 @@ MCHistoryTools::init() {
     }
     if (!found) {
       for (unsigned i=0; i<theAssociatedLeps.size(); ++i) {
+	if (theAssociatedLeps[i]==theGenFSRParents[j]) {
 	  found=true;
 	  break;
 	}
@@ -287,6 +288,8 @@ MCHistoryTools::init() {
     if (!found) cout << "ERROR: mismatch in FSR photon " << theGenFSR[j]->pt() << " " << theGenFSRParents[j]->pt() << " " << theGenFSRParents[j] << endl;
   }
   
+  // Sort leptons, as done for the signal, for cases where we have 4.
+  if (theGenLeps.size()==4) {
     const float ZmassValue = 91.1876;  
     float minDZMass=1E36;
     float iZ11=-1, iZ12=-1, iZ21=-1, iZ22=-1;
@@ -354,34 +357,46 @@ MCHistoryTools::init() {
   }
   
   //Visible leptons and tau neutrinos
-  for (int ilep = 0;ilep<4;++ilep) {
-    id = abs(theSortedGenLepts[ilep]->pdgId());
+  //cout<<"Visible leptons and tau neutrinos"<<endl;
+  for (size_t ilep = 0;ilep<theSortedGenLepts.size();++ilep) {
+    int id = abs(theSortedGenLepts[ilep]->pdgId());
+    //cout<<"Lep "<<ilep<<", pdgId="<<id<<endl;
     if (id==11 || id==13) {
+      //cout<<"lepton"<<endl;
       theSortedVisGenLeps.push_back(theSortedGenLepts[ilep]);
-      theGenTauNus.push_back(0);
+      theGenTauNus.push_back(0);//theSortedGenLepts[ilep]);
+      //cout<<"lepton"<<endl;
     } else if (id==15) {
-      int nDau=theSortedGenLepts[ilep].numberOfDaughters();
-      bool lepDecay=false;
+      //cout<<"Number of daughters:";
+      int nDau=theSortedGenLepts[ilep]->numberOfDaughters();
+      //cout<<nDau<<endl;
+      //bool lepDecay=false;
       vector<int> TauNuIdx,LepIdx;
       for (int iDau=0;iDau<nDau;++iDau) {
+	//cout<<"iDau:"<<iDau;
 	const Candidate *Dau = theSortedGenLepts[ilep]->daughter(iDau);
 	if (abs(Dau->pdgId())==11 || abs(Dau->pdgId())==13) {
 	  LepIdx.push_back(iDau);
-	} else if (abs(Dau->pdgId)==16) {
+	} else if (abs(Dau->pdgId())==16) {
 	  TauNuIdx.push_back(iDau);
 	}
+	//cout<<", iDau finished"<<endl;
       }
       if (LepIdx.size()==1 && TauNuIdx.size()==1) {//For leptonically decaying taus, we save the lepton decay products, instead of 
-	lepDecay=true;
+	//lepDecay=true;
+	//cout<<"LepDecay"<<endl;
 	theSortedVisGenLeps.push_back(theSortedGenLepts[ilep]->daughter(LepIdx[0]));
 	theGenTauNus.push_back(theSortedGenLepts[ilep]->daughter(TauNuIdx[0]));
+	//cout<<"LepDecay"<<endl;
       } else if (TauNuIdx.size()==1) {//For hadronically decaying taus, we still save the gen tau lepton
+	//cout<<"Hadronic decay"<<endl;
 	theSortedVisGenLeps.push_back(theSortedGenLepts[ilep]);
 	theGenTauNus.push_back(theSortedGenLepts[ilep]->daughter(TauNuIdx[0]));
+	//cout<<"Hadronic decay"<<endl;
       } else {
 	cout<<"Warning: number of tau neutrinos not equal to one, must be something wrong"<<endl;
 	theSortedVisGenLeps.push_back(theSortedGenLepts[ilep]);
-        theGenTauNus.push_back(theSortedGenLepts[ilep]->daughter(TauNuIdx[0]));
+        theGenTauNus.push_back(0);//theSortedGenLepts[ilep]->daughter(TauNuIdx[0]));
       }
     }
   }

@@ -165,6 +165,8 @@ namespace {
   Int_t CRflag  = 0;
   Float_t Z1Mass  = 0;
   Float_t Z1Pt  = 0;
+  Float_t Z1Eta  = 0;
+  Float_t Z1Phi  = 0;
   Short_t Z1Flav  = 0;
   Float_t ZZMassRefit  = 0;
   Float_t ZZMassRefitErr  = 0;
@@ -173,6 +175,8 @@ namespace {
   Float_t ZZChi2CFit  = 0;
   Float_t Z2Mass  = 0;
   Float_t Z2Pt  = 0;
+  Float_t Z2Eta  = 0;
+  Float_t Z2Phi  = 0;
   Short_t Z2Flav  = 0;
   Float_t costhetastar  = 0;
   Float_t helphi  = 0;
@@ -185,6 +189,10 @@ namespace {
   Float_t TLE_dR_Z = -1; // Delta-R between a TLE and the Z it does not belong to.
   Float_t TLE_min_dR_3l = 999; // Minimum DR between a TLE and any of the other leptons
   Short_t evtPassMETTrigger = 0;
+  Bool_t Z1muHLTMatch = false;
+  Bool_t Z1eleHLTMatch = false;
+  Bool_t Z2muHLTMatch = false;
+  Bool_t Z2eleHLTMatch = false;
 
   //ZZ kinematic fit
   Float_t ZZKMass  = 0;
@@ -264,9 +272,9 @@ namespace {
   std::vector<float> LepSigma_Phi_Dn;
 
 //tau specified
-  std::vector<int> TauVSmu;
-  std::vector<int> TauVSe;
-  std::vector<int> TauVSjet;
+  std::vector<short> TauVSmu;
+  std::vector<short> TauVSe;
+  std::vector<short> TauVSjet;
   std::vector<float> TauDecayMode;
   std::vector<float> TauTES_p_Up;
   std::vector<float> TauTES_p_Dn;
@@ -281,6 +289,9 @@ namespace {
   std::vector<float> TauFES_e_Up;
   std::vector<float> TauFES_e_Dn;
 
+//HLT match
+  std::vector<short> HLTMatch1;
+  std::vector<short> HLTMatch2;
 
   std::vector<float> fsrPt;
   std::vector<float> fsrEta;
@@ -596,6 +607,11 @@ private:
   TGraphErrors *gr_NNLOPSratio_pt_powheg_2jet;
   TGraphErrors *gr_NNLOPSratio_pt_powheg_3jet;
 
+  //tau discriminants
+  std::vector<std::string> VSmuDisc;
+  std::vector<std::string> VSeDisc;
+  std::vector<std::string> VSjetDisc;
+
 };
 
 //
@@ -773,6 +789,34 @@ HZZ4lNtupleMaker::HZZ4lNtupleMaker(const edm::ParameterSet& pset) :
     FileZXWeightEle->Close();
     FileZXWeightMuo->Close();
   }
+  
+  VSmuDisc = {
+    "byVLooseDeepTau2017v2p1VSmu",
+    "byLooseDeepTau2017v2p1VSmu", 
+    "byMediumDeepTau2017v2p1VSmu",
+    "byTightDeepTau2017v2p1VSmu"
+  };
+  VSeDisc = {
+    "byVVVLooseDeepTau2017v2p1VSe",  
+    "byVVLooseDeepTau2017v2p1VSe", 
+    "byVLooseDeepTau2017v2p1VSe",   
+    "byLooseDeepTau2017v2p1VSe",   
+    "byMediumDeepTau2017v2p1VSe",   
+    "byTightDeepTau2017v2p1VSe",   
+    "byVTightDeepTau2017v2p1VSe",   
+    "byVVTightDeepTau2017v2p1VSe"
+  };
+  VSjetDisc = {
+    "byVVVLooseDeepTau2017v2p1VSjet",
+    "byVVLooseDeepTau2017v2p1VSjet", 
+    "byVLooseDeepTau2017v2p1VSjet",  
+    "byLooseDeepTau2017v2p1VSjet",   
+    "byMediumDeepTau2017v2p1VSjet",  
+    "byTightDeepTau2017v2p1VSjet",   
+    "byVTightDeepTau2017v2p1VSjet",  
+    "byVVTightDeepTau2017v2p1VSjet"
+  };
+
 }
 
 HZZ4lNtupleMaker::~HZZ4lNtupleMaker()
@@ -788,7 +832,7 @@ HZZ4lNtupleMaker::~HZZ4lNtupleMaker()
 void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& eSetup)
 {
   myTree->InitializeVariables();
-
+  //cout<<"HZZ4lNtupleMaker:"<<theChannel<<endl;
   //----------------------------------------------------------------------
   // Analyze MC truth; collect MC weights and update counters (this is done for all generated events,
   // including those that do not pass skim, trigger etc!)
@@ -933,13 +977,13 @@ void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& e
                      genZLeps.at(2)->p4()+genZLeps.at(3)->p4());
 
         math::XYZTLorentzVector genVisLep1p4,genVisLep2p4,genVisLep3p4,genVisLep4p4;
-	if (abs(genVisZLeps.at(0)->pdgId())!=15) { genVisLep1p4=genVisZLeps.at(0)->p4(); }
+	if (abs(genVisZLeps.at(0)->pdgId())!=15 || genTauNus.at(0)==0) { genVisLep1p4=genVisZLeps.at(0)->p4(); }
 	else { genVisLep1p4=genVisZLeps.at(0)->p4()-genTauNus.at(0)->p4(); }
-        if (abs(genVisZLeps.at(1)->pdgId())!=15) { genVisLep2p4=genVisZLeps.at(1)->p4(); }
+        if (abs(genVisZLeps.at(1)->pdgId())!=15 || genTauNus.at(1)==0) { genVisLep2p4=genVisZLeps.at(1)->p4(); }
         else { genVisLep2p4=genVisZLeps.at(1)->p4()-genTauNus.at(1)->p4(); }
-        if (abs(genVisZLeps.at(2)->pdgId())!=15) { genVisLep3p4=genVisZLeps.at(2)->p4(); }
+        if (abs(genVisZLeps.at(2)->pdgId())!=15 || genTauNus.at(2)==0) { genVisLep3p4=genVisZLeps.at(2)->p4(); }
         else { genVisLep3p4=genVisZLeps.at(2)->p4()-genTauNus.at(2)->p4(); }
-        if (abs(genVisZLeps.at(3)->pdgId())!=15) { genVisLep4p4=genVisZLeps.at(3)->p4(); }
+        if (abs(genVisZLeps.at(3)->pdgId())!=15 || genTauNus.at(3)==0) { genVisLep4p4=genVisZLeps.at(3)->p4(); }
         else { genVisLep4p4=genVisZLeps.at(3)->p4()-genTauNus.at(3)->p4(); }
 
 	FillVisZGenInfo(genVisZLeps.at(0)->pdgId()*genVisZLeps.at(1)->pdgId(),
@@ -958,11 +1002,11 @@ void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& e
       if (genZLeps.size()==3) {
 
         math::XYZTLorentzVector genVisLep1p4,genVisLep2p4,genVisLep3p4;
-        if (abs(genVisZLeps.at(0)->pdgId())!=15) { genVisLep1p4=genVisZLeps.at(0)->p4(); }
+        if (abs(genVisZLeps.at(0)->pdgId())!=15 || genTauNus.at(0)==0) { genVisLep1p4=genVisZLeps.at(0)->p4(); }
         else { genVisLep1p4=genVisZLeps.at(0)->p4()-genTauNus.at(0)->p4(); }
-        if (abs(genVisZLeps.at(1)->pdgId())!=15) { genVisLep2p4=genVisZLeps.at(1)->p4(); }
+        if (abs(genVisZLeps.at(1)->pdgId())!=15 || genTauNus.at(1)==0) { genVisLep2p4=genVisZLeps.at(1)->p4(); }
         else { genVisLep2p4=genVisZLeps.at(1)->p4()-genTauNus.at(1)->p4(); }
-        if (abs(genVisZLeps.at(2)->pdgId())!=15) { genVisLep3p4=genVisZLeps.at(2)->p4(); }
+        if (abs(genVisZLeps.at(2)->pdgId())!=15 || genTauNus.at(2)==0) { genVisLep3p4=genVisZLeps.at(2)->p4(); }
         else { genVisLep3p4=genVisZLeps.at(2)->p4()-genTauNus.at(2)->p4(); }
 
         FillLepGenInfo(genZLeps.at(0)->pdgId(), genZLeps.at(1)->pdgId(), genZLeps.at(2)->pdgId(), 0,
@@ -973,12 +1017,12 @@ void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& e
       if (genZLeps.size()==2) {
 
         math::XYZTLorentzVector genVisLep1p4,genVisLep2p4;
-        if (abs(genVisZLeps.at(0)->pdgId())!=15) { genVisLep1p4=genVisZLeps.at(0)->p4(); }
+        if (abs(genVisZLeps.at(0)->pdgId())!=15 || genTauNus.at(0)==0) { genVisLep1p4=genVisZLeps.at(0)->p4(); }
         else { genVisLep1p4=genVisZLeps.at(0)->p4()-genTauNus.at(0)->p4(); }
-        if (abs(genVisZLeps.at(1)->pdgId())!=15) { genVisLep2p4=genVisZLeps.at(1)->p4(); }
+        if (abs(genVisZLeps.at(1)->pdgId())!=15 || genTauNus.at(1)==0) { genVisLep2p4=genVisZLeps.at(1)->p4(); }
         else { genVisLep2p4=genVisZLeps.at(1)->p4()-genTauNus.at(1)->p4(); }
-
-        FillLepGenInfo(genZLeps.at(0)->pdgId(), genZLeps.at(1)->pdgId(), 0, 0,
+	
+	FillLepGenInfo(genZLeps.at(0)->pdgId(), genZLeps.at(1)->pdgId(), 0, 0,
                        genZLeps.at(0)->p4(), genZLeps.at(1)->p4(), *(new math::XYZTLorentzVector), *(new math::XYZTLorentzVector));
 	FillVisLepGenInfo(genVisZLeps.at(0)->pdgId(), genVisZLeps.at(1)->pdgId(), 0, 0,
            genVisLep1p4, genVisLep2p4, *(new math::XYZTLorentzVector), *(new math::XYZTLorentzVector));
@@ -1590,6 +1634,12 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
   LepSigma_Phi_Up.clear();
   LepSigma_Phi_Dn.clear();
 
+  HLTMatch1.clear();
+  HLTMatch2.clear();
+
+  TauVSmu.clear();
+  TauVSe.clear();
+  TauVSjet.clear();
   TauDecayMode.clear();
   TauTES_p_Up.clear();
   TauTES_p_Dn.clear();
@@ -1700,8 +1750,12 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
 
   Z1Mass = Z1->mass();
   Z1Pt =   Z1->pt();
+  Z1Eta =  Z1->eta();
+  Z1Phi =  Z1->Phi();
   Z1Flav =  getPdgId(Z1->daughter(0)) * getPdgId(Z1->daughter(1));
   Z1GoodMass = userdatahelpers::getUserFloat(Z1,"goodMass");
+  Z1muHLTMatch = userdatahelpers::getUserFloat(Z1,"muHLTMatch");
+  Z1eleHLTMatch = userdatahelpers::getUserFloat(Z1,"eleHLTMatch");
 
   if(addSVfit && userdatahelpers::hasUserFloat(Z1,"ComputeSV")){
     //if(userdatahelpers::getUserFloat(Z1,"ComputeSV")){
@@ -1723,13 +1777,21 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
  
   Z2Mass = Z2->mass();
   Z2Pt =   Z2->pt();
+  Z2Eta  = Z2->eta();
+  Z2Phi  = Z2->phi();
   Z2Flav = theChannel==ZL ? getPdgId(Z2) : getPdgId(Z2->daughter(0)) * getPdgId(Z2->daughter(1));
   if(userdatahelpers::hasUserFloat(Z2,"goodMass")){
     Z2GoodMass = userdatahelpers::getUserFloat(Z2,"goodMass");
   }
+  if(userdatahelpers::hasUserFloat(Z2,"muHLTMatch")){
+    Z2muHLTMatch = userdatahelpers::getUserFloat(Z2,"muHLTMatch");
+  }
+  if(userdatahelpers::hasUserFloat(Z2,"eleHLTMatch")){
+    Z2eleHLTMatch = userdatahelpers::getUserFloat(Z2,"eleHLTMatch");
+  }
 
   if(addSVfit && userdatahelpers::hasUserFloat(Z2,"ComputeSV")){
-    if(userdatahelpers::getUserFloat(Z2,"ComputeSV")){
+    //if(userdatahelpers::getUserFloat(Z2,"ComputeSV")){
 	Z2SVMass	= userdatahelpers::getUserFloat(Z2,"SVfitMass");
 	Z2SVPt		= userdatahelpers::getUserFloat(Z2,"SVfit_pt");
 	Z2SVEta		= userdatahelpers::getUserFloat(Z2,"SVfit_eta");
@@ -1743,7 +1805,7 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
 	Z2SVPhiUnc	= userdatahelpers::getUserFloat(Z2,"SVfit_phiUnc");
 	Z2SVMETRho	= userdatahelpers::getUserFloat(Z2,"SVfit_METRho");
 	Z2SVMETPhi	= userdatahelpers::getUserFloat(Z2,"SVfit_METPhi");
-    }
+    //}
   }
 
   const reco::Candidate* non_TLE_Z = nullptr;
@@ -1849,6 +1911,17 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
     LepisLoose.push_back(userdatahelpers::hasUserFloat(leptons[i],"isLoose") == 1 ? userdatahelpers::getUserFloat(leptons[i],"isLoose") : -2);
 
     if(lepFlav==15){
+	short tauVSmu=0,tauVSe=0,tauVSjet=0;
+	for (size_t iDisc = 0; iDisc<VSmuDisc.size(); ++iDisc) 
+	    if (userdatahelpers::getUserInt(leptons[i],VSmuDisc[iDisc].c_str())==1) tauVSmu=iDisc+1;
+	for (size_t iDisc = 0; iDisc<VSeDisc.size(); ++iDisc)
+	    if (userdatahelpers::getUserInt(leptons[i],VSeDisc[iDisc].c_str())==1) tauVSe=iDisc+1;
+	for (size_t iDisc = 0; iDisc<VSjetDisc.size(); ++iDisc)
+            if (userdatahelpers::getUserInt(leptons[i],VSjetDisc[iDisc].c_str())==1) tauVSjet=iDisc+1;
+	TauVSmu.push_back(tauVSmu);
+	TauVSe.push_back(tauVSe);
+	TauVSjet.push_back(tauVSjet);
+
 	TauDecayMode.push_back( userdatahelpers::getUserFloat(leptons[i],"decayMode") );
 	if (userdatahelpers::getUserInt(leptons[i],"isTESShifted")){
 	    TauTES_p_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"px_TauUp")/leptons[i]->px() );
@@ -1880,7 +1953,28 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
             TauFES_e_Up.push_back(0.);
             TauFES_e_Dn.push_back(0.);
 	}
+    } else{
+	TauVSmu.push_back(-1);
+	TauVSe.push_back(-1);
+	TauVSjet.push_back(-1);
+	TauDecayMode.push_back(-1);
+	TauTES_p_Up.push_back(0.);
+        TauTES_p_Dn.push_back(0.);
+        TauTES_m_Up.push_back(0.);
+        TauTES_m_Dn.push_back(0.);
+        TauTES_e_Up.push_back(0.);
+        TauTES_e_Dn.push_back(0.);
+	TauFES_p_Up.push_back(0.);
+        TauFES_p_Dn.push_back(0.);
+        TauFES_m_Up.push_back(0.);
+        TauFES_m_Dn.push_back(0.);
+        TauFES_e_Up.push_back(0.);
+        TauFES_e_Dn.push_back(0.);
     }
+
+    HLTMatch1.push_back( userdatahelpers::hasUserFloat(leptons[i],"HLTMatch1") ? userdatahelpers::getUserFloat(leptons[i],"HLTMatch1") : -1 );
+    HLTMatch2.push_back( userdatahelpers::hasUserFloat(leptons[i],"HLTMatch2") ? userdatahelpers::getUserFloat(leptons[i],"HLTMatch2") : -1 );
+
   }
 
   // FSR
@@ -2433,6 +2527,8 @@ void HZZ4lNtupleMaker::BookAllBranches(){
   myTree->Book("Z1Mass",Z1Mass, false);
   myTree->Book("Z1GoodMass",Z1GoodMass, false);
   myTree->Book("Z1Pt",Z1Pt, false);
+  myTree->Book("Z1Eta",Z1Eta, false);
+  myTree->Book("Z1Phi",Z1Phi, false);
   myTree->Book("Z1Flav",Z1Flav, false);
   if (addSVfit){
     myTree->Book("Z1SVMass",Z1SVMass, false);
@@ -2448,11 +2544,15 @@ void HZZ4lNtupleMaker::BookAllBranches(){
     myTree->Book("Z1SVMETRho",Z1SVMETRho, false);
     myTree->Book("Z1SVMETPhi",Z1SVMETPhi, false);
   }
+  myTree->Book("Z1muHLTMatch",Z1muHLTMatch, false);
+  myTree->Book("Z1eleHLTMatch",Z1eleHLTMatch, false);
 
   //Z2 variables
   myTree->Book("Z2Mass",Z2Mass, false);
   myTree->Book("Z2GoodMass",Z2GoodMass, false);
   myTree->Book("Z2Pt",Z2Pt, false);
+  myTree->Book("Z2Eta",Z2Eta, false);
+  myTree->Book("Z2Phi",Z2Phi, false);
   myTree->Book("Z2Flav",Z2Flav, false);
   if (addSVfit){
     myTree->Book("Z2SVMass",Z2SVMass, false);
@@ -2468,6 +2568,8 @@ void HZZ4lNtupleMaker::BookAllBranches(){
     myTree->Book("Z2SVMETRho",Z2SVMETRho, false);
     myTree->Book("Z2SVMETPhi",Z2SVMETPhi, false);
   }
+  myTree->Book("Z2muHLTMatch",Z2muHLTMatch, false);
+  myTree->Book("Z2eleHLTMatch",Z2eleHLTMatch, false);
 
   myTree->Book("costhetastar",costhetastar, false);
   myTree->Book("helphi",helphi, false);
@@ -2519,6 +2621,9 @@ void HZZ4lNtupleMaker::BookAllBranches(){
   myTree->Book("LepSigma_Phi_Up",LepSigma_Phi_Up, false);
   myTree->Book("LepSigma_Phi_Dn",LepSigma_Phi_Up, false);
 
+  myTree->Book("TauVSmu",TauVSmu, false);
+  myTree->Book("TauVSe",TauVSe, false);
+  myTree->Book("TauVSjet",TauVSjet, false);
   myTree->Book("TauDecayMode",TauDecayMode, false);
   myTree->Book("TauTES_p_Up",TauTES_p_Up, false);
   myTree->Book("TauTES_p_Dn",TauTES_p_Dn, false);
@@ -2532,6 +2637,9 @@ void HZZ4lNtupleMaker::BookAllBranches(){
   myTree->Book("TauFES_m_Dn",TauFES_m_Dn, false);
   myTree->Book("TauFES_e_Up",TauFES_e_Up, false);
   myTree->Book("TauFES_e_Dn",TauFES_e_Dn, false);
+
+  myTree->Book("HLTMatch1",HLTMatch1, false);
+  myTree->Book("HLTMatch2",HLTMatch2, false);
 
   myTree->Book("fsrPt",fsrPt, false);
   myTree->Book("fsrEta",fsrEta, false);
@@ -2646,10 +2754,12 @@ void HZZ4lNtupleMaker::BookAllBranches(){
     myTree->Book("GenZ1Mass", GenZ1Mass, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenZ1Pt", GenZ1Pt, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenZ1Phi", GenZ1Phi, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenZ1Eta", GenZ1Eta, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenZ1Flav", GenZ1Flav, failedTreeLevel >= minimalFailedTree);
     myTree->Book("GenZ2Mass", GenZ2Mass, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenZ2Pt", GenZ2Pt, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenZ2Phi", GenZ2Phi, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenZ2Eta", GenZ2Eta, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenZ2Flav", GenZ2Flav, failedTreeLevel >= minimalFailedTree);
     myTree->Book("GenLep1Pt", GenLep1Pt, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenLep1Eta", GenLep1Eta, failedTreeLevel >= fullFailedTree);
@@ -2667,6 +2777,32 @@ void HZZ4lNtupleMaker::BookAllBranches(){
     myTree->Book("GenLep4Eta", GenLep4Eta, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenLep4Phi", GenLep4Phi, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenLep4Id", GenLep4Id, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisZ1Mass", GenVisZ1Mass, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisZ1Pt", GenVisZ1Pt, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisZ1Eta", GenVisZ1Eta, failedTreeLevel >= minimalFailedTree);
+    myTree->Book("GenVisZ1Phi", GenVisZ1Phi, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisZ1Flav", GenVisZ1Flav, failedTreeLevel >= minimalFailedTree);
+    myTree->Book("GenVisZ2Mass", GenVisZ2Mass, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisZ2Pt", GenVisZ2Pt, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisZ2Eta", GenVisZ2Eta, failedTreeLevel >= minimalFailedTree);
+    myTree->Book("GenVisZ2Phi", GenVisZ2Phi, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisZ2Flav", GenVisZ2Flav, failedTreeLevel >= minimalFailedTree);
+    myTree->Book("GenVisLep1Pt", GenVisLep1Pt, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisLep1Eta", GenVisLep1Eta, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisLep1Phi", GenVisLep1Phi, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisLep1Id", GenVisLep1Id, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisLep2Pt", GenVisLep2Pt, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisLep2Eta", GenVisLep2Eta, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisLep2Phi", GenVisLep2Phi, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisLep2Id", GenVisLep2Id, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisLep3Pt", GenVisLep3Pt, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisLep3Eta", GenVisLep3Eta, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisLep3Phi", GenVisLep3Phi, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisLep3Id", GenVisLep3Id, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisLep4Pt", GenVisLep4Pt, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisLep4Eta", GenVisLep4Eta, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisLep4Phi", GenVisLep4Phi, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisLep4Id", GenVisLep4Id, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenAssocLep1Pt", GenAssocLep1Pt, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenAssocLep1Eta", GenAssocLep1Eta, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenAssocLep1Phi", GenAssocLep1Phi, failedTreeLevel >= fullFailedTree);

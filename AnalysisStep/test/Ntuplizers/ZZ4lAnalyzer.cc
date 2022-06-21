@@ -382,7 +382,8 @@ void ZZ4lAnalyzer::endJob(){
 
 
 
-void ZZ4lAnalyzer::analyze(const Event & event, const EventSetup& eventSetup){  
+void ZZ4lAnalyzer::analyze(const Event & event, const EventSetup& eventSetup){ 
+  //cout<<"ZZ4lAnalyzer"<<endl; 
   int irun=event.id().run();
   long long int ievt=event.id().event(); 
   int ils =event.luminosityBlock();
@@ -391,24 +392,27 @@ void ZZ4lAnalyzer::analyze(const Event & event, const EventSetup& eventSetup){
   float nTrueInt = -1.;
   float PUweight = 1.;
 
+  //cout<<"Vertex"<<endl;
   Handle<vector<Vertex> > vertices;
   event.getByToken(vtxToken,vertices);
   int Nvtx = vertices->size();
 
+  //cout<<"Rho"<<endl;
   Handle<double> rhoHandle;
   event.getByToken(rhoToken, rhoHandle);
 
   int genFinalState = NONE;
   if (isMC) {
-
+    //cout<<"isMC:"<<isMC<<endl;
     edm::Handle<edm::View<reco::Candidate> > genParticles;
     event.getByToken(genParticleToken, genParticles);
     edm::Handle<GenEventInfoProduct> genInfo;
     event.getByToken(genInfoToken, genInfo);
-
+    
+    //cout<<"Begin MCHistoryTools"<<endl;
     MCHistoryTools mch(event, sampleName, genParticles, genInfo);
     genFinalState = mch.genFinalState();
-
+    //cout<<"Executing"<<endl;
     const reco::Candidate* genH = mch.genH();
     std::vector<const reco::Candidate *> genZLeps = mch.sortedGenZZLeps();
     if(genH!=0){
@@ -435,6 +439,7 @@ void ZZ4lAnalyzer::analyze(const Event & event, const EventSetup& eventSetup){
       ++gen_BUGGY;
       return;
     }
+    //cout<<"After filling histograms"<<endl;
 
     vector<Handle<std::vector< PileupSummaryInfo > > >  PupInfos; //FIXME support for miniAOD v1/v2 where name changed; catch does not work...
     event.getManyByType(PupInfos);

@@ -15,6 +15,7 @@ PROCESS_CR = False   # Uncomment to run CR paths and trees
 ADDZTREE = False # Add tree for Z analysis
 ADDLHEKINEMATICS = True  #
 
+IsMC = True
 PD = ""
 MCFILTER = ""
 
@@ -32,7 +33,7 @@ PyFilePath = os.environ['CMSSW_BASE'] + "/src/HTauTauHMuMu/AnalysisStep/test/"
 ### ----------------------------------------------------------------------
 
 execfile(PyFilePath + "analyzer.py")
-execfile(PyFilePath + "prod/pyFragments/RecoProbabilities.py")
+#execfile(PyFilePath + "prod/pyFragments/RecoProbabilities.py")
 
 if not IsMC:
 	process.source.inputCommands = cms.untracked.vstring("keep *", "drop LHERunInfoProduct_*_*_*", "drop LHEEventProduct_*_*_*") ###FIXME In 9X this removes all collections for MC
@@ -45,9 +46,9 @@ process.source.fileNames = cms.untracked.vstring(
 
 
 ### LEGACY PAPER - 2018 sync files
-'/store/mc/RunIIAutumn18MiniAOD/GluGluHToZZTo4L_M125_13TeV_powheg2_JHUGenV7011_pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v2/270000/E5E2F122-AA57-5248-8177-594EC87DD494.root',
-'/store/mc/RunIIAutumn18MiniAOD/ttH_HToZZ_4LFilter_M125_13TeV_powheg2_JHUGenV7011_pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v2/60000/19B6ADC2-4F62-AA4D-9488-F53CE2936856.root',
-'/store/mc/RunIIAutumn18MiniAOD/VBF_HToZZTo4L_M125_13TeV_powheg2_JHUGenV7011_pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v2/90000/96A5F68D-DCB8-3D4E-8615-919D86D1534F.root'
+'/store/mc/RunIIAutumn18MiniAOD/GluGluHToZZTo4L_M125_13TeV_powheg2_JHUGenV7011_pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v2/270000/E5E2F122-AA57-5248-8177-594EC87DD494.root'#,
+#'/store/mc/RunIIAutumn18MiniAOD/ttH_HToZZ_4LFilter_M125_13TeV_powheg2_JHUGenV7011_pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v2/60000/19B6ADC2-4F62-AA4D-9488-F53CE2936856.root',
+#'/store/mc/RunIIAutumn18MiniAOD/VBF_HToZZTo4L_M125_13TeV_powheg2_JHUGenV7011_pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v2/90000/96A5F68D-DCB8-3D4E-8615-919D86D1534F.root'
         
 ###Run2018A-ReReco-v2                                                                                                                 
         #'/store/data/Run2018A/DoubleMuon/MINIAOD/17Sep2018-v2/120000/39DE1F78-583A-1948-8E09-E47E33DCCBED.root'                                      
@@ -59,7 +60,7 @@ process.source.fileNames = cms.untracked.vstring(
 #process.calibratedPatElectrons.isSynchronization = cms.bool(True) #not needed anymore since new EGamma smearing is event deterministic
 #process.calibratedMuons.isSynchronization = cms.bool(True)
 
-process.maxEvents.input = -1
+process.maxEvents.input = 2000
 #process.source.skipEvents = cms.untracked.uint32(5750)
 
 # Silence output

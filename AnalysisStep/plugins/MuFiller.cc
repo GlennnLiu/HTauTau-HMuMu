@@ -47,6 +47,8 @@ class MuFiller : public edm::EDProducer {
    virtual void endJob(){};
    
    edm::EDGetTokenT<pat::MuonRefVector> muonToken;
+   //edm::EDGetTokenT<vector<pat::Muon> > muonToken;
+
    int sampleType;
    int setup;
    const StringCutObjectSelector<pat::Muon, true> cut;
@@ -67,6 +69,7 @@ class MuFiller : public edm::EDProducer {
 
 
 MuFiller::MuFiller(const edm::ParameterSet& iConfig) :
+//muonToken(consumes<vector<pat::Muon> >(iConfig.getParameter<edm::InputTag>("src"))),
 muonToken(consumes<pat::MuonRefVector>(iConfig.getParameter<edm::InputTag>("src"))),
 sampleType(iConfig.getParameter<int>("sampleType")),
 setup(iConfig.getParameter<int>("setup")),
@@ -135,7 +138,8 @@ flags(iConfig.getParameter<edm::ParameterSet>("flags"))
 	};
 	muHLTFilters1_ =
 	{
-	"hltL3crIsoL1sMu22Or25L1f0L2f10QL3f27QL3trkIsoFiltered0p09",
+	"hltL3crIsoL1sMu22Or25L1f0L2f10QL3f27QL3trkIsoFiltered0p07",
+	//"hltL3crIsoL1sMu22Or25L1f0L2f10QL3f27QL3trkIsoFiltered0p09",
         };
    }
    else if (sampleType == 2018)
@@ -154,7 +158,8 @@ flags(iConfig.getParameter<edm::ParameterSet>("flags"))
 	};
 	muHLTFilters1_ =
 	{
-	"hltL3crIsoL1sMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p09",
+	"hltL3crIsoL1sSingleMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p07",
+	//"hltL3crIsoL1sMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p09",
         };
    }
 	
@@ -168,9 +173,12 @@ MuFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    
    //--- Get leptons and rho
+   //edm::Handle<vector<pat::Muon> > muonHandle;
    edm::Handle<pat::MuonRefVector> muonHandle;
    iEvent.getByToken(muonToken, muonHandle);
-   
+   //const vector<pat::Muon> *inputMuons = muonHandle.product();  
+
+ 
    edm::Handle< edm::TriggerResults > triggerResults;
    iEvent.getByToken( triggerResultsToken_, triggerResults );
    
@@ -185,6 +193,9 @@ MuFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
    // Output collection
    auto result = std::make_unique<pat::MuonCollection>();
    
+
+   //for (unsigned i=0; i<inputMuons->size(); ++i) {
+      //pat::Muon l = inputMuons->at(i);
    for (unsigned int i = 0; i< muonHandle->size(); ++i){
       //---Clone the pat::Muon
       pat::Muon l(*((*muonHandle)[i].get()));
@@ -311,8 +322,13 @@ MuFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
          eachPath2.push_back(false);
 
       pat::TriggerObjectStandAloneCollection obj= l.triggerObjectMatches();
+      cout<<obj.size()<<endl;
       for ( size_t iTrigObj = 0; iTrigObj < obj.size(); ++iTrigObj ) {
          obj.at( iTrigObj ).unpackFilterLabels(iEvent,*triggerResults );
+	 //for (size_t test=0;test<obj.at( iTrigObj ).filterLabels().size();test++) {
+	 //    cout<<obj.at( iTrigObj ).filterLabels()[test].c_str()<<", ";
+	 //}
+	 //cout<<endl;
       }
       for ( size_t i = 0; i < obj.size(); ++i ) {
 	 for (size_t j = 0; j < muHLTPaths1_.size(); j++) {
