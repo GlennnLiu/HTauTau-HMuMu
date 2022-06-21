@@ -386,7 +386,7 @@ MCHistoryTools::init() {
 	//lepDecay=true;
 	//cout<<"LepDecay"<<endl;
 	theSortedVisGenLeps.push_back(theSortedGenLepts[ilep]->daughter(LepIdx[0]));
-	theGenTauNus.push_back(theSortedGenLepts[ilep]->daughter(TauNuIdx[0]));
+	theGenTauNus.push_back(0);//theSortedGenLepts[ilep]->daughter(TauNuIdx[0]));
 	//cout<<"LepDecay"<<endl;
       } else if (TauNuIdx.size()==1) {//For hadronically decaying taus, we still save the gen tau lepton
 	//cout<<"Hadronic decay"<<endl;

@@ -1751,7 +1751,7 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
   Z1Mass = Z1->mass();
   Z1Pt =   Z1->pt();
   Z1Eta =  Z1->eta();
-  Z1Phi =  Z1->Phi();
+  Z1Phi =  Z1->phi();
   Z1Flav =  getPdgId(Z1->daughter(0)) * getPdgId(Z1->daughter(1));
   Z1GoodMass = userdatahelpers::getUserFloat(Z1,"goodMass");
   Z1muHLTMatch = userdatahelpers::getUserFloat(Z1,"muHLTMatch");
