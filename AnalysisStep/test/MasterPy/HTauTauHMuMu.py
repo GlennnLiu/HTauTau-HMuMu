@@ -385,6 +385,7 @@ process.softMuons = cms.EDProducer("MuFiller",
     setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
     cut = cms.string("userFloat('dxy')<0.5 && userFloat('dz')<1."),
     TriggerResults = cms.InputTag('TriggerResults','','HLT'),
+    TriggerSet = cms.InputTag("selectedPatTrigger"),
     flags = cms.PSet(
         ID = cms.string(TIGHTMUON), #"userFloat('isBDT')"), # muonMVA ID
         isSIP = cms.string(SIP),
@@ -448,6 +449,7 @@ process.bareSoftElectrons = cms.EDFilter("PATElectronRefSelector",
 process.softElectrons = cms.EDProducer("EleFiller",
    src    = cms.InputTag("bareSoftElectrons"),
    TriggerResults = cms.InputTag('TriggerResults','','HLT'),
+   TriggerSet = cms.InputTag("slimmedPatTrigger"),
    sampleType = cms.int32(SAMPLE_TYPE),
    setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
    cut = cms.string("pt>7 && abs(eta) < 2.5 && userFloat('dxy')<0.5 && userFloat('dz')<1"),
@@ -465,7 +467,7 @@ process.electrons = cms.Sequence(process.egammaPostRecoSeq + process.selectedSli
 
 
 
-#--- TrackLess Electrons
+--- TrackLess Electrons
 process.bareSoftPhotons = cms.EDFilter("PATPhotonRefSelector",
    src = cms.InputTag("slimmedPhotons"),
    cut = cms.string("pt>7 && abs(eta)<2.5")

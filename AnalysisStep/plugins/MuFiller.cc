@@ -19,6 +19,7 @@
 #include <DataFormats/PatCandidates/interface/Muon.h>
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include <DataFormats/Common/interface/TriggerResults.h>
+#include "DataFormats/Math/interface/deltaR.h"
 
 #include <HTauTauHMuMu/AnalysisStep/interface/CutSet.h>
 #include <HTauTauHMuMu/AnalysisStep/interface/LeptonIsoHelper.h>
@@ -52,6 +53,7 @@ class MuFiller : public edm::EDProducer {
    int sampleType;
    int setup;
    const StringCutObjectSelector<pat::Muon, true> cut;
+   const edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> triggerObjects_;
    const edm::EDGetTokenT< edm::TriggerResults > triggerResultsToken_;
    const CutSet<pat::Muon> flags;
    edm::EDGetTokenT<double> rhoToken;
@@ -65,6 +67,8 @@ class MuFiller : public edm::EDProducer {
    vector<string> muHLTPaths2_;//double mu
    vector<string> muHLTFilters1_;
    vector<string> muHLTFilters2_;
+   vector<string> muHLTFilters2_leg1;
+   vector<string> muHLTFilters2_leg2;
 };
 
 
@@ -74,6 +78,7 @@ muonToken(consumes<pat::MuonRefVector>(iConfig.getParameter<edm::InputTag>("src"
 sampleType(iConfig.getParameter<int>("sampleType")),
 setup(iConfig.getParameter<int>("setup")),
 cut(iConfig.getParameter<std::string>("cut")),
+triggerObjects_(consumes<pat::TriggerObjectStandAloneCollection> (iConfig.getParameter<edm::InputTag>("TriggerSet"))),
 triggerResultsToken_( consumes< edm::TriggerResults >( iConfig.getParameter< edm::InputTag >( "TriggerResults" ) ) ),
 flags(iConfig.getParameter<edm::ParameterSet>("flags"))
 {
@@ -110,6 +115,16 @@ flags(iConfig.getParameter<edm::ParameterSet>("flags"))
 	"hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4",
 	"hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4",
 	};
+	muHLTFilters2_leg1 =
+	{
+	"hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4",
+	
+	};
+        muHLTFilters2_leg2 =
+        {
+	"hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4",
+
+        };
 	muHLTFilters1_ =
 	{
 	"hltL3crIsoL1sMu18L1f0L2f10QL3f20QL3trkIsoFiltered0p09",
@@ -181,7 +196,11 @@ MuFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
  
    edm::Handle< edm::TriggerResults > triggerResults;
    iEvent.getByToken( triggerResultsToken_, triggerResults );
-   
+   const edm::TriggerNames &names = iEvent.triggerNames(*triggerResults);
+  
+   edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects;
+   iEvent.getByToken(triggerObjects_, triggerObjects);
+ 
    edm::Handle<double> rhoHandle;
    iEvent.getByToken(rhoToken, rhoHandle);
    double rho = *rhoHandle;
@@ -321,24 +340,31 @@ MuFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       for ( size_t j = 0; j < muHLTPaths2_.size(); ++j)
          eachPath2.push_back(false);
 
-      pat::TriggerObjectStandAloneCollection obj= l.triggerObjectMatches();
-      cout<<obj.size()<<endl;
-      for ( size_t iTrigObj = 0; iTrigObj < obj.size(); ++iTrigObj ) {
-         obj.at( iTrigObj ).unpackFilterLabels(iEvent,*triggerResults );
+      for (size_t idxto = 0; idxto < triggerObjects->size(); ++idxto) {
+
+         pat::TriggerObjectStandAlone obj = triggerObjects->at(idxto);
+         obj.unpackFilterLabels(iEvent,*triggerResults );
+      
+         if (deltaR2(obj,l)>0.25) continue;
+	 if (!obj.hasTriggerObjectType(trigger::TriggerMuon)) continue;
+      //pat::TriggerObjectStandAloneCollection obj= l.triggerObjectMatches();
+      //cout<<obj.size()<<endl;
+      //for ( size_t iTrigObj = 0; iTrigObj < obj.size(); ++iTrigObj ) {
+         //obj.at( iTrigObj ).unpackFilterLabels(iEvent,*triggerResults );
 	 //for (size_t test=0;test<obj.at( iTrigObj ).filterLabels().size();test++) {
 	 //    cout<<obj.at( iTrigObj ).filterLabels()[test].c_str()<<", ";
 	 //}
 	 //cout<<endl;
-      }
-      for ( size_t i = 0; i < obj.size(); ++i ) {
+      //}
+      //for ( size_t i = 0; i < obj.size(); ++i ) {
 	 for (size_t j = 0; j < muHLTPaths1_.size(); j++) {
-	    if (obj.at( i ).hasFilterLabel( muHLTFilters1_[j] )) {
+	    if (obj.hasFilterLabel( muHLTFilters1_[j] )) {
 		HLTMatch1=true;
 		eachPath1[j]=true;
 	    }
 	 }
 	 for (size_t j = 0; j < muHLTPaths2_.size(); j++) {
-	    if (obj.at( i ).hasFilterLabel( muHLTFilters2_[j] )) {
+	    if (obj.hasFilterLabel( muHLTFilters2_[j] )) {
                 HLTMatch2=true;
 		eachPath2[j]=true;
             }
