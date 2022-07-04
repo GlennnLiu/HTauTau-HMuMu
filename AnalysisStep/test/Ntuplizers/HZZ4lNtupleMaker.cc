@@ -159,8 +159,8 @@ namespace {
   Float_t ZZjjPt = 0;
  
   Float_t ZZGoodMass  = 0;
-  Bool_t muHLTMatch  = true;
-  Bool_t eleHLTMatch  = true;
+  Bool_t muHLTMatch  = false;
+  Bool_t eleHLTMatch  = false;
  
   Int_t CRflag  = 0;
   Float_t Z1Mass  = 0;
@@ -189,9 +189,18 @@ namespace {
   Float_t TLE_dR_Z = -1; // Delta-R between a TLE and the Z it does not belong to.
   Float_t TLE_min_dR_3l = 999; // Minimum DR between a TLE and any of the other leptons
   Short_t evtPassMETTrigger = 0;
+
+  Bool_t Z1muHLTMatch1 = false;
+  Bool_t Z1muHLTMatch2 = false;
   Bool_t Z1muHLTMatch = false;
+  Bool_t Z1eleHLTMatch1 = false;
+  Bool_t Z1eleHLTMatch2 = false;
   Bool_t Z1eleHLTMatch = false;
+  Bool_t Z2muHLTMatch1 = false;
+  Bool_t Z2muHLTMatch2 = false;
   Bool_t Z2muHLTMatch = false;
+  Bool_t Z2eleHLTMatch1 = false;
+  Bool_t Z2eleHLTMatch2 = false;
   Bool_t Z2eleHLTMatch = false;
 
   //ZZ kinematic fit
@@ -291,7 +300,7 @@ namespace {
 
 //HLT match
   std::vector<short> HLTMatch1;
-  std::vector<short> HLTMatch2;
+//  std::vector<short> HLTMatch2;
 
   std::vector<float> fsrPt;
   std::vector<float> fsrEta;
@@ -1635,7 +1644,7 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
   LepSigma_Phi_Dn.clear();
 
   HLTMatch1.clear();
-  HLTMatch2.clear();
+  //HLTMatch2.clear();
 
   TauVSmu.clear();
   TauVSe.clear();
@@ -1754,7 +1763,11 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
   Z1Phi =  Z1->phi();
   Z1Flav =  getPdgId(Z1->daughter(0)) * getPdgId(Z1->daughter(1));
   Z1GoodMass = userdatahelpers::getUserFloat(Z1,"goodMass");
+  Z1muHLTMatch1 = userdatahelpers::getUserFloat(Z1,"muHLTMatch1");
+  Z1muHLTMatch2 = userdatahelpers::getUserFloat(Z1,"muHLTMatch2");
   Z1muHLTMatch = userdatahelpers::getUserFloat(Z1,"muHLTMatch");
+  Z1eleHLTMatch1 = userdatahelpers::getUserFloat(Z1,"eleHLTMatch1");
+  Z1eleHLTMatch2 = userdatahelpers::getUserFloat(Z1,"eleHLTMatch2");
   Z1eleHLTMatch = userdatahelpers::getUserFloat(Z1,"eleHLTMatch");
 
   if(addSVfit && userdatahelpers::hasUserFloat(Z1,"ComputeSV")){
@@ -1784,9 +1797,13 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
     Z2GoodMass = userdatahelpers::getUserFloat(Z2,"goodMass");
   }
   if(userdatahelpers::hasUserFloat(Z2,"muHLTMatch")){
+    Z2muHLTMatch1 = userdatahelpers::getUserFloat(Z2,"muHLTMatch1");
+    Z2muHLTMatch2 = userdatahelpers::getUserFloat(Z2,"muHLTMatch2");
     Z2muHLTMatch = userdatahelpers::getUserFloat(Z2,"muHLTMatch");
   }
   if(userdatahelpers::hasUserFloat(Z2,"eleHLTMatch")){
+    Z2eleHLTMatch1 = userdatahelpers::getUserFloat(Z2,"eleHLTMatch1");
+    Z2eleHLTMatch2 = userdatahelpers::getUserFloat(Z2,"eleHLTMatch2");
     Z2eleHLTMatch = userdatahelpers::getUserFloat(Z2,"eleHLTMatch");
   }
 
@@ -1973,7 +1990,7 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
     }
 
     HLTMatch1.push_back( userdatahelpers::hasUserFloat(leptons[i],"HLTMatch1") ? userdatahelpers::getUserFloat(leptons[i],"HLTMatch1") : -1 );
-    HLTMatch2.push_back( userdatahelpers::hasUserFloat(leptons[i],"HLTMatch2") ? userdatahelpers::getUserFloat(leptons[i],"HLTMatch2") : -1 );
+    //HLTMatch2.push_back( userdatahelpers::hasUserFloat(leptons[i],"HLTMatch2") ? userdatahelpers::getUserFloat(leptons[i],"HLTMatch2") : -1 );
 
   }
 
@@ -2544,7 +2561,11 @@ void HZZ4lNtupleMaker::BookAllBranches(){
     myTree->Book("Z1SVMETRho",Z1SVMETRho, false);
     myTree->Book("Z1SVMETPhi",Z1SVMETPhi, false);
   }
+  myTree->Book("Z1muHLTMatch1",Z1muHLTMatch1, false);
+  myTree->Book("Z1muHLTMatch2",Z1muHLTMatch2, false);
   myTree->Book("Z1muHLTMatch",Z1muHLTMatch, false);
+  myTree->Book("Z1eleHLTMatch1",Z1eleHLTMatch1, false);
+  myTree->Book("Z1eleHLTMatch2",Z1eleHLTMatch2, false);
   myTree->Book("Z1eleHLTMatch",Z1eleHLTMatch, false);
 
   //Z2 variables
@@ -2568,7 +2589,11 @@ void HZZ4lNtupleMaker::BookAllBranches(){
     myTree->Book("Z2SVMETRho",Z2SVMETRho, false);
     myTree->Book("Z2SVMETPhi",Z2SVMETPhi, false);
   }
+  myTree->Book("Z2muHLTMatch1",Z2muHLTMatch1, false);
+  myTree->Book("Z2muHLTMatch2",Z2muHLTMatch2, false);
   myTree->Book("Z2muHLTMatch",Z2muHLTMatch, false);
+  myTree->Book("Z2eleHLTMatch1",Z2eleHLTMatch1, false);
+  myTree->Book("Z2eleHLTMatch2",Z2eleHLTMatch2, false);
   myTree->Book("Z2eleHLTMatch",Z2eleHLTMatch, false);
 
   myTree->Book("costhetastar",costhetastar, false);
@@ -2639,7 +2664,7 @@ void HZZ4lNtupleMaker::BookAllBranches(){
   myTree->Book("TauFES_e_Dn",TauFES_e_Dn, false);
 
   myTree->Book("HLTMatch1",HLTMatch1, false);
-  myTree->Book("HLTMatch2",HLTMatch2, false);
+//  myTree->Book("HLTMatch2",HLTMatch2, false);
 
   myTree->Book("fsrPt",fsrPt, false);
   myTree->Book("fsrEta",fsrEta, false);

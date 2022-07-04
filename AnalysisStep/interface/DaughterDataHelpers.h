@@ -51,6 +51,11 @@ namespace userdatahelpers {
       string newname = base + *name;
       cand.addUserFloat(newname, d->userFloat(*name));
     }
+    const vector<string> & userLabelsInt = d->userIntNames();
+    for (vector<string>::const_iterator name = userLabelsInt.begin(); name!= userLabelsInt.end(); ++name){
+      string newname = base + *name;
+      cand.addUserInt(newname, d->userInt(*name));
+    }
   }
 
 

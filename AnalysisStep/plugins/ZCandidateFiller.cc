@@ -28,6 +28,7 @@
 #include <DataFormats/METReco/interface/PFMET.h>
 #include <DataFormats/METReco/interface/PFMETCollection.h>
 #include <DataFormats/METReco/interface/CommonMETData.h>
+#include "DataFormats/Math/interface/deltaR.h"
 
 #include <TauAnalysis/ClassicSVfit/interface/ClassicSVfit.h>
 #include <TauAnalysis/ClassicSVfit/interface/ClassicSVfitIntegrand.h>
@@ -80,6 +81,9 @@ class ZCandidateFiller : public edm::EDProducer {
 
   edm::EDGetTokenT<edm::View<reco::CompositeCandidate> > candidateToken;
   const StringCutObjectSelector<pat::CompositeCandidate, true> preBestZSelection;
+  const edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> triggerObjects_;
+  const edm::EDGetTokenT< edm::TriggerResults > triggerResultsToken_;
+
   int sampleType;
   int setup;
   const CutSet<pat::CompositeCandidate> cuts;
@@ -104,7 +108,18 @@ class ZCandidateFiller : public edm::EDProducer {
   
   //For HLT match
   vector<string> muHLTPaths2_;
+  vector<string> muHLTFilters2_;
+  vector<string> muHLTFilters2_leg1;
+  vector<string> muHLTFilters2_leg2;
+  vector<float> muHLTFilters2_DZ;
+  vector<float> muHLTFilters2_DR;
+
   vector<string> eleHLTPaths2_;
+  vector<string> eleHLTFilters2_;
+  vector<string> eleHLTFilters2_leg1;
+  vector<string> eleHLTFilters2_leg2;
+  vector<float> eleHLTFilters2_DZ;
+  vector<float> eleHLTFilters2_DR;
 
   enum pairType {
     kMuHad  = 0,
@@ -125,6 +140,8 @@ class ZCandidateFiller : public edm::EDProducer {
 ZCandidateFiller::ZCandidateFiller(const edm::ParameterSet& iConfig) :
   candidateToken(consumes<edm::View<reco::CompositeCandidate> >(iConfig.getParameter<edm::InputTag>("src"))),
   preBestZSelection(iConfig.getParameter<std::string>("bestZAmong")),
+  triggerObjects_(consumes<pat::TriggerObjectStandAloneCollection> (iConfig.getParameter<edm::InputTag>("TriggerSet"))),
+  triggerResultsToken_( consumes< edm::TriggerResults >( iConfig.getParameter< edm::InputTag >( "TriggerResults" ) ) ),
   sampleType(iConfig.getParameter<int>("sampleType")),
   setup(iConfig.getParameter<int>("setup")),
   cuts(iConfig.getParameter<edm::ParameterSet>("flags")),
@@ -164,12 +181,69 @@ ZCandidateFiller::ZCandidateFiller(const edm::ParameterSet& iConfig) :
 	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*",
 	"HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*",
 	};
+	muHLTFilters2_ = 
+	{
+	"hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4DzFiltered0p2",
+	"hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4DzFiltered0p2",
+	"hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4",
+	"hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4",
+	};
+	muHLTFilters2_leg1 = 
+	{
+	"hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4",
+	"hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4",
+	"hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4",
+	"hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4",
+	};
+        muHLTFilters2_leg2 =
+        {
+	"hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4",
+        "hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4",
+	"hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4",
+	"hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4",
+	};
+	muHLTFilters2_DZ = 
+	{
+	0.2,0.2,-1,-1,
+	};
+        muHLTFilters2_DR =
+        {
+	0.001,0.001,-1,-1,
+        };
+
 	eleHLTPaths2_ = 
 	{
 	"HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*",
 	"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*",
 	"HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v*",
 	};
+        eleHLTFilters2_ =
+        {
+	"hltEle17Ele12CaloIdLTrackIdLIsoVLDZFilter",
+        "hltEle23Ele12CaloIdLTrackIdLIsoVLDZFilter",
+	"hltDiEle33CaloIdLGsfTrkIdVLDPhiUnseededFilter",
+	};
+        eleHLTFilters2_leg1 =
+        {
+	"hltEle17Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg1Filter",
+	"hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg1Filter",
+	"hltDiEle33CaloIdLGsfTrkIdVLDPhiUnseededFilter",
+        };
+        eleHLTFilters2_leg2 =
+        {
+	"hltEle17Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter",
+        "hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter",
+	"hltDiEle33CaloIdLGsfTrkIdVLDPhiUnseededFilter",
+	};
+        eleHLTFilters2_DZ =
+        {
+	0.2,0.2,-1,
+        };
+        eleHLTFilters2_DR =
+        {
+	-1,-1,-1,
+        };
+
   }
   else if (sampleType == 2017)
   {
@@ -178,11 +252,59 @@ ZCandidateFiller::ZCandidateFiller(const edm::ParameterSet& iConfig) :
 	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v*",
 	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v*",
 	};
+        muHLTFilters2_ =
+        {
+	"hltDiMuon178RelTrkIsoFiltered0p4DzFiltered0p2",//hltDiMuon178Mass3p8Filtered
+        "hltDiMuon178RelTrkIsoFiltered0p4DzFiltered0p2",//hltDiMuon178Mass8Filtered
+	};
+        muHLTFilters2_leg1 =
+        {
+	"hltDiMuon178RelTrkIsoFiltered0p4",
+        "hltDiMuon178RelTrkIsoFiltered0p4",
+	};
+        muHLTFilters2_leg2 =
+        {
+	"hltDiMuon178RelTrkIsoFiltered0p4",
+        "hltDiMuon178RelTrkIsoFiltered0p4",
+	};
+        muHLTFilters2_DZ =
+        {
+	0.2,0.2,
+        };
+        muHLTFilters2_DR =
+        {
+	0.001,0.001,
+        };
+
 	eleHLTPaths2_ = 
 	{
 	"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*",
 	"HLT_DoubleEle33_CaloIdL_MW_v*",
 	};
+        eleHLTFilters2_ =
+        {
+	"pass",
+	"hltDiEle33CaloIdLMWPMS2UnseededFilter",
+        };
+        eleHLTFilters2_leg1 =
+        {
+	"hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg1Filter",
+        "hltDiEle33CaloIdLMWPMS2UnseededFilter",
+	};
+        eleHLTFilters2_leg2 =
+        {
+	"hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter",
+        "hltDiEle33CaloIdLMWPMS2UnseededFilter",
+	};
+        eleHLTFilters2_DZ =
+        {
+	-1,-1,
+        };
+        eleHLTFilters2_DR =
+        {
+	-1,-1,
+        };
+
   }
   else if (sampleType == 2018)
   {
@@ -190,11 +312,56 @@ ZCandidateFiller::ZCandidateFiller(const edm::ParameterSet& iConfig) :
 	{
 	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v*",
 	};
+        muHLTFilters2_ =
+        {
+	"hltDiMuon178RelTrkIsoFiltered0p4DzFiltered0p2",//hltDiMuon178Mass3p8Filtered
+        };
+        muHLTFilters2_leg1 =
+        {
+	"hltDiMuon178RelTrkIsoFiltered0p4",
+        };
+        muHLTFilters2_leg2 =
+        {
+	"hltDiMuon178RelTrkIsoFiltered0p4",
+        };
+        muHLTFilters2_DZ =
+        {
+	0.2,
+        };
+        muHLTFilters2_DR =
+        {
+	0.001,
+        };
+
 	eleHLTPaths2_ = 
 	{
 	"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*",
 	"HLT_DoubleEle25_CaloIdL_MW_v*",
 	};
+        eleHLTFilters2_ =
+        {
+	"pass",
+	"hltDiEle25CaloIdLMWPMS2UnseededFilter",
+        };
+        eleHLTFilters2_leg1 =
+        {
+	"hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg1Filter",
+	"hltDiEle25CaloIdLMWPMS2UnseededFilter",
+        };
+        eleHLTFilters2_leg2 =
+        {
+	"hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter",
+	"hltDiEle25CaloIdLMWPMS2UnseededFilter",
+        };
+        eleHLTFilters2_DZ =
+        {
+	-1,-1,
+        };
+        eleHLTFilters2_DR =
+        {
+	-1,-1,
+        };
+
   }
   
   produces<pat::CompositeCandidateCollection>();
@@ -213,6 +380,13 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   //-- Get LL candidates
   Handle<View<reco::CompositeCandidate> > LLCands;
   iEvent.getByToken(candidateToken, LLCands);
+
+  edm::Handle< edm::TriggerResults > triggerResults;
+  iEvent.getByToken( triggerResultsToken_, triggerResults );
+
+  edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects;
+  iEvent.getByToken(triggerObjects_, triggerObjects);
+
 
   //SV fit info
   Handle<View<pat::MET> > METHandle;
@@ -449,6 +623,9 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     // ---------------------------------------------------------------------------
     const Candidate *l1 = myCand.daughter(0);
     const Candidate *l2 = myCand.daughter(1);
+
+    //pt sum, for sorting in ZZ cand
+    //myCand.addUserFloat("ptSum",l1->pt()+l2->pt());
 
     classic_svFit::MeasuredTauLepton::kDecayType l1Type = GetDecayTypeFlag (l1->pdgId());
     classic_svFit::MeasuredTauLepton::kDecayType l2Type = GetDecayTypeFlag (l2->pdgId());
@@ -1169,7 +1346,11 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     //}
     else
 	myCand.addUserFloat("goodMass",myCand.mass());
-    
+
+    //pt sum, for sorting in ZZ cand
+    float ptSum=l1->pt()+l2->pt();
+    myCand.addUserFloat("ptSum",ptSum);
+
     //int id0 = myCand.daughter(0)->pdgId();
     //int id1 = myCand.daughter(1)->pdgId();
 
@@ -1189,25 +1370,90 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
     //HLTMatch
     //The candidate passes HLTMatch if at least one lepton daughter matches the single trigger or both matches to the double trigger
-    bool muHLTMatch;
-    bool eleHLTMatch;
-    muHLTMatch=false;
-    eleHLTMatch=false;
+    bool muHLTMatch1=false,muHLTMatch2=false,muHLTMatch=false;
+    bool eleHLTMatch1=false,eleHLTMatch2=false,eleHLTMatch=false;
+    
     if (abs(id0)==13 && abs(id1)==13) {
         if (myCand.userFloat("d0.HLTMatch1") || myCand.userFloat("d1.HLTMatch1"))
-            muHLTMatch=true;
-        for (size_t j=0; j<muHLTPaths2_.size(); ++j)
-            if (myCand.userFloat("d0."+muHLTPaths2_[j]) && myCand.userFloat("d1."+muHLTPaths2_[j]))
-                muHLTMatch=true;
+            muHLTMatch1=true;
+	
+	for (size_t idxto = 0; idxto < triggerObjects->size(); ++idxto) {
+	    for (size_t jdxto = 0; jdxto < triggerObjects->size(); ++jdxto) {
+		if (!myCand.hasUserInt("d0.TrgObj"+std::to_string(idxto)) || !myCand.hasUserInt("d1.TrgObj"+std::to_string(jdxto)))
+		    continue;
+	  	pat::TriggerObjectStandAlone obj1 = triggerObjects->at(idxto);
+	        obj1.unpackFilterLabels(iEvent,*triggerResults );
+                pat::TriggerObjectStandAlone obj2 = triggerObjects->at(jdxto);
+                obj2.unpackFilterLabels(iEvent,*triggerResults );
+		for (size_t j=0; j<muHLTPaths2_.size(); ++j) {
+		    if (!( obj1.hasFilterLabel(muHLTFilters2_[j]) && obj2.hasFilterLabel(muHLTFilters2_[j]) ))
+			continue;
+		    if (!( obj1.hasFilterLabel(muHLTFilters2_leg1[j]) && obj2.hasFilterLabel(muHLTFilters2_leg2[j]) ) && !( obj1.hasFilterLabel(muHLTFilters2_leg2[j]) && obj2.hasFilterLabel(muHLTFilters2_leg1[j]) ))
+			continue;
+		    float dr=deltaR(obj1,obj2);
+		    float dz=abs(obj1.vz()-obj2.vz());
+		    if ( muHLTFilters2_DR[j] >= 0 && dr<muHLTFilters2_DR[j])
+			continue;
+		    if ( muHLTFilters2_DZ[j] >= 0 && dz>muHLTFilters2_DZ[j])
+			continue;
+		    muHLTMatch2=true;
+		    break;
+		}
+	    }
+	}
     }
+    muHLTMatch=muHLTMatch1 || muHLTMatch2;
+
     if (abs(id0)==11 && abs(id1)==11) {
         if (myCand.userFloat("d0.HLTMatch1") || myCand.userFloat("d1.HLTMatch1"))
-            eleHLTMatch=true;
-        for (size_t j=0; j<eleHLTPaths2_.size(); ++j)
-            if (myCand.userFloat("d0."+eleHLTPaths2_[j]) && myCand.userFloat("d1."+eleHLTPaths2_[j]))
-                eleHLTMatch=true;
+            eleHLTMatch1=true;
+
+        for (size_t idxto = 0; idxto < triggerObjects->size(); ++idxto) {
+            for (size_t jdxto = 0; jdxto < triggerObjects->size(); ++jdxto) {
+                if (!myCand.hasUserInt("d0.TrgObj"+std::to_string(idxto)) || !myCand.hasUserInt("d1.TrgObj"+std::to_string(jdxto)))
+                    continue;
+                pat::TriggerObjectStandAlone obj1 = triggerObjects->at(idxto);
+                obj1.unpackFilterLabels(iEvent,*triggerResults );
+                pat::TriggerObjectStandAlone obj2 = triggerObjects->at(jdxto);
+                obj2.unpackFilterLabels(iEvent,*triggerResults );
+                for (size_t j=0; j<eleHLTPaths2_.size(); ++j) {
+                    if (!( obj1.hasFilterLabel(eleHLTFilters2_[j]) && obj2.hasFilterLabel(eleHLTFilters2_[j]) ))
+                        continue;
+                    if (!( obj1.hasFilterLabel(eleHLTFilters2_leg1[j]) && obj2.hasFilterLabel(eleHLTFilters2_leg2[j]) ) && !( obj1.hasFilterLabel(eleHLTFilters2_leg2[j]) && obj2.hasFilterLabel(eleHLTFilters2_leg1[j]) ))
+                        continue;
+                    float dr=deltaR(obj1,obj2);
+                    float dz=abs(obj1.vz()-obj2.vz());
+                    if ( eleHLTFilters2_DR[j] >= 0 && dr<eleHLTFilters2_DR[j])
+                        continue;
+                    if ( eleHLTFilters2_DZ[j] >= 0 && dz>eleHLTFilters2_DZ[j])
+                        continue;
+		    if (eleHLTPaths2_[j].find("Mass3p8")!=string::npos) {
+			if (!( obj1.hasFilterLabel("hltDiMuon178Mass3p8Filtered") && obj2.hasFilterLabel("hltDiMuon178Mass3p8Filtered") ))
+			    continue;
+			float invMass=(obj1.p4()+obj2.p4()).M();
+			if (invMass<3.8)
+			    continue;
+			}
+		    if (eleHLTPaths2_[j].find("Mass8")!=string::npos) {
+                        if (!( obj1.hasFilterLabel("hltDiMuon178Mass8Filtered") && obj2.hasFilterLabel("hltDiMuon178Mass8Filtered") ))
+                            continue;
+                        float invMass=(obj1.p4()+obj2.p4()).M();
+                        if (invMass<8.)
+                            continue;
+			}
+                    eleHLTMatch2=true;
+                    break;
+                }
+            }
+        }
     }
+    eleHLTMatch=eleHLTMatch1 || eleHLTMatch2;
+
+    myCand.addUserFloat("muHLTMatch1",muHLTMatch1);
+    myCand.addUserFloat("muHLTMatch2",muHLTMatch2);
     myCand.addUserFloat("muHLTMatch",muHLTMatch);
+    myCand.addUserFloat("eleHLTMatch1",eleHLTMatch1);
+    myCand.addUserFloat("eleHLTMatch2",eleHLTMatch2);
     myCand.addUserFloat("eleHLTMatch",eleHLTMatch);
 
 

@@ -394,7 +394,7 @@ MCHistoryTools::init() {
 	theGenTauNus.push_back(theSortedGenLepts[ilep]->daughter(TauNuIdx[0]));
 	//cout<<"Hadronic decay"<<endl;
       } else {
-	cout<<"Warning: number of tau neutrinos not equal to one, must be something wrong"<<endl;
+	cout<<"Warning: number of tau neutrinos not equal to one, must be something wrong: nDau="<<nDau<<",nLep="<<LepIdx.size()<<",nTauNu="<<TauNuIdx.size()<<"."<<endl;
 	theSortedVisGenLeps.push_back(theSortedGenLepts[ilep]);
         theGenTauNus.push_back(0);//theSortedGenLepts[ilep]->daughter(TauNuIdx[0]));
       }

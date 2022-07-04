@@ -449,7 +449,7 @@ process.bareSoftElectrons = cms.EDFilter("PATElectronRefSelector",
 process.softElectrons = cms.EDProducer("EleFiller",
    src    = cms.InputTag("bareSoftElectrons"),
    TriggerResults = cms.InputTag('TriggerResults','','HLT'),
-   TriggerSet = cms.InputTag("slimmedPatTrigger"),
+   TriggerSet = cms.InputTag("selectedPatTrigger"),
    sampleType = cms.int32(SAMPLE_TYPE),
    setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
    cut = cms.string("pt>7 && abs(eta) < 2.5 && userFloat('dxy')<0.5 && userFloat('dz')<1"),
@@ -467,7 +467,7 @@ process.electrons = cms.Sequence(process.egammaPostRecoSeq + process.selectedSli
 
 
 
---- TrackLess Electrons
+#--- TrackLess Electrons
 process.bareSoftPhotons = cms.EDFilter("PATPhotonRefSelector",
    src = cms.InputTag("slimmedPhotons"),
    cut = cms.string("pt>7 && abs(eta)<2.5")
@@ -922,6 +922,9 @@ process.ZCand = cms.EDProducer("ZCandidateFiller",
     METdxDOWN_EES = cms.InputTag("ShiftMETforEES", "METdxDOWNEES"),
     METdyDOWN_EES = cms.InputTag("ShiftMETforEES", "METdyDOWNEES"),
 
+    TriggerResults = cms.InputTag('TriggerResults','','HLT'),
+    TriggerSet = cms.InputTag("selectedPatTrigger"),
+
     sampleType = cms.int32(SAMPLE_TYPE),
     setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
     bestZAmong = cms.string(BESTZ_AMONG),
@@ -979,6 +982,9 @@ process.LLCand = cms.EDProducer("ZCandidateFiller",
     setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
     bestZAmong = cms.string(BESTZ_AMONG),
     FSRMode = cms.string(FSRMODE), # "skip", "Legacy", "RunII"
+
+    TriggerResults = cms.InputTag('TriggerResults','','HLT'),
+    TriggerSet = cms.InputTag("selectedPatTrigger"),
 
                                   srcSig     = cms.InputTag("METSignificance", "METSignificance"),
                                   srcCov     = cms.InputTag("METSignificance", "METCovariance"),
@@ -1045,7 +1051,7 @@ SMARTMALLCOMB     = "userFloat('passSmartMLL')" # Require swapped-lepton Z2' to 
 PT20_10           = "( userFloat('pt1')>20 && userFloat('pt2')>10 )" #20/10 on any of the 4 leptons
 M4l100            = "mass>100"
 OSSF		  = "( daughter('Z1').masterClone.userFloat('OSSF') && daughter('Z2').masterClone.userFloat('OSSF') )"
-
+HLTMATCH	  = "( (daughter('Z1').daughter(0).pdgId()*daughter('Z1').daughter(1).pdgId()==-169 && daughter('Z1').masterClone().userFloat('muHLTMatch')) || (daughter('Z1').daughter(0).pdgId()*daughter('Z1').daughter(1).pdgId()==-121 && daughter('Z1').masterClone().userFloat('eleHLTMatch')) )"
 
 
 if SELSETUP=="Legacy": # Default Configuration (Legacy paper): cut on selected best candidate
@@ -1118,6 +1124,7 @@ elif SELSETUP=="allCutsAtOncePlusSmart": # Apply smarter mZb cut
                       Z2MASS          + "&&" +
                       MLLALLCOMB      + "&&" +
                       PT20_10         + "&&" +
+		      #HLTMATCH	      + "&&" +
 		      #OSSF	      + "&&" +
                       #"userFloat('goodMass')>70"       + "&&" +
                       SMARTMALLCOMB#   + "&&" +
@@ -1159,6 +1166,7 @@ if FSRMODE == "Legacy":
 process.bareZZCand= cms.EDProducer("CandViewShallowCloneCombiner",
     decay = cms.string('ZCand ZCand'),
     cut = cms.string(LLLLPRESEL),
+    #checkOverlap = cms.bool(False),
     checkCharge = cms.bool(True)
 )
 process.ZZCand = cms.EDProducer("ZZCandidateFiller",

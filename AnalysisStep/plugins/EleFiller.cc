@@ -17,6 +17,7 @@
 #include <FWCore/Framework/interface/ESHandle.h>
 
 #include <DataFormats/Common/interface/TriggerResults.h>
+#include "DataFormats/Math/interface/deltaR.h"
 
 #include <HTauTauHMuMu/AnalysisStep/interface/CutSet.h>
 #include <HTauTauHMuMu/AnalysisStep/interface/LeptonIsoHelper.h>
@@ -45,6 +46,7 @@ class EleFiller : public edm::EDProducer {
   virtual void endJob(){};
 
   edm::EDGetTokenT<pat::ElectronRefVector> electronToken;
+  const edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> triggerObjects_;
   const edm::EDGetTokenT< edm::TriggerResults > triggerResultsToken_;
   int sampleType;
   int setup;
@@ -55,15 +57,16 @@ class EleFiller : public edm::EDProducer {
   TRandom3 rgen_;
 
   vector<string> eleHLTPaths1_;
-  vector<string> eleHLTPaths2_;
+//  vector<string> eleHLTPaths2_;
   vector<string> eleHLTFilters1_;
-  vector<string> eleHLTFilters2_;
+//  vector<string> eleHLTFilters2_;
 
 };
 
 
 EleFiller::EleFiller(const edm::ParameterSet& iConfig) :
   electronToken(consumes<pat::ElectronRefVector>(iConfig.getParameter<edm::InputTag>("src"))),
+  triggerObjects_(consumes<pat::TriggerObjectStandAloneCollection> (iConfig.getParameter<edm::InputTag>("TriggerSet"))),
   triggerResultsToken_( consumes< edm::TriggerResults >( iConfig.getParameter< edm::InputTag >( "TriggerResults" ) ) ),
   sampleType(iConfig.getParameter<int>("sampleType")),
   setup(iConfig.getParameter<int>("setup")),
@@ -77,12 +80,12 @@ EleFiller::EleFiller(const edm::ParameterSet& iConfig) :
 
   if (sampleType == 2016)
   {
-	eleHLTPaths2_ = 
-	{
-	"HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*",
-	"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*",
-	"HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v*",
-	};
+//	eleHLTPaths2_ = 
+//	{
+//	"HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*",
+//	"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*",
+//	"HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v*",
+//	};
 	eleHLTPaths1_ = 
 	{
 	"HLT_Ele25_eta2p1_WPTight_Gsf_v*",
@@ -90,12 +93,12 @@ EleFiller::EleFiller(const edm::ParameterSet& iConfig) :
 	"HLT_Ele27_eta2p1_WPLoose_Gsf_v*",
 	"HLT_Ele32_eta2p1_WPTight_Gsf_v*",
 	};
-	eleHLTFilters2_ =
-	{
-	"hltEle17Ele12CaloIdLTrackIdLIsoVLDZFilter",
-	"hltEle23Ele12CaloIdLTrackIdLIsoVLDZFilter",
-	"hltDiEle33CaloIdLGsfTrkIdVLDPhiUnseededFilter",
-	};
+//	eleHLTFilters2_ =
+//	{
+//	"hltEle17Ele12CaloIdLTrackIdLIsoVLDZFilter",
+//	"hltEle23Ele12CaloIdLTrackIdLIsoVLDZFilter",
+//	"hltDiEle33CaloIdLGsfTrkIdVLDPhiUnseededFilter",
+//	};
 	eleHLTFilters1_ =
 	{
 	"hltEle25erWPTightGsfTrackIsoFilter",
@@ -106,22 +109,22 @@ EleFiller::EleFiller(const edm::ParameterSet& iConfig) :
   }
   else if (sampleType == 2017)
   {
-	eleHLTPaths2_ = 
-	{
-	"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*",
-	"HLT_DoubleEle33_CaloIdL_MW_v*",
-	};
+//	eleHLTPaths2_ = 
+//	{
+//	"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*",
+//	"HLT_DoubleEle33_CaloIdL_MW_v*",
+//	};
 	eleHLTPaths1_ =
 	{
 	"HLT_Ele35_WPTight_Gsf_v*",
 	"HLT_Ele38_WPTight_Gsf_v*",
 	"HLT_Ele40_WPTight_Gsf_v*",
 	};
-        eleHLTFilters2_ =
-        {
-	"hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg",//"hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter",
-	"hltDiEle33CaloIdLMWPMS2UnseededFilter",
-	};
+//        eleHLTFilters2_ =
+//        {
+//	"hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg",//"hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter",
+//	"hltDiEle33CaloIdLMWPMS2UnseededFilter",
+//	};
 	eleHLTFilters1_ =
 	{
 	"hltEle35noerWPTightGsfTrackIsoFilter",
@@ -131,20 +134,20 @@ EleFiller::EleFiller(const edm::ParameterSet& iConfig) :
   }
   else if (sampleType == 2018)
   {
-	eleHLTPaths2_ = 
-	{
-	"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*",
-	"HLT_DoubleEle25_CaloIdL_MW_v*",
-	};
+//	eleHLTPaths2_ = 
+//	{
+//	"HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*",
+//	"HLT_DoubleEle25_CaloIdL_MW_v*",
+//	};
 	eleHLTPaths1_ =
 	{
 	"HLT_Ele32_WPTight_Gsf_v*",
 	};
-        eleHLTFilters2_ =
-        {
-	"hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg",//"hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter",
-	"hltDiEle25CaloIdLMWPMS2UnseededFilter",
-	};
+//        eleHLTFilters2_ =
+//        {
+//	"hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg",//"hltEle23Ele12CaloIdLTrackIdLIsoVLTrackIsoLeg2Filter",
+//	"hltDiEle25CaloIdLMWPMS2UnseededFilter",
+//	};
 	eleHLTFilters1_ =
 	{
 	"hltEle32WPTightGsfTrackIsoFilter",
@@ -167,6 +170,10 @@ EleFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   edm::Handle< edm::TriggerResults > triggerResults;
   iEvent.getByToken( triggerResultsToken_, triggerResults );
+
+  edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects;
+  iEvent.getByToken(triggerObjects_, triggerObjects);
+
 
   edm::Handle<double> rhoHandle;
   iEvent.getByToken(rhoToken, rhoHandle);
@@ -265,50 +272,59 @@ EleFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
      
     //--- Trigger matching
     bool HLTMatch1 = false;
-    bool HLTMatch2 = false;
+//    bool HLTMatch2 = false;
     vector<bool> eachPath1;
-    vector<bool> eachPath2;
+//    vector<bool> eachPath2;
     for ( size_t j = 0; j < eleHLTPaths1_.size(); ++j) 
        eachPath1.push_back(false);
-    for ( size_t j = 0; j < eleHLTPaths2_.size(); ++j)
-       eachPath2.push_back(false);
+//    for ( size_t j = 0; j < eleHLTPaths2_.size(); ++j)
+//       eachPath2.push_back(false);
 
-    pat::TriggerObjectStandAloneCollection obj= l.triggerObjectMatches();
-    cout<<obj.size()<<endl;
-    for ( size_t iTrigObj = 0; iTrigObj < obj.size(); ++iTrigObj ) {
-       obj.at( iTrigObj ).unpackFilterLabels(iEvent,*triggerResults );
-       for (size_t test=0;test<obj.at( iTrigObj ).filterLabels().size();test++) {
-	  cout<<obj.at( iTrigObj ).filterLabels()[test].c_str()<<", ";
-       }
-       cout<<endl;
-    }
-    for ( size_t i = 0; i < obj.size(); ++i ) {
-	 for (size_t j = 0; j < eleHLTPaths1_.size(); ++j) {
-	    if (obj.at( i ).hasFilterLabel( eleHLTFilters1_[j] )) {
-		HLTMatch1=true;
-		eachPath1[j]=true;
-	    }
+    for (size_t idxto = 0; idxto < triggerObjects->size(); ++idxto) {
+
+       pat::TriggerObjectStandAlone obj = triggerObjects->at(idxto);
+       obj.unpackFilterLabels(iEvent,*triggerResults );
+
+       if (deltaR(obj,l)>0.1) continue;
+       if (!obj.hasTriggerObjectType(trigger::TriggerElectron) && !obj.hasTriggerObjectType(trigger::TriggerPhoton)) continue;
+    //pat::TriggerObjectStandAloneCollection obj= l.triggerObjectMatches();
+    //cout<<obj.size()<<endl;
+    //for ( size_t iTrigObj = 0; iTrigObj < obj.size(); ++iTrigObj ) {
+    //   obj.at( iTrigObj ).unpackFilterLabels(iEvent,*triggerResults );
+    //   for (size_t test=0;test<obj.at( iTrigObj ).filterLabels().size();test++) {
+    //	  cout<<obj.at( iTrigObj ).filterLabels()[test].c_str()<<", ";
+    //   }
+    //   cout<<endl;
+    //}
+    //for ( size_t i = 0; i < obj.size(); ++i ) {
+       l.addUserInt("TrgObj"+std::to_string(idxto),idxto);
+
+       for (size_t j = 0; j < eleHLTPaths1_.size(); ++j) {
+         if (obj.hasFilterLabel( eleHLTFilters1_[j] )) {
+            HLTMatch1=true;
+	    eachPath1[j]=true;
 	 }
-         for (size_t j = 0; j < eleHLTPaths2_.size(); ++j ) {
-	    if (eleHLTPaths2_[j] == "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*") {
-		if (obj.at( i ).hasFilterLabel( eleHLTFilters2_[j]+"1Filter" ) || obj.at( i ).hasFilterLabel( eleHLTFilters2_[j]+"2Filter" )) {
-		    HLTMatch2=true;
-		    eachPath2[j]=true;
-		}
-	    }
-	    else {
-                if (obj.at( i ).hasFilterLabel( eleHLTFilters2_[j] )) {
-                    HLTMatch2=true;
-                    eachPath2[j]=true;
-                }
-	    }
+       }
+//         for (size_t j = 0; j < eleHLTPaths2_.size(); ++j ) {
+//	    if (eleHLTPaths2_[j] == "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*") {
+//		if (obj.at( i ).hasFilterLabel( eleHLTFilters2_[j]+"1Filter" ) || obj.at( i ).hasFilterLabel( eleHLTFilters2_[j]+"2Filter" )) {
+//		    HLTMatch2=true;
+//		    eachPath2[j]=true;
+//		}
+//	    }
+//	    else {
+//                if (obj.at( i ).hasFilterLabel( eleHLTFilters2_[j] )) {
+//                    HLTMatch2=true;
+//                    eachPath2[j]=true;
+//                }
+//	    }
          }
-      }
+//      }
 
     for ( size_t j = 0; j < eleHLTPaths1_.size(); ++j)
        l.addUserFloat(eleHLTPaths1_[j], eachPath1[j]);
-    for ( size_t j = 0; j < eleHLTPaths2_.size(); ++j)
-       l.addUserFloat(eleHLTPaths2_[j], eachPath2[j]);
+//    for ( size_t j = 0; j < eleHLTPaths2_.size(); ++j)
+//       l.addUserFloat(eleHLTPaths2_[j], eachPath2[j]);
 	 
      
     //-- Scale and smearing corrections are now stored in the miniAOD https://twiki.cern.ch/twiki/bin/view/CMS/EgammaMiniAODV2#Energy_Scale_and_Smearing
@@ -351,7 +367,7 @@ EleFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     l.addUserFloat("isBDT",isBDT);
     l.addUserFloat("isCrack",isCrack);
     l.addUserFloat("HLTMatch1", HLTMatch1);
-    l.addUserFloat("HLTMatch2", HLTMatch2);
+//    l.addUserFloat("HLTMatch2", HLTMatch2);
     l.addUserFloat("missingHit", missingHit);
     l.addUserFloat("uncorrected_pt",uncorrected_pt);
     l.addUserFloat("scale_total_up",scale_total_up);
