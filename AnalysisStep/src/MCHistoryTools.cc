@@ -368,13 +368,27 @@ MCHistoryTools::init() {
       //cout<<"lepton"<<endl;
     } else if (id==15) {
       //cout<<"Number of daughters:";
-      int nDau=theSortedGenLepts[ilep]->numberOfDaughters();
+      bool isFinalTau=false;
+      const Candidate *finalTau=theSortedGenLepts[ilep];
+      while (!isFinalTau) {
+	bool noTauDau=true;
+	for (size_t iDau=0;iDau<finalTau->numberOfDaughters();iDau++) {
+	  if (abs(finalTau->daughter(iDau)->pdgId())==15) {
+	    noTauDau=false;
+	    finalTau=finalTau->daughter(iDau);
+	    break;
+	  }
+      	}
+	if (noTauDau)
+	  isFinalTau=true;
+      }
+      int nDau=finalTau->numberOfDaughters();
       //cout<<nDau<<endl;
       //bool lepDecay=false;
       vector<int> TauNuIdx,LepIdx;
       for (int iDau=0;iDau<nDau;++iDau) {
 	//cout<<"iDau:"<<iDau;
-	const Candidate *Dau = theSortedGenLepts[ilep]->daughter(iDau);
+	const Candidate *Dau = finalTau->daughter(iDau);
 	if (abs(Dau->pdgId())==11 || abs(Dau->pdgId())==13) {
 	  LepIdx.push_back(iDau);
 	} else if (abs(Dau->pdgId())==16) {
@@ -385,16 +399,19 @@ MCHistoryTools::init() {
       if (LepIdx.size()==1 && TauNuIdx.size()==1) {//For leptonically decaying taus, we save the lepton decay products, instead of 
 	//lepDecay=true;
 	//cout<<"LepDecay"<<endl;
-	theSortedVisGenLeps.push_back(theSortedGenLepts[ilep]->daughter(LepIdx[0]));
+	theSortedVisGenLeps.push_back(finalTau->daughter(LepIdx[0]));
 	theGenTauNus.push_back(0);//theSortedGenLepts[ilep]->daughter(TauNuIdx[0]));
 	//cout<<"LepDecay"<<endl;
       } else if (TauNuIdx.size()==1) {//For hadronically decaying taus, we still save the gen tau lepton
 	//cout<<"Hadronic decay"<<endl;
 	theSortedVisGenLeps.push_back(theSortedGenLepts[ilep]);
-	theGenTauNus.push_back(theSortedGenLepts[ilep]->daughter(TauNuIdx[0]));
+	theGenTauNus.push_back(finalTau->daughter(TauNuIdx[0]));
 	//cout<<"Hadronic decay"<<endl;
       } else {
-	cout<<"Warning: number of tau neutrinos not equal to one, must be something wrong: nDau="<<nDau<<",nLep="<<LepIdx.size()<<",nTauNu="<<TauNuIdx.size()<<"."<<endl;
+	cout<<"Warning: number of tau neutrinos not equal to one, must be something wrong: nDau="<<nDau<<",nLep="<<LepIdx.size()<<",nTauNu="<<TauNuIdx.size()<<". ";
+	//for (int iDau=0;iDau<nDau;++iDau)
+	//    cout<<"dau"<<iDau<<"ID="<<theSortedGenLepts[ilep]->daughter(iDau)->pdgId()<<"; ";
+	cout<<endl;
 	theSortedVisGenLeps.push_back(theSortedGenLepts[ilep]);
         theGenTauNus.push_back(0);//theSortedGenLepts[ilep]->daughter(TauNuIdx[0]));
       }
