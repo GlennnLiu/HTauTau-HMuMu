@@ -53,7 +53,7 @@
 #include <HTauTauHMuMu/AnalysisStep/interface/FinalStates.h>
 #include <HTauTauHMuMu/AnalysisStep/interface/MCHistoryTools.h>
 #include <HTauTauHMuMu/AnalysisStep/interface/PileUpWeight.h>
-//#include "SimDataFormats/HTXS/interface/HiggsTemplateCrossSections.h"
+#include "SimDataFormats/HTXS/interface/HiggsTemplateCrossSections.h"
 
 
 #include "HTauTauHMuMu/AnalysisStep/interface/EwkCorrections.h"
@@ -247,6 +247,7 @@ namespace {
   std::vector<float> LepPt;
   std::vector<float> LepEta;
   std::vector<float> LepPhi;
+  std::vector<float> LepM;
   std::vector<float> LepSCEta;
   std::vector<short> LepLepId;
   std::vector<float> LepSIP;
@@ -409,18 +410,22 @@ namespace {
   Float_t GenLep1Pt  = 0;
   Float_t GenLep1Eta  = 0;
   Float_t GenLep1Phi  = 0;
+  Float_t GenLep1M  = 0;
   Short_t GenLep1Id  = 0;
   Float_t GenLep2Pt  = 0;
   Float_t GenLep2Eta  = 0;
   Float_t GenLep2Phi  = 0;
+  Float_t GenLep2M  = 0;
   Short_t GenLep2Id  = 0;
   Float_t GenLep3Pt  = 0;
   Float_t GenLep3Eta  = 0;
   Float_t GenLep3Phi  = 0;
+  Float_t GenLep3M  = 0;
   Short_t GenLep3Id  = 0;
   Float_t GenLep4Pt  = 0;
   Float_t GenLep4Eta  = 0;
   Float_t GenLep4Phi  = 0;
+  Float_t GenLep4M  = 0;
   Short_t GenLep4Id  = 0;
   //Visible information
   Float_t GenVisZ1Mass  = 0;
@@ -436,18 +441,22 @@ namespace {
   Float_t GenVisLep1Pt  = 0;
   Float_t GenVisLep1Eta  = 0;
   Float_t GenVisLep1Phi  = 0;
+  Float_t GenVisLep1M  = 0;
   Short_t GenVisLep1Id  = 0;
   Float_t GenVisLep2Pt  = 0;
   Float_t GenVisLep2Eta  = 0;
   Float_t GenVisLep2Phi  = 0;
+  Float_t GenVisLep2M  = 0;
   Short_t GenVisLep2Id  = 0;
   Float_t GenVisLep3Pt  = 0;
   Float_t GenVisLep3Eta  = 0;
   Float_t GenVisLep3Phi  = 0;
+  Float_t GenVisLep3M  = 0;
   Short_t GenVisLep3Id  = 0;
   Float_t GenVisLep4Pt  = 0;
   Float_t GenVisLep4Eta  = 0;
   Float_t GenVisLep4Phi  = 0;
+  Float_t GenVisLep4M  = 0;
   Short_t GenVisLep4Id  = 0;
 
   Float_t GenAssocLep1Pt  = 0;
@@ -458,6 +467,19 @@ namespace {
   Float_t GenAssocLep2Eta  = 0;
   Float_t GenAssocLep2Phi  = 0;
   Short_t GenAssocLep2Id  = 0;
+
+
+  Int_t   htxsNJets = -1;
+  Float_t htxsHPt = 0;
+  Int_t   htxs_errorCode=-1;
+  Int_t   htxs_prodMode=-1;
+  Int_t   htxs_stage0_cat = -1;
+  Int_t   htxs_stage1p1_cat = -1;
+  Int_t   htxs_stage1p0_cat = -1;
+  Int_t   htxs_stage1p2_cat = -1;
+  Float_t ggH_NNLOPS_weight = 0;
+  Float_t ggH_NNLOPS_weight_unc = 0;
+  std::vector<float> qcd_ggF_uncertSF;
 
 
 //FIXME: temporary fix to the mismatch of charge() and sign(pdgId()) for muons with BTT=4
@@ -565,6 +587,7 @@ private:
   //edm::EDGetTokenT<pat::METCollection> metNoHFToken;
   edm::EDGetTokenT<pat::MuonCollection> muonToken;
   edm::EDGetTokenT<pat::ElectronCollection> electronToken;
+  edm::EDGetTokenT<HTXS::HiggsClassification> htxsToken;
   edm::EDGetTokenT<edm::MergeableCounter> preSkimToken;
    
   edm::EDGetTokenT< double > prefweight_token;
@@ -582,6 +605,8 @@ private:
   Float_t gen_ZZ2mu2e;
   Float_t gen_ZZ2l2tau;
   Float_t gen_ZZ2emu2tau;
+  Float_t gen_ZZ2mu2tau;
+  Float_t gen_ZZ2e2tau;
   Float_t gen_ZZ4tau;
   Float_t gen_ZZ4mu_EtaAcceptance;
   Float_t gen_ZZ4mu_LeptonAcceptance;
@@ -707,7 +732,7 @@ HZZ4lNtupleMaker::HZZ4lNtupleMaker(const edm::ParameterSet& pset) :
     //      year, LHEHandler::tryNNPDF30, LHEHandler::tryNLO
     //    );
     metCorrHandler = new METCorrectionHandler(Form("%i", year));
-    //    htxsToken = consumes<HTXS::HiggsClassification>(edm::InputTag("rivetProducerHTXS","HiggsClassification"));
+    htxsToken = consumes<HTXS::HiggsClassification>(edm::InputTag("rivetProducerHTXS","HiggsClassification"));
     pileUpReweight = new PileUpWeight(myHelper.sampleType(), myHelper.setup());
   }
 
@@ -720,6 +745,8 @@ HZZ4lNtupleMaker::HZZ4lNtupleMaker(const edm::ParameterSet& pset) :
   gen_ZZ2mu2e = 0;
   gen_ZZ2l2tau = 0;
   gen_ZZ2emu2tau = 0;
+  gen_ZZ2mu2tau = 0;
+  gen_ZZ2e2tau = 0;
   gen_ZZ4tau = 0;
   gen_ZZ4mu_EtaAcceptance = 0;
   gen_ZZ4mu_LeptonAcceptance = 0;
@@ -755,7 +782,8 @@ HZZ4lNtupleMaker::HZZ4lNtupleMaker(const edm::ParameterSet& pset) :
   ggZZKFactorFile = TFile::Open(fipPath.data());
   for (unsigned int ikf=0; ikf<9; ikf++) spkfactor_ggzz_nlo[ikf] = (TSpline3*)ggZZKFactorFile->Get(Form("sp_kfactor_%s", strZZGGKFVar[ikf].Data()))->Clone(Form("sp_kfactor_%s_NLO", strZZGGKFVar[ikf].Data()));
   ggZZKFactorFile->Close();
-	
+
+ 
   edm::FileInPath NNLOPS_weight_path("HTauTauHMuMu/AnalysisStep/data/ggH_NNLOPS_Weights/NNLOPS_reweight.root");
   fipPath=NNLOPS_weight_path.fullPath();
   TFile* NNLOPS_weight_file = TFile::Open(fipPath.data());
@@ -909,8 +937,8 @@ void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& e
     event.getByToken(genParticleToken, genParticles);
     event.getByToken(genInfoToken, genInfo);
 
-    //edm::Handle<HTXS::HiggsClassification> htxs;
-    //event.getByToken(htxsToken,htxs);
+    edm::Handle<HTXS::HiggsClassification> htxs;
+    event.getByToken(htxsToken,htxs);
 
     MCHistoryTools mch(event, sampleName, genParticles, genInfo);
     genFinalState = mch.genFinalState();
@@ -947,14 +975,14 @@ void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& e
       PythiaWeight_fsr_muR0p5 = PythiaWeight_fsr_muR4 = PythiaWeight_fsr_muR0p25 = 1;
     }
 
-   //htxsNJets = htxs->jets30.size();
-   //htxsHPt = htxs->higgs.Pt();
-   //htxs_stage0_cat = htxs->stage0_cat;
-   //htxs_stage1p0_cat = htxs->stage1_cat_pTjet30GeV;
-   //htxs_stage1p1_cat = htxs->stage1_1_cat_pTjet30GeV;
-   //htxs_stage1p2_cat = htxs->stage1_2_cat_pTjet30GeV;
-   //htxs_errorCode=htxs->errorCode;
-   //htxs_prodMode= htxs->prodMode;
+   htxsNJets = htxs->jets30.size();
+   htxsHPt = htxs->higgs.Pt();
+   htxs_stage0_cat = htxs->stage0_cat;
+   htxs_stage1p0_cat = htxs->stage1_cat_pTjet30GeV;
+   htxs_stage1p1_cat = htxs->stage1_1_cat_pTjet30GeV;
+   htxs_stage1p2_cat = htxs->stage1_2_cat_pTjet30GeV;
+   htxs_errorCode=htxs->errorCode;
+   htxs_prodMode= htxs->prodMode;
 
    genExtInfo = mch.genAssociatedFS();
 
@@ -1076,7 +1104,12 @@ void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& e
       addweight(gen_ZZ2mu2e, 1);
       if (gen_ZZ4lInEtaAcceptance) addweight(gen_ZZ2mu2e_EtaAcceptance, 1);
       if (gen_ZZ4lInEtaPtAcceptance) addweight(gen_ZZ2mu2e_LeptonAcceptance, 1);
-    } else if (genFinalState == llTT){
+    } else if (genFinalState == MMTT){
+      addweight(gen_ZZ2mu2tau, 1);
+      addweight(gen_ZZ2emu2tau, 1);
+      addweight(gen_ZZ2l2tau, 1);
+    } else if (genFinalState == EETT){
+      addweight(gen_ZZ2e2tau, 1);
       addweight(gen_ZZ2emu2tau, 1);
       addweight(gen_ZZ2l2tau, 1);
     } else if (genFinalState == TTTT){
@@ -1275,53 +1308,50 @@ void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& e
       NRecoEle++;
   }
 
-//  if(isMC && apply_QCD_GGF_UNCERT)
-//  {
+  if(isMC && apply_QCD_GGF_UNCERT)
+  {
 
 	  
 
-//    if (htxsNJets==0)
-//    {
-//      ggH_NNLOPS_weight = gr_NNLOPSratio_pt_powheg_0jet->Eval(min((double) htxsHPt, 125.0));
-//      ggH_NNLOPS_weight_unc=(gr_NNLOPSratio_pt_powheg_0jet->GetErrorY(FindBinValue(gr_NNLOPSratio_pt_powheg_0jet, min((double) htxsHPt, 125.0))))/ggH_NNLOPS_weight;
+    if (htxsNJets==0)
+    {
+      ggH_NNLOPS_weight = gr_NNLOPSratio_pt_powheg_0jet->Eval(min((double) htxsHPt, 125.0));
+      ggH_NNLOPS_weight_unc=(gr_NNLOPSratio_pt_powheg_0jet->GetErrorY(FindBinValue(gr_NNLOPSratio_pt_powheg_0jet, min((double) htxsHPt, 125.0))))/ggH_NNLOPS_weight;
 
-//    }
-//	  else if (htxsNJets==1)
-//	  {
-//		  ggH_NNLOPS_weight = gr_NNLOPSratio_pt_powheg_1jet->Eval(min((double)htxsHPt,625.0));
-//		  ggH_NNLOPS_weight_unc=(gr_NNLOPSratio_pt_powheg_1jet->GetErrorY(FindBinValue(gr_NNLOPSratio_pt_powheg_1jet,min((double)htxsHPt,125.0))))/ggH_NNLOPS_weight;
-//	  }
-//	  else if (htxsNJets==2)
-//	  {
-//		  ggH_NNLOPS_weight = gr_NNLOPSratio_pt_powheg_2jet->Eval(min((double)htxsHPt,800.0));
-//		  ggH_NNLOPS_weight_unc=(gr_NNLOPSratio_pt_powheg_2jet->GetErrorY(FindBinValue(gr_NNLOPSratio_pt_powheg_2jet,min((double)htxsHPt,125.0))))/ggH_NNLOPS_weight;
-//	  }
-//	  else if (htxsNJets>=3)
-//	  {
-//		  ggH_NNLOPS_weight = gr_NNLOPSratio_pt_powheg_3jet->Eval(min((double)htxsHPt,925.0));
-//		  ggH_NNLOPS_weight_unc=(gr_NNLOPSratio_pt_powheg_3jet->GetErrorY(FindBinValue(gr_NNLOPSratio_pt_powheg_3jet,min((double)htxsHPt,125.0))))/ggH_NNLOPS_weight;
-//	  }
-//	  else
-//	  {
-//		  ggH_NNLOPS_weight = 1.0;
-//		  ggH_NNLOPS_weight_unc = 0.0;
-//	  }
-
-
-//	  std::vector<double> qcd_ggF_uncertSF_tmp;
-//	  qcd_ggF_uncertSF.clear();
-
-    ////////////////////////////////////////////////////////////
+    }
+	  else if (htxsNJets==1)
+	  {
+		  ggH_NNLOPS_weight = gr_NNLOPSratio_pt_powheg_1jet->Eval(min((double)htxsHPt,625.0));
+		  ggH_NNLOPS_weight_unc=(gr_NNLOPSratio_pt_powheg_1jet->GetErrorY(FindBinValue(gr_NNLOPSratio_pt_powheg_1jet,min((double)htxsHPt,125.0))))/ggH_NNLOPS_weight;
+	  }
+	  else if (htxsNJets==2)
+	  {
+		  ggH_NNLOPS_weight = gr_NNLOPSratio_pt_powheg_2jet->Eval(min((double)htxsHPt,800.0));
+		  ggH_NNLOPS_weight_unc=(gr_NNLOPSratio_pt_powheg_2jet->GetErrorY(FindBinValue(gr_NNLOPSratio_pt_powheg_2jet,min((double)htxsHPt,125.0))))/ggH_NNLOPS_weight;
+	  }
+	  else if (htxsNJets>=3)
+	  {
+		  ggH_NNLOPS_weight = gr_NNLOPSratio_pt_powheg_3jet->Eval(min((double)htxsHPt,925.0));
+		  ggH_NNLOPS_weight_unc=(gr_NNLOPSratio_pt_powheg_3jet->GetErrorY(FindBinValue(gr_NNLOPSratio_pt_powheg_3jet,min((double)htxsHPt,125.0))))/ggH_NNLOPS_weight;
+	  }
+	  else
+	  {
+		  ggH_NNLOPS_weight = 1.0;
+		  ggH_NNLOPS_weight_unc = 0.0;
+	  }
+	  std::vector<double> qcd_ggF_uncertSF_tmp;
+	  qcd_ggF_uncertSF.clear();
+     ////////////////////////////////////////////////////////////
     //////////////////     CHECK THIS!!!!!    //////////////////
     // Why is this done with the STXS 1.0 bins uncertainties? //
     //////////////////     CHECK THIS!!!!!    //////////////////
     ////////////////////////////////////////////////////////////
 
-//	  qcd_ggF_uncertSF_tmp = qcd_ggF_uncertSF_2017(htxsNJets, htxsHPt, htxs_stage1p0_cat);
-//	  qcd_ggF_uncertSF = std::vector<float>(qcd_ggF_uncertSF_tmp.begin(),qcd_ggF_uncertSF_tmp.end());
+	  qcd_ggF_uncertSF_tmp = qcd_ggF_uncertSF_2017(htxsNJets, htxsHPt, htxs_stage1p0_cat);
+	  qcd_ggF_uncertSF = std::vector<float>(qcd_ggF_uncertSF_tmp.begin(),qcd_ggF_uncertSF_tmp.end());
 
 
-//  }
+  }
    
   //Loop on the candidates
   vector<Int_t> CRFLAG(cands->size());
@@ -1609,6 +1639,7 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
   LepPt.clear();
   LepEta.clear();
   LepPhi.clear();
+  LepM.clear();
   LepSCEta.clear();
   LepLepId.clear();
   LepSIP.clear();
@@ -1894,6 +1925,7 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
     LepPt .push_back( leptons[i]->pt() );
     LepEta.push_back( leptons[i]->eta() );
     LepPhi.push_back( leptons[i]->phi() );
+    LepM.push_back( leptons[i]->mass() );
     LepSCEta.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"SCeta") : -99. );
     int id =  leptons[i]->pdgId();
     if(id == 22 && (i == 1 || i == 3)) id=-22; //FIXME this assumes a standard ordering of leptons.
@@ -2120,6 +2152,8 @@ void HZZ4lNtupleMaker::endJob()
   hCounter->SetBinContent(6 ,gen_ZZ4mu_EtaAcceptance);
   hCounter->SetBinContent(7 ,gen_ZZ4mu_LeptonAcceptance);
   hCounter->SetBinContent(8 ,gen_ZZ2emu2tau);
+  hCounter->SetBinContent(30,gen_ZZ2mu2tau);
+  hCounter->SetBinContent(31,gen_ZZ2e2tau);
   hCounter->SetBinContent(9 ,gen_ZZ4tau);
   hCounter->SetBinContent(10,gen_ZZ4e_EtaAcceptance);
   hCounter->SetBinContent(11,gen_ZZ4e_LeptonAcceptance);
@@ -2142,6 +2176,8 @@ void HZZ4lNtupleMaker::endJob()
     h[i]->GetXaxis()->SetBinLabel(6 ,"gen_ZZ4mu_EtaAcceptance");
     h[i]->GetXaxis()->SetBinLabel(7 ,"gen_ZZ4mu_LeptonAcceptance");
     h[i]->GetXaxis()->SetBinLabel(8 ,"gen_ZZ2emu2tau");
+    h[i]->GetXaxis()->SetBinLabel(30,"gen_ZZ2mu2tau");
+    h[i]->GetXaxis()->SetBinLabel(31,"gen_ZZ2e2tau");
     h[i]->GetXaxis()->SetBinLabel(9 ,"gen_ZZ4tau");
     h[i]->GetXaxis()->SetBinLabel(10,"gen_ZZ4e_EtaAcceptance");
     h[i]->GetXaxis()->SetBinLabel(11,"gen_ZZ4e_LeptonAcceptance");
@@ -2366,21 +2402,25 @@ void HZZ4lNtupleMaker::FillLepGenInfo(Short_t Lep1Id, Short_t Lep2Id, Short_t Le
   GenLep1Pt=Lep1.Pt();
   GenLep1Eta=Lep1.Eta();
   GenLep1Phi=Lep1.Phi();
+  GenLep1M=Lep1.M();
   GenLep1Id=Lep1Id;
 
   GenLep2Pt=Lep2.Pt();
   GenLep2Eta=Lep2.Eta();
   GenLep2Phi=Lep2.Phi();
+  GenLep2M=Lep2.M();
   GenLep2Id=Lep2Id;
 
   GenLep3Pt=Lep3.Pt();
   GenLep3Eta=Lep3.Eta();
   GenLep3Phi=Lep3.Phi();
+  GenLep3M=Lep3.M();
   GenLep3Id=Lep3Id;
 
   GenLep4Pt=Lep4.Pt();
   GenLep4Eta=Lep4.Eta();
   GenLep4Phi=Lep4.Phi();
+  GenLep4M=Lep4.M();
   GenLep4Id=Lep4Id;
 
   //can comment this back in if Gen angles are needed for any reason...
@@ -2396,21 +2436,25 @@ void HZZ4lNtupleMaker::FillVisLepGenInfo(Short_t Lep1Id, Short_t Lep2Id, Short_t
   GenVisLep1Pt=Lep1.Pt();
   GenVisLep1Eta=Lep1.Eta();
   GenVisLep1Phi=Lep1.Phi();
+  GenVisLep1M=Lep1.M();
   GenVisLep1Id=Lep1Id;
 
   GenVisLep2Pt=Lep2.Pt();
   GenVisLep2Eta=Lep2.Eta();
   GenVisLep2Phi=Lep2.Phi();
+  GenVisLep2M=Lep2.M();
   GenVisLep2Id=Lep2Id;
 
   GenVisLep3Pt=Lep3.Pt();
   GenVisLep3Eta=Lep3.Eta();
   GenVisLep3Phi=Lep3.Phi();
+  GenVisLep3M=Lep3.M();
   GenVisLep3Id=Lep3Id;
 
   GenVisLep4Pt=Lep4.Pt();
   GenVisLep4Eta=Lep4.Eta();
   GenVisLep4Phi=Lep4.Phi();
+  GenVisLep4M=Lep4.M();
   GenVisLep4Id=Lep4Id;
 
   return;
@@ -2613,6 +2657,7 @@ void HZZ4lNtupleMaker::BookAllBranches(){
   myTree->Book("LepPt",LepPt, false);
   myTree->Book("LepEta",LepEta, false);
   myTree->Book("LepPhi",LepPhi, false);
+  myTree->Book("LepM",LepM, false);
   myTree->Book("LepSCEta",LepSCEta, false);
   myTree->Book("LepLepId",LepLepId, false);
   myTree->Book("LepSIP",LepSIP, false);
@@ -2789,18 +2834,22 @@ void HZZ4lNtupleMaker::BookAllBranches(){
     myTree->Book("GenLep1Pt", GenLep1Pt, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenLep1Eta", GenLep1Eta, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenLep1Phi", GenLep1Phi, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenLep1M", GenLep1M, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenLep1Id", GenLep1Id, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenLep2Pt", GenLep2Pt, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenLep2Eta", GenLep2Eta, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenLep2Phi", GenLep2Phi, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenLep2M", GenLep2M, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenLep2Id", GenLep2Id, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenLep3Pt", GenLep3Pt, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenLep3Eta", GenLep3Eta, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenLep3Phi", GenLep3Phi, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenLep3M", GenLep3M, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenLep3Id", GenLep3Id, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenLep4Pt", GenLep4Pt, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenLep4Eta", GenLep4Eta, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenLep4Phi", GenLep4Phi, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenLep4M", GenLep4M, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenLep4Id", GenLep4Id, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenVisZ1Mass", GenVisZ1Mass, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenVisZ1Pt", GenVisZ1Pt, failedTreeLevel >= fullFailedTree);
@@ -2815,18 +2864,22 @@ void HZZ4lNtupleMaker::BookAllBranches(){
     myTree->Book("GenVisLep1Pt", GenVisLep1Pt, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenVisLep1Eta", GenVisLep1Eta, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenVisLep1Phi", GenVisLep1Phi, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisLep1M", GenVisLep1M, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenVisLep1Id", GenVisLep1Id, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenVisLep2Pt", GenVisLep2Pt, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenVisLep2Eta", GenVisLep2Eta, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenVisLep2Phi", GenVisLep2Phi, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisLep2M", GenVisLep2M, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenVisLep2Id", GenVisLep2Id, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenVisLep3Pt", GenVisLep3Pt, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenVisLep3Eta", GenVisLep3Eta, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenVisLep3Phi", GenVisLep3Phi, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisLep3M", GenVisLep3M, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenVisLep3Id", GenVisLep3Id, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenVisLep4Pt", GenVisLep4Pt, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenVisLep4Eta", GenVisLep4Eta, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenVisLep4Phi", GenVisLep4Phi, failedTreeLevel >= fullFailedTree);
+    myTree->Book("GenVisLep4M", GenVisLep4M, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenVisLep4Id", GenVisLep4Id, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenAssocLep1Pt", GenAssocLep1Pt, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenAssocLep1Eta", GenAssocLep1Eta, failedTreeLevel >= fullFailedTree);
@@ -2836,20 +2889,20 @@ void HZZ4lNtupleMaker::BookAllBranches(){
     myTree->Book("GenAssocLep2Eta", GenAssocLep2Eta, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenAssocLep2Phi", GenAssocLep2Phi, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenAssocLep2Id", GenAssocLep2Id, failedTreeLevel >= fullFailedTree);
-    //myTree->Book("htxs_errorCode", htxs_errorCode, failedTreeLevel >= minimalFailedTree);
-    //myTree->Book("htxs_prodMode", htxs_prodMode, failedTreeLevel >= minimalFailedTree);
-    //myTree->Book("htxsNJets", htxsNJets, failedTreeLevel >= minimalFailedTree);
-    //myTree->Book("htxsHPt", htxsHPt, failedTreeLevel >= minimalFailedTree);
-    //myTree->Book("htxs_stage0_cat", htxs_stage0_cat, failedTreeLevel >= minimalFailedTree);
-    //myTree->Book("htxs_stage1p1_cat", htxs_stage1p1_cat, failedTreeLevel >= minimalFailedTree);
-    //myTree->Book("htxs_stage1p2_cat", htxs_stage1p2_cat, failedTreeLevel >= minimalFailedTree);
+    myTree->Book("htxs_errorCode", htxs_errorCode, failedTreeLevel >= minimalFailedTree);
+    myTree->Book("htxs_prodMode", htxs_prodMode, failedTreeLevel >= minimalFailedTree);
+    myTree->Book("htxsNJets", htxsNJets, failedTreeLevel >= minimalFailedTree);
+    myTree->Book("htxsHPt", htxsHPt, failedTreeLevel >= minimalFailedTree);
+    myTree->Book("htxs_stage0_cat", htxs_stage0_cat, failedTreeLevel >= minimalFailedTree);
+    myTree->Book("htxs_stage1p1_cat", htxs_stage1p1_cat, failedTreeLevel >= minimalFailedTree);
+    myTree->Book("htxs_stage1p2_cat", htxs_stage1p2_cat, failedTreeLevel >= minimalFailedTree);
 
-//    if(apply_QCD_GGF_UNCERT)
-//      {
-//	myTree->Book("ggH_NNLOPS_weight", ggH_NNLOPS_weight, failedTreeLevel >= minimalFailedTree);
-//	myTree->Book("ggH_NNLOPS_weight_unc", ggH_NNLOPS_weight_unc, failedTreeLevel >= minimalFailedTree);
-//	myTree->Book("qcd_ggF_uncertSF", qcd_ggF_uncertSF, failedTreeLevel >= minimalFailedTree);
-//      }	  
+    if(apply_QCD_GGF_UNCERT)
+      {
+	myTree->Book("ggH_NNLOPS_weight", ggH_NNLOPS_weight, failedTreeLevel >= minimalFailedTree);
+	myTree->Book("ggH_NNLOPS_weight_unc", ggH_NNLOPS_weight_unc, failedTreeLevel >= minimalFailedTree);
+	myTree->Book("qcd_ggF_uncertSF", qcd_ggF_uncertSF, failedTreeLevel >= minimalFailedTree);
+      }	  
 
 //  if (addLHEKinematics){
 //      myTree->Book("LHEMotherPz", LHEMotherPz, failedTreeLevel >= LHEFailedTree);

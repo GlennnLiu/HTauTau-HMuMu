@@ -150,7 +150,7 @@ TreeSetup = cms.EDAnalyzer("HZZ4lNtupleMaker",
                            skimPaths = cms.vstring(SkimPaths),
                            PD = cms.string(PD),
                            MCFilterPath = cms.string(MCFILTER),
-                           metSrc = metTag,
+                           metSrc = srcMETTag,#metTag,
                            applyTrigger = cms.bool(APPLYTRIG), #Skip events failing required triggers. They are stored with sel<0 if set to false
                            applyTrigEff = cms.bool(False), #Add trigger efficiency as a weight, for samples where the trigger cannot be applied (obsoltete)
                            skipEmptyEvents = cms.bool(SKIP_EMPTY_EVENTS),
@@ -174,7 +174,7 @@ TreeSetup = cms.EDAnalyzer("HZZ4lNtupleMaker",
                            Apply_K_NNLOQCD_ZZGG = cms.int32(APPLY_K_NNLOQCD_ZZGG),
                            Apply_K_NNLOQCD_ZZQQB = cms.bool(APPLY_K_NNLOQCD_ZZQQB),
                            Apply_K_NLOEW_ZZQQB = cms.bool(APPLY_K_NLOEW_ZZQQB),
-									Apply_QCD_GGF_UNCERT = cms.bool(APPLY_QCD_GGF_UNCERT),
+			   Apply_QCD_GGF_UNCERT = cms.bool(APPLY_QCD_GGF_UNCERT),
                            )
 
 ### Signal region
@@ -249,7 +249,7 @@ process.ZTree = cms.EDAnalyzer("ZNtupleMaker",
                                skimPaths = cms.vstring(SkimPaths),
                                PD = cms.string(PD),
                                MCFilterPath = cms.string(MCFILTER),
-                               metSrc = metTag,
+                               metSrc = srcMETTag,#metTag,
                                skipEmptyEvents = cms.bool(True),
                                sampleName = cms.string(SAMPLENAME),
                                xsec = cms.double(XSEC)

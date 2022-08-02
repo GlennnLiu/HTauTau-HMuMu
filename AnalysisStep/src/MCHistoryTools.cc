@@ -488,14 +488,23 @@ MCHistoryTools::genFinalState(){
       gen_finalState = MMMM;
     } else if (ifs==20449) {
       gen_finalState = EEMM;
-    } else if (ifs==38025||ifs==27225) {
+    } else if (ifs==27225) {
       if (theGenLeps[0]->p4() == theGenLeps[1]->p4() || theGenLeps[0]->p4() == theGenLeps[2]->p4() || theGenLeps[0]->p4() == theGenLeps[3]->p4()
                                                      || theGenLeps[1]->p4() == theGenLeps[2]->p4() || theGenLeps[1]->p4() == theGenLeps[3]->p4()
                                                                                                    || theGenLeps[2]->p4() == theGenLeps[3]->p4()
          ) {  //MCFM bug where mZ < 2mtau.  In this case it gives each tau half the momentum and energy of the Z.
         gen_finalState = BUGGY;
       } else {
-        gen_finalState = llTT;
+        gen_finalState = EETT;
+      }
+    } else if (ifs==38025) {
+      if (theGenLeps[0]->p4() == theGenLeps[1]->p4() || theGenLeps[0]->p4() == theGenLeps[2]->p4() || theGenLeps[0]->p4() == theGenLeps[3]->p4()
+                                                     || theGenLeps[1]->p4() == theGenLeps[2]->p4() || theGenLeps[1]->p4() == theGenLeps[3]->p4()
+                                                                                                   || theGenLeps[2]->p4() == theGenLeps[3]->p4()
+         ) {  //MCFM bug where mZ < 2mtau.  In this case it gives each tau half the momentum and energy of the Z.
+        gen_finalState = BUGGY;
+      } else {
+        gen_finalState = MMTT;
       }
     } else if (ifs==50625) {
       if (theGenLeps[0]->p4() == theGenLeps[1]->p4() || theGenLeps[0]->p4() == theGenLeps[2]->p4() || theGenLeps[0]->p4() == theGenLeps[3]->p4()

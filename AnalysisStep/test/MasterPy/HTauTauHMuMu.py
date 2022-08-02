@@ -286,23 +286,23 @@ process.goodPrimaryVertices = cms.EDFilter("VertexSelector",
 ### ----------------------------------------------------------------------
 ### HTXS categorisation
 ### ----------------------------------------------------------------------
-#if(IsMC):
-#   process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
-#   process.mergedGenParticles = cms.EDProducer("MergedGenParticleProducer",
-#															  inputPruned = cms.InputTag("prunedGenParticles"),
-#															  inputPacked = cms.InputTag("packedGenParticles"),
-#															  )
-#   process.myGenerator = cms.EDProducer("GenParticles2HepMCConverter",
-#													 genParticles = cms.InputTag("mergedGenParticles"),
-#													 genEventInfo = cms.InputTag("generator"),
-#													 signalParticlePdgIds = cms.vint32(25), ## for the Higgs analysis
-#													 )
-#   process.rivetProducerHTXS = cms.EDProducer('HTXSRivetProducer',
-#															 HepMCCollection = cms.InputTag('myGenerator','unsmeared'),
-#															 LHERunInfo = cms.InputTag('externalLHEProducer'),
-#															 ProductionMode = cms.string('AUTO'),
-#															 )
-#   process.htxs = cms.Path(process.mergedGenParticles*process.myGenerator*process.rivetProducerHTXS)
+if(IsMC):
+   process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
+   process.mergedGenParticles = cms.EDProducer("MergedGenParticleProducer",
+															  inputPruned = cms.InputTag("prunedGenParticles"),
+															  inputPacked = cms.InputTag("packedGenParticles"),
+															  )
+   process.myGenerator = cms.EDProducer("GenParticles2HepMCConverter",
+													 genParticles = cms.InputTag("mergedGenParticles"),
+													 genEventInfo = cms.InputTag("generator"),
+													 signalParticlePdgIds = cms.vint32(25), ## for the Higgs analysis
+													 )
+   process.rivetProducerHTXS = cms.EDProducer('HTXSRivetProducer',
+															 HepMCCollection = cms.InputTag('myGenerator','unsmeared'),
+															 LHERunInfo = cms.InputTag('externalLHEProducer'),
+															 ProductionMode = cms.string('AUTO'),
+															 )
+   process.htxs = cms.Path(process.mergedGenParticles*process.myGenerator*process.rivetProducerHTXS)
 
 ### ----------------------------------------------------------------------
 ### ----------------------------------------------------------------------
@@ -897,7 +897,7 @@ srcMETTag = cms.InputTag("ShiftMETcentral")
 
 ZLEPTONSEL     = TWOGOODLEPTONS # Note: this is without ISO
 
-Z1PRESEL    = (ZLEPTONSEL + " && userFloat('goodMass') > 40 && userFloat('goodMass') < 120") # Note: this is without ISO
+Z1PRESEL    = (ZLEPTONSEL + " && userFloat('goodMass') >= 81.1876 && userFloat('goodMass') <= 101.1876") # Note: this is without ISO
 
 BESTZ_AMONG = ( Z1PRESEL + "&&" + TWOISOLEPTONS )
 
@@ -1042,8 +1042,8 @@ FOURGOODLEPTONS    =  ("( userFloat('d0.GoodLeptons') && userFloat('d1.GoodLepto
                        "&& userFloat('d1.worstMuIso') <" + str(MUISOCUT) + ")"
                        ) #ZZ made of 4 tight leptons passing SIP and ISO 
 
-Z1MASS            = "( daughter('Z1').masterClone.userFloat('goodMass')>4 && daughter('Z1').masterClone.userFloat('goodMass')<200 )"
-Z2MASS            = "( daughter('Z2').masterClone.userFloat('goodMass')>4  && daughter('Z2').masterClone.userFloat('goodMass')<140 )" # (was > 4 in Synch) to deal with m12 cut at gen level
+Z1MASS            = "( daughter('Z1').masterClone().userFloat('goodMass')>4 && daughter('Z1').masterClone().userFloat('goodMass')<200 )"
+Z2MASS            = "( daughter('Z2').masterClone().userFloat('goodMass')>4  && daughter('Z2').masterClone().userFloat('goodMass')<140 )" # (was > 4 in Synch) to deal with m12 cut at gen level
 #MLL3On4_12        = "userFloat('mZa')>12" # mll>12 on 3/4 pairs;
 #MLLALLCOMB        = "userFloat('mLL6')>4" # mll>4 on 6/6 AF/AS pairs;
 MLLALLCOMB        = "userFloat('mLL4')>4" # mll>4 on 4/4 AF/OS pairs;
@@ -1052,6 +1052,7 @@ PT20_10           = "( userFloat('pt1')>20 && userFloat('pt2')>10 )" #20/10 on a
 M4l100            = "mass>100"
 OSSF		  = "( daughter('Z1').masterClone.userFloat('OSSF') && daughter('Z2').masterClone.userFloat('OSSF') )"
 HLTMATCH	  = "( (daughter('Z1').daughter(0).pdgId()*daughter('Z1').daughter(1).pdgId()==-169 && daughter('Z1').masterClone().userFloat('muHLTMatch')) || (daughter('Z1').daughter(0).pdgId()*daughter('Z1').daughter(1).pdgId()==-121 && daughter('Z1').masterClone().userFloat('eleHLTMatch')) )"
+BESTZ1		  = "daughter('Z1').masterClone().userFloat('isBestZ')"
 
 
 if SELSETUP=="Legacy": # Default Configuration (Legacy paper): cut on selected best candidate
@@ -1124,7 +1125,8 @@ elif SELSETUP=="allCutsAtOncePlusSmart": # Apply smarter mZb cut
                       Z2MASS          + "&&" +
                       MLLALLCOMB      + "&&" +
                       PT20_10         + "&&" +
-		      #HLTMATCH	      + "&&" +
+		      HLTMATCH	      + "&&" +
+		      BESTZ1	      + "&&" +
 		      #OSSF	      + "&&" +
                       #"userFloat('goodMass')>70"       + "&&" +
                       SMARTMALLCOMB#   + "&&" +

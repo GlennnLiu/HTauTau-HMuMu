@@ -23,6 +23,7 @@
 #include <DataFormats/PatCandidates/interface/CompositeCandidate.h>
 #include <DataFormats/PatCandidates/interface/Muon.h>
 #include <DataFormats/PatCandidates/interface/Electron.h>
+#include <DataFormats/PatCandidates/interface/Tau.h>
 #include <DataFormats/PatCandidates/interface/Jet.h>
 #include <DataFormats/PatCandidates/interface/MET.h>
 #include <DataFormats/METReco/interface/PFMET.h>
@@ -43,6 +44,8 @@
 #include <HTauTauHMuMu/AnalysisStep/interface/bitops.h>
 #include <HTauTauHMuMu/AnalysisStep/interface/LeptonIsoHelper.h>
 #include <HTauTauHMuMu/AnalysisStep/interface/LeptonSFHelper.h>
+#include <HTauTauHMuMu/AnalysisStep/interface/MCHistoryTools.h>
+#include <HTauTauHMuMu/AnalysisStep/interface/FinalStates.h>
 #include "ZZ4lConfigHelper.h"
 #include "HZZ4lNtupleFactory.h"
 
@@ -59,6 +62,7 @@ namespace {
   bool addPhotons = true;
   bool addQGLInputs = false;
   bool addAddLept = false;
+  bool skipHqTWeight = true;
 
   //List of variables with default values
   Int_t RunNumber = 0;
@@ -140,6 +144,17 @@ namespace {
   std::vector<float> AddMuNeutralHadIso;
   std::vector<float> AddMuPhotonIso;
   std::vector<float> AddMuCombRelIsoPF;
+  Short_t nAddTau = 0;
+  std::vector<float> AddTauPt;
+  std::vector<float> AddTauEta;
+  std::vector<float> AddTauPhi;
+  std::vector<float> AddTauLepId;
+  std::vector<float> AddTauMass;
+  std::vector<float> AddTauVSe;
+  std::vector<float> AddTauVSmu;
+  std::vector<float> AddTauVSjet;
+  std::vector<float> AddTauDecayMode;
+
   Short_t nCleanedJetsPt30 = 0;
   Short_t nCleanedJetsPt30_jesUp = 0;
   Short_t nCleanedJetsPt30_jesDn = 0;
@@ -185,14 +200,76 @@ namespace {
   std::vector<float> PhotonPhi;
   std::vector<bool> PhotonIsCutBasedLooseID;
 
-	
+  // Gen information
+  Short_t genFinalState  = 0;
+  Int_t genProcessId  = 0;
+  Float_t genHEPMCweight  = 0;
+  Float_t genHEPMCweight_NNLO  = 0;
+  Float_t HqTMCweight  = 0;
+
+  Float_t GenHMass  = 0;
+  Float_t GenHPt  = 0;
+  Float_t GenHRapidity  = 0;
+  Float_t GenZ1Mass  = 0;
+  Float_t GenZ1Eta  = 0;
+  Float_t GenZ1Pt  = 0;
+  Float_t GenZ1Phi  = 0;
+  Float_t GenZ1Flav  = 0;
+  Float_t GenZ2Mass  = 0;
+  Float_t GenZ2Eta  = 0;
+  Float_t GenZ2Pt  = 0;
+  Float_t GenZ2Phi  = 0;
+  Float_t GenZ2Flav  = 0;
+  Float_t GenLep1Pt  = 0;
+  Float_t GenLep1Eta  = 0;
+  Float_t GenLep1Phi  = 0;
+  Short_t GenLep1Id  = 0;
+  Float_t GenLep2Pt  = 0;
+  Float_t GenLep2Eta  = 0;
+  Float_t GenLep2Phi  = 0;
+  Short_t GenLep2Id  = 0;
+  Float_t GenLep3Pt  = 0;
+  Float_t GenLep3Eta  = 0;
+  Float_t GenLep3Phi  = 0;
+  Short_t GenLep3Id  = 0;
+  Float_t GenLep4Pt  = 0;
+  Float_t GenLep4Eta  = 0;
+  Float_t GenLep4Phi  = 0;
+  Short_t GenLep4Id  = 0;
+  //Visible information
+  Float_t GenVisZ1Mass  = 0;
+  Float_t GenVisZ1Eta  = 0;
+  Float_t GenVisZ1Pt  = 0;
+  Float_t GenVisZ1Phi  = 0;
+  Float_t GenVisZ1Flav  = 0;
+  Float_t GenVisZ2Mass  = 0;
+  Float_t GenVisZ2Eta  = 0;
+  Float_t GenVisZ2Pt  = 0;
+  Float_t GenVisZ2Phi  = 0;
+  Float_t GenVisZ2Flav  = 0;
+  Float_t GenVisLep1Pt  = 0;
+  Float_t GenVisLep1Eta  = 0;
+  Float_t GenVisLep1Phi  = 0;
+  Short_t GenVisLep1Id  = 0;
+  Float_t GenVisLep2Pt  = 0;
+  Float_t GenVisLep2Eta  = 0;
+  Float_t GenVisLep2Phi  = 0;
+  Short_t GenVisLep2Id  = 0;
+  Float_t GenVisLep3Pt  = 0;
+  Float_t GenVisLep3Eta  = 0;
+  Float_t GenVisLep3Phi  = 0;
+  Short_t GenVisLep3Id  = 0;
+  Float_t GenVisLep4Pt  = 0;
+  Float_t GenVisLep4Eta  = 0;
+  Float_t GenVisLep4Phi  = 0;
+  Short_t GenVisLep4Id  = 0;
+
   // Generic MET object
   METObject metobj;
   METObject metobj_corrected;
   Float_t GenMET = -99;
   Float_t GenMETPhi = -99;
 
-  Float_t genHEPMCweight = 0;
   Float_t xsection = 0;
   Float_t dataMCWeight = 0;
   Float_t overallEventWeight = 0;
@@ -226,6 +303,18 @@ private:
   virtual void FillPhoton(int year, const pat::Photon& photon);
   virtual void endJob();
 
+
+  void FillHGenInfo(const math::XYZTLorentzVector Hp, float w);
+  void FillZGenInfo(Short_t Z1Id, Short_t Z2Id,
+                    const math::XYZTLorentzVector pZ1, const math::XYZTLorentzVector pZ2);
+  void FillLepGenInfo(Short_t Lep1Id, Short_t Lep2Id, Short_t Lep3Id, Short_t Lep4Id,
+    const math::XYZTLorentzVector Lep1, const math::XYZTLorentzVector Lep2, const math::XYZTLorentzVector Lep3, const math::XYZTLorentzVector Lep4);
+  void FillVisZGenInfo(Short_t Z1Id, Short_t Z2Id,
+                    const math::XYZTLorentzVector pZ1, const math::XYZTLorentzVector pZ2);
+  void FillVisLepGenInfo(Short_t Lep1Id, Short_t Lep2Id, Short_t Lep3Id, Short_t Lep4Id,
+    const math::XYZTLorentzVector Lep1, const math::XYZTLorentzVector Lep2, const math::XYZTLorentzVector Lep3, const math::XYZTLorentzVector Lep4);
+
+  Float_t getHqTWeight(double mH, double genPt) const;
   Float_t getAllWeight(const reco::Candidate* Lep);
 
   // ----------member data ---------------------------
@@ -247,6 +336,8 @@ private:
    
   METCorrectionHandler* metCorrHandler;
 
+  edm::EDGetTokenT<edm::View<reco::Candidate> > genParticleToken;
+  edm::Handle<edm::View<reco::Candidate> > genParticles;
   edm::EDGetTokenT<GenEventInfoProduct> genInfoToken;
   edm::EDGetTokenT<edm::View<pat::CompositeCandidate> > candToken;
   edm::EDGetTokenT<edm::TriggerResults> triggerResultToken;
@@ -261,6 +352,8 @@ private:
   const vector<pat::Electron>* softElectrons;
   edm::EDGetTokenT<vector<pat::Muon> > muonToken;
   const vector<pat::Muon>* softMuons;
+  edm::EDGetTokenT<vector<pat::Tau> > tauToken;
+  const vector<pat::Tau>* softTaus;
    
   edm::EDGetTokenT< double > prefweight_token;
   edm::EDGetTokenT< double > prefweightup_token;
@@ -280,6 +373,7 @@ private:
 
   LeptonSFHelper *lepSFHelper;
 
+  TH2D* h_weight;
 };
 
 //
@@ -287,7 +381,8 @@ private:
 //
 ZNtupleMaker::ZNtupleMaker(const edm::ParameterSet& pset) :
   myHelper(pset),
-  pileUpReweight(myHelper.sampleType(), myHelper.setup())
+  pileUpReweight(myHelper.sampleType(), myHelper.setup()),
+  h_weight(0)
 {
   theCandLabel = pset.getUntrackedParameter<string>("CandCollection"); // Name of input Z collection
   theFileName = pset.getUntrackedParameter<string>("fileName");
@@ -298,6 +393,7 @@ ZNtupleMaker::ZNtupleMaker(const edm::ParameterSet& pset) :
   metTag = pset.getParameter<edm::InputTag>("metSrc");
 
   consumesMany<std::vector< PileupSummaryInfo > >();
+  genParticleToken = consumes<edm::View<reco::Candidate> >(edm::InputTag("prunedGenParticles"));
   genInfoToken = consumes<GenEventInfoProduct>(edm::InputTag("generator"));
   candToken = consumes<edm::View<pat::CompositeCandidate> >(edm::InputTag(theCandLabel));
   triggerResultToken = consumes<edm::TriggerResults>(edm::InputTag("TriggerResults"));
@@ -312,6 +408,7 @@ ZNtupleMaker::ZNtupleMaker(const edm::ParameterSet& pset) :
   //softElectrons->clear();
   muonToken = consumes<vector<pat::Muon> >(edm::InputTag("softMuons"));
   //softMuons->clear();
+  tauToken = consumes<vector<pat::Tau> >(edm::InputTag("softTaus"));
 
   preSkimToken = consumes<edm::MergeableCounter,edm::InLumi>(edm::InputTag("preSkimCounter"));
 
@@ -341,7 +438,15 @@ ZNtupleMaker::ZNtupleMaker(const edm::ParameterSet& pset) :
 
    //Scale factors for data/MC efficiency
    if (!skipEleDataMCWeight && isMC) { lepSFHelper = new LeptonSFHelper(); }
-	
+
+  if (!skipHqTWeight) {
+    //HqT weights
+    edm::FileInPath HqTfip("HTauTauHMuMu/AnalysisStep/test/Macros/HqTWeights.root");
+    std::string fipPath=HqTfip.fullPath();
+    TFile *fHqt = TFile::Open(fipPath.data(),"READ");
+    h_weight = (TH2D*)fHqt->Get("wH_400")->Clone();//FIXME: Ask simon to provide the 2D histo
+    fHqt->Close();
+    }	
 }
 
 
@@ -375,12 +480,113 @@ void ZNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& eSetu
 
     PUWeight = pileUpReweight.weight(NTrueInt);
 
-    edm::Handle<GenEventInfoProduct> gen;
-    event.getByToken(genInfoToken, gen);
-    GenEventInfoProduct  genInfo = *(gen.product());
-    genHEPMCweight = genInfo.weight();
+//   edm::Handle<GenEventInfoProduct> gen;
+//    event.getByToken(genInfoToken, gen);
+//    GenEventInfoProduct  genInfo = *(gen.product());
+//    genHEPMCweight = genInfo.weight();
 
-    // keep track of sum of weights
+
+    //------------------------------------------------------------
+    //-------------------Gen information--------------------------
+    //------------------------------------------------------------
+
+    edm::Handle<GenEventInfoProduct> genInfo;
+    event.getByToken(genParticleToken, genParticles);
+    event.getByToken(genInfoToken, genInfo);
+
+    MCHistoryTools mch(event, sampleName, genParticles, genInfo);
+    genFinalState = mch.genFinalState();
+    genProcessId = mch.getProcessID();
+    genHEPMCweight_NNLO = genHEPMCweight = mch.gethepMCweight(); 
+
+
+    const reco::Candidate * genH = 0;
+    std::vector<const reco::Candidate *> genZLeps;
+//    std::vector<const reco::Candidate *> genAssocLeps;
+    std::vector<const reco::Candidate *> genVisZLeps;
+    std::vector<const reco::Candidate *> genTauNus;
+
+    genH = mch.genH();
+    genZLeps     = mch.sortedGenZZLeps();
+//    genAssocLeps = mch.genAssociatedLeps();
+//    genFSR       = mch.genFSR();
+    genVisZLeps	= mch.sortedVisGenZZLeps();
+    genTauNus	= mch.genTauNus();
+
+    if(genH != 0){
+      FillHGenInfo(genH->p4(),getHqTWeight(genH->p4().M(),genH->p4().Pt()));
+    }
+    else if(genZLeps.size()==4){ // for 4l events take the mass of the ZZ(4l) system
+      FillHGenInfo((genZLeps.at(0)->p4()+genZLeps.at(1)->p4()+genZLeps.at(2)->p4()+genZLeps.at(3)->p4()),0);
+    }
+
+
+
+
+    if (genFinalState!=BUGGY) {
+
+      if (genZLeps.size()==4) {
+
+        // "generated Zs" defined with standard pairing applied on gen leptons (genZLeps is sorted by MCHistoryTools)
+        FillZGenInfo(genZLeps.at(0)->pdgId()*genZLeps.at(1)->pdgId(),
+                     genZLeps.at(2)->pdgId()*genZLeps.at(3)->pdgId(),
+                     genZLeps.at(0)->p4()+genZLeps.at(1)->p4(),
+                     genZLeps.at(2)->p4()+genZLeps.at(3)->p4());
+
+        math::XYZTLorentzVector genVisLep1p4,genVisLep2p4,genVisLep3p4,genVisLep4p4;
+	if (abs(genVisZLeps.at(0)->pdgId())!=15 || genTauNus.at(0)==0) { genVisLep1p4=genVisZLeps.at(0)->p4(); }
+	else { genVisLep1p4=genVisZLeps.at(0)->p4()-genTauNus.at(0)->p4(); }
+        if (abs(genVisZLeps.at(1)->pdgId())!=15 || genTauNus.at(1)==0) { genVisLep2p4=genVisZLeps.at(1)->p4(); }
+        else { genVisLep2p4=genVisZLeps.at(1)->p4()-genTauNus.at(1)->p4(); }
+        if (abs(genVisZLeps.at(2)->pdgId())!=15 || genTauNus.at(2)==0) { genVisLep3p4=genVisZLeps.at(2)->p4(); }
+        else { genVisLep3p4=genVisZLeps.at(2)->p4()-genTauNus.at(2)->p4(); }
+        if (abs(genVisZLeps.at(3)->pdgId())!=15 || genTauNus.at(3)==0) { genVisLep4p4=genVisZLeps.at(3)->p4(); }
+        else { genVisLep4p4=genVisZLeps.at(3)->p4()-genTauNus.at(3)->p4(); }
+
+	FillVisZGenInfo(genVisZLeps.at(0)->pdgId()*genVisZLeps.at(1)->pdgId(),
+		        genVisZLeps.at(2)->pdgId()*genVisZLeps.at(3)->pdgId(),
+		        genVisLep1p4+genVisLep2p4, 
+			genVisLep3p4+genVisLep4p4);
+        // Gen leptons
+        FillLepGenInfo(genZLeps.at(0)->pdgId(), genZLeps.at(1)->pdgId(), genZLeps.at(2)->pdgId(), genZLeps.at(3)->pdgId(),
+           genZLeps.at(0)->p4(), genZLeps.at(1)->p4(), genZLeps.at(2)->p4(), genZLeps.at(3)->p4());
+
+	FillVisLepGenInfo(genVisZLeps.at(0)->pdgId(), genVisZLeps.at(1)->pdgId(), genVisZLeps.at(2)->pdgId(), genVisZLeps.at(3)->pdgId(),
+	   genVisLep1p4, genVisLep2p4, genVisLep3p4, genVisLep4p4);
+
+      }
+
+      if (genZLeps.size()==3) {
+
+        math::XYZTLorentzVector genVisLep1p4,genVisLep2p4,genVisLep3p4;
+        if (abs(genVisZLeps.at(0)->pdgId())!=15 || genTauNus.at(0)==0) { genVisLep1p4=genVisZLeps.at(0)->p4(); }
+        else { genVisLep1p4=genVisZLeps.at(0)->p4()-genTauNus.at(0)->p4(); }
+        if (abs(genVisZLeps.at(1)->pdgId())!=15 || genTauNus.at(1)==0) { genVisLep2p4=genVisZLeps.at(1)->p4(); }
+        else { genVisLep2p4=genVisZLeps.at(1)->p4()-genTauNus.at(1)->p4(); }
+        if (abs(genVisZLeps.at(2)->pdgId())!=15 || genTauNus.at(2)==0) { genVisLep3p4=genVisZLeps.at(2)->p4(); }
+        else { genVisLep3p4=genVisZLeps.at(2)->p4()-genTauNus.at(2)->p4(); }
+
+        FillLepGenInfo(genZLeps.at(0)->pdgId(), genZLeps.at(1)->pdgId(), genZLeps.at(2)->pdgId(), 0,
+                       genZLeps.at(0)->p4(), genZLeps.at(1)->p4(), genZLeps.at(2)->p4(), *(new math::XYZTLorentzVector));
+	FillVisLepGenInfo(genVisZLeps.at(0)->pdgId(), genVisZLeps.at(1)->pdgId(), genVisZLeps.at(2)->pdgId(), 0,
+           genVisLep1p4, genVisLep2p4, genVisLep3p4, *(new math::XYZTLorentzVector));
+      }
+      if (genZLeps.size()==2) {
+
+        math::XYZTLorentzVector genVisLep1p4,genVisLep2p4;
+        if (abs(genVisZLeps.at(0)->pdgId())!=15 || genTauNus.at(0)==0) { genVisLep1p4=genVisZLeps.at(0)->p4(); }
+        else { genVisLep1p4=genVisZLeps.at(0)->p4()-genTauNus.at(0)->p4(); }
+        if (abs(genVisZLeps.at(1)->pdgId())!=15 || genTauNus.at(1)==0) { genVisLep2p4=genVisZLeps.at(1)->p4(); }
+        else { genVisLep2p4=genVisZLeps.at(1)->p4()-genTauNus.at(1)->p4(); }
+	
+	FillLepGenInfo(genZLeps.at(0)->pdgId(), genZLeps.at(1)->pdgId(), 0, 0,
+                       genZLeps.at(0)->p4(), genZLeps.at(1)->p4(), *(new math::XYZTLorentzVector), *(new math::XYZTLorentzVector));
+	FillVisLepGenInfo(genVisZLeps.at(0)->pdgId(), genVisZLeps.at(1)->pdgId(), 0, 0,
+           genVisLep1p4, genVisLep2p4, *(new math::XYZTLorentzVector), *(new math::XYZTLorentzVector));
+      }
+    }
+
+   // keep track of sum of weights
     gen_sumPUWeight    += PUWeight;
     gen_sumGenMCWeight += genHEPMCweight;
     gen_sumWeights     += PUWeight*genHEPMCweight;
@@ -594,6 +800,9 @@ void ZNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& eSetu
   edm::Handle<vector<pat::Muon> > muonHandle;
   event.getByToken(muonToken, muonHandle);
   softMuons = muonHandle.product();
+  edm::Handle<vector<pat::Tau> > tauHandle;
+  event.getByToken(tauToken, tauHandle);
+  softTaus = tauHandle.product();
 
   // Loop on candidates
   int nFilled = 0;
@@ -601,6 +810,8 @@ void ZNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& eSetu
 
     // let's take only the selected Z's now, since we don't plot other events anyway
     if(!((bool)(cand->userFloat("isBestZ")))) continue;
+    short ZFlav=abs(cand->daughter(0)->pdgId()) * cand->daughter(0)->charge() * abs(cand->daughter(1)->pdgId()) * cand->daughter(1)->charge();
+    if(ZFlav!=-121 && ZFlav!=-169) continue;
 
     FillCandidate(*cand, evtPassTrigger&&evtPassSkim, event);
     // Fill the candidate as one entry in the tree. Do not reinitialize the event variables, as there could be several candidates per event.
@@ -797,6 +1008,69 @@ void ZNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool evtPa
       }
     }
   }
+  AddTauPt.clear();
+  AddTauEta.clear();
+  AddTauPhi.clear();
+  AddTauLepId.clear();
+  AddTauMass.clear();
+  AddTauVSe.clear();
+  AddTauVSmu.clear();
+  AddTauVSjet.clear();
+  AddTauDecayMode.clear();
+
+  std::vector<std::string> VSmuDisc;
+  std::vector<std::string> VSeDisc;
+  std::vector<std::string> VSjetDisc;
+  VSmuDisc = {
+    "byVLooseDeepTau2017v2p1VSmu",
+    "byLooseDeepTau2017v2p1VSmu", 
+    "byMediumDeepTau2017v2p1VSmu",
+    "byTightDeepTau2017v2p1VSmu"
+  };
+  VSeDisc = {
+    "byVVVLooseDeepTau2017v2p1VSe",  
+    "byVVLooseDeepTau2017v2p1VSe", 
+    "byVLooseDeepTau2017v2p1VSe",   
+    "byLooseDeepTau2017v2p1VSe",   
+    "byMediumDeepTau2017v2p1VSe",   
+    "byTightDeepTau2017v2p1VSe",   
+    "byVTightDeepTau2017v2p1VSe",   
+    "byVVTightDeepTau2017v2p1VSe"
+  };
+  VSjetDisc = {
+    "byVVVLooseDeepTau2017v2p1VSjet",
+    "byVVLooseDeepTau2017v2p1VSjet", 
+    "byVLooseDeepTau2017v2p1VSjet",  
+    "byLooseDeepTau2017v2p1VSjet",   
+    "byMediumDeepTau2017v2p1VSjet",  
+    "byTightDeepTau2017v2p1VSjet",   
+    "byVTightDeepTau2017v2p1VSjet",  
+    "byVVTightDeepTau2017v2p1VSjet"
+  };
+  for (unsigned i=0; i<softTaus->size(); ++i) {
+    pat::Tau lep = softTaus->at(i);
+    if(reco::deltaR(lep.p4(), leptons[0]->p4()) > 0.02 && reco::deltaR(lep.p4(), leptons[1]->p4()) > 0.02){
+      nAddTau++;
+      if (addAddLept) {
+        AddTauPt.push_back(lep.pt());
+	AddTauEta.push_back(lep.eta());
+	AddTauPhi.push_back(lep.phi());
+	AddTauLepId.push_back(lep.pdgId());
+	AddTauMass.push_back(lep.mass());
+	short tauVSmu=0,tauVSe=0,tauVSjet=0;	
+	for (size_t iDisc = 0; iDisc<VSmuDisc.size(); ++iDisc) 
+	    if (userdatahelpers::getUserInt(leptons[i],VSmuDisc[iDisc].c_str())==1) tauVSmu=iDisc+1;
+	for (size_t iDisc = 0; iDisc<VSeDisc.size(); ++iDisc)
+	    if (userdatahelpers::getUserInt(leptons[i],VSeDisc[iDisc].c_str())==1) tauVSe=iDisc+1;
+	for (size_t iDisc = 0; iDisc<VSjetDisc.size(); ++iDisc)
+            if (userdatahelpers::getUserInt(leptons[i],VSjetDisc[iDisc].c_str())==1) tauVSjet=iDisc+1;
+	AddTauVSe.push_back(tauVSe);
+	AddTauVSmu.push_back(tauVSmu);
+	AddTauVSjet.push_back(tauVSjet);
+	AddTauDecayMode.push_back(lep.userFloat("decayMode"));
+      }
+    }
+  }	
 
   //Compute the data/MC weight and overall event weight
   dataMCWeight = 1.;
@@ -925,6 +1199,107 @@ void ZNtupleMaker::fillDescriptions(edm::ConfigurationDescriptions& descriptions
   descriptions.addDefault(desc);
 }
 
+void ZNtupleMaker::FillHGenInfo(const math::XYZTLorentzVector pH, float w)
+{
+  GenHMass=pH.M();
+  GenHPt=pH.Pt();
+  GenHRapidity=pH.Rapidity();
+
+  HqTMCweight=w;
+
+  return;
+}
+
+void ZNtupleMaker::FillZGenInfo(Short_t Z1Id, Short_t Z2Id,
+                                    const math::XYZTLorentzVector pZ1, const math::XYZTLorentzVector pZ2)
+{
+  GenZ1Mass= pZ1.M();
+  GenZ1Pt= pZ1.Pt();
+  GenZ1Eta= pZ1.Eta();
+  GenZ1Phi= pZ1.Phi();
+  GenZ1Flav= Z1Id;
+
+  GenZ2Mass= pZ2.M();
+  GenZ2Pt= pZ2.Pt();
+  GenZ2Eta= pZ2.Eta();
+  GenZ2Phi= pZ2.Phi();
+  GenZ2Flav= Z2Id;
+
+  return;
+}
+
+void ZNtupleMaker::FillVisZGenInfo(Short_t Z1Id, Short_t Z2Id,
+                                    const math::XYZTLorentzVector pZ1, const math::XYZTLorentzVector pZ2)
+{
+  GenVisZ1Mass= pZ1.M();
+  GenVisZ1Pt= pZ1.Pt();
+  GenVisZ1Eta= pZ1.Eta();
+  GenVisZ1Phi= pZ1.Phi();
+  GenVisZ1Flav= Z1Id;
+
+  GenVisZ2Mass= pZ2.M();
+  GenVisZ2Pt= pZ2.Pt();
+  GenVisZ2Eta= pZ2.Eta();
+  GenVisZ2Phi= pZ2.Phi();
+  GenVisZ2Flav= Z2Id;
+
+  return;
+}
+
+void ZNtupleMaker::FillLepGenInfo(Short_t Lep1Id, Short_t Lep2Id, Short_t Lep3Id, Short_t Lep4Id,
+                                      const math::XYZTLorentzVector Lep1, const math::XYZTLorentzVector Lep2,
+                                      const math::XYZTLorentzVector Lep3, const math::XYZTLorentzVector Lep4)
+{
+  GenLep1Pt=Lep1.Pt();
+  GenLep1Eta=Lep1.Eta();
+  GenLep1Phi=Lep1.Phi();
+  GenLep1Id=Lep1Id;
+
+  GenLep2Pt=Lep2.Pt();
+  GenLep2Eta=Lep2.Eta();
+  GenLep2Phi=Lep2.Phi();
+  GenLep2Id=Lep2Id;
+
+  GenLep3Pt=Lep3.Pt();
+  GenLep3Eta=Lep3.Eta();
+  GenLep3Phi=Lep3.Phi();
+  GenLep3Id=Lep3Id;
+
+  GenLep4Pt=Lep4.Pt();
+  GenLep4Eta=Lep4.Eta();
+  GenLep4Phi=Lep4.Phi();
+  GenLep4Id=Lep4Id;
+
+  return;
+}
+
+void ZNtupleMaker::FillVisLepGenInfo(Short_t Lep1Id, Short_t Lep2Id, Short_t Lep3Id, Short_t Lep4Id,
+                                      const math::XYZTLorentzVector Lep1, const math::XYZTLorentzVector Lep2,
+                                      const math::XYZTLorentzVector Lep3, const math::XYZTLorentzVector Lep4)
+{
+  GenVisLep1Pt=Lep1.Pt();
+  GenVisLep1Eta=Lep1.Eta();
+  GenVisLep1Phi=Lep1.Phi();
+  GenVisLep1Id=Lep1Id;
+
+  GenVisLep2Pt=Lep2.Pt();
+  GenVisLep2Eta=Lep2.Eta();
+  GenVisLep2Phi=Lep2.Phi();
+  GenVisLep2Id=Lep2Id;
+
+  GenVisLep3Pt=Lep3.Pt();
+  GenVisLep3Eta=Lep3.Eta();
+  GenVisLep3Phi=Lep3.Phi();
+  GenVisLep3Id=Lep3Id;
+
+  GenVisLep4Pt=Lep4.Pt();
+  GenVisLep4Eta=Lep4.Eta();
+  GenVisLep4Phi=Lep4.Phi();
+  GenVisLep4Id=Lep4Id;
+
+  return;
+}
+
 
 Float_t ZNtupleMaker::getAllWeight(const reco::Candidate* Lep)
 {
@@ -961,6 +1336,31 @@ Float_t ZNtupleMaker::getAllWeight(const reco::Candidate* Lep)
  return SF;
 }
 
+Float_t ZNtupleMaker::getHqTWeight(double mH, double genPt) const
+{
+  if (skipHqTWeight) return 1.;
+
+  //cout<<"mH = "<<mH<<", genPt = "<<genPt<<endl;
+  if (mH<400 || genPt>250) return 1.;
+
+  double weight = 1.;
+
+  const int masses[4] = {400,600,800,1000};
+  double massDiff = 1000;
+  int iMass = -1;
+  for (int i=0; i<4; ++i){
+    double massDiffTmp = std::fabs(mH-masses[i]);
+    if (massDiffTmp<massDiff){
+      massDiff = massDiffTmp;
+      iMass = i;
+    }
+  }
+
+  if (iMass>=0) {
+    weight = h_weight->GetBinContent(h_weight->FindBin(genPt));
+  }
+  return weight;
+}
 
 void ZNtupleMaker::BookAllBranches(){
   myTree->Book("RunNumber",RunNumber);
@@ -1019,6 +1419,7 @@ void ZNtupleMaker::BookAllBranches(){
   myTree->Book("fsrLeptId",fsrLeptID);
   myTree->Book("nAddEle",nAddEle);
   myTree->Book("nAddMu",nAddMu);
+  myTree->Book("nAddTau",nAddTau);
   if (addAddLept) {
     myTree->Book("AddElePt",AddElePt);
     myTree->Book("AddEleEta",AddEleEta);
@@ -1043,6 +1444,15 @@ void ZNtupleMaker::BookAllBranches(){
     myTree->Book("AddMuNeutralHadIso",AddMuNeutralHadIso);
     myTree->Book("AddMuPhotonIso",AddMuPhotonIso);
     myTree->Book("AddMuCombRelIsoPF",AddMuCombRelIsoPF);
+    myTree->Book("AddTauPt",AddTauPt);
+    myTree->Book("AddTauEta",AddTauEta);
+    myTree->Book("AddTauPhi",AddTauPhi);
+    myTree->Book("AddTauLepId",AddTauLepId);
+    myTree->Book("AddTauMass",AddTauMass);
+    myTree->Book("AddTauVSe",AddTauVSe);
+    myTree->Book("AddTauVSmu",AddTauVSmu);
+    myTree->Book("AddTauVSjet",AddTauVSjet);
+    myTree->Book("AddTauDecayMode",AddTauDecayMode);
   }
 	
    myTree->Book("nCleanedJetsPt30",nCleanedJetsPt30);
@@ -1124,6 +1534,8 @@ void ZNtupleMaker::BookAllBranches(){
     myTree->Book("JetPtD",JetPtD);
   }
   if (isMC) {
+    myTree->Book("genFinalState",genFinalState);
+    myTree->Book("genProcessId",genProcessId);
     myTree->Book("genHEPMCweight",genHEPMCweight);
     myTree->Book("xsec",xsection);
     myTree->Book("dataMCWeight",dataMCWeight);
@@ -1131,9 +1543,67 @@ void ZNtupleMaker::BookAllBranches(){
     myTree->Book("L1prefiringWeight", L1prefiringWeight);
     myTree->Book("L1prefiringWeightUp", L1prefiringWeightUp);
     myTree->Book("L1prefiringWeightDn", L1prefiringWeightDn);
+    myTree->Book("HqTMCweight", HqTMCweight);
+
+    myTree->Book("GenHMass",GenHMass);
+    myTree->Book("GenHPt",GenHPt);
+    myTree->Book("GenHRapidity",GenHRapidity);
+    myTree->Book("GenZ1Mass",GenZ1Mass);
+    myTree->Book("GenZ1Eta",GenZ1Eta);
+    myTree->Book("GenZ1Pt",GenZ1Pt);
+    myTree->Book("GenZ1Phi",GenZ1Phi);
+    myTree->Book("GenZ1Flav",GenZ1Flav);
+    myTree->Book("GenZ2Mass",GenZ2Mass);
+    myTree->Book("GenZ2Eta",GenZ2Eta);
+    myTree->Book("GenZ2Pt",GenZ2Pt);
+    myTree->Book("GenZ2Phi",GenZ2Phi);
+    myTree->Book("GenZ2Flav",GenZ2Flav);
+    myTree->Book("GenLep1Pt",GenLep1Pt);
+    myTree->Book("GenLep1Eta",GenLep1Eta);
+    myTree->Book("GenLep1Phi",GenLep1Phi);
+    myTree->Book("GenLep1Id",GenLep1Id);
+    myTree->Book("GenLep2Pt",GenLep2Pt);
+    myTree->Book("GenLep2Eta",GenLep2Eta);
+    myTree->Book("GenLep2Phi",GenLep2Phi);
+    myTree->Book("GenLep2Id",GenLep2Id);
+    myTree->Book("GenLep3Pt",GenLep3Pt);
+    myTree->Book("GenLep3Eta",GenLep3Eta);
+    myTree->Book("GenLep3Phi",GenLep3Phi);
+    myTree->Book("GenLep3Id",GenLep3Id);
+    myTree->Book("GenLep4Pt",GenLep4Pt);
+    myTree->Book("GenLep4Eta",GenLep4Eta);
+    myTree->Book("GenLep4Phi",GenLep4Phi);
+    myTree->Book("GenLep4Id",GenLep4Id);
+
+    myTree->Book("GenVisZ1Mass",GenVisZ1Mass);
+    myTree->Book("GenVisZ1Eta",GenVisZ1Eta);
+    myTree->Book("GenVisZ1Pt",GenVisZ1Pt);
+    myTree->Book("GenVisZ1Phi",GenVisZ1Phi);
+    myTree->Book("GenVisZ1Flav",GenVisZ1Flav);
+    myTree->Book("GenVisZ2Mass",GenVisZ2Mass);
+    myTree->Book("GenVisZ2Eta",GenVisZ2Eta);
+    myTree->Book("GenVisZ2Pt",GenVisZ2Pt);
+    myTree->Book("GenVisZ2Phi",GenVisZ2Phi);
+    myTree->Book("GenVisZ2Flav",GenVisZ2Flav);
+    myTree->Book("GenVisLep1Pt",GenVisLep1Pt);
+    myTree->Book("GenVisLep1Eta",GenVisLep1Eta);
+    myTree->Book("GenVisLep1Phi",GenVisLep1Phi);
+    myTree->Book("GenVisLep1Id",GenVisLep1Id);
+    myTree->Book("GenVisLep2Pt",GenVisLep2Pt);
+    myTree->Book("GenVisLep2Eta",GenVisLep2Eta);
+    myTree->Book("GenVisLep2Phi",GenVisLep2Phi);
+    myTree->Book("GenVisLep2Id",GenVisLep2Id);
+    myTree->Book("GenVisLep3Pt",GenVisLep3Pt);
+    myTree->Book("GenVisLep3Eta",GenVisLep3Eta);
+    myTree->Book("GenVisLep3Phi",GenVisLep3Phi);
+    myTree->Book("GenVisLep3Id",GenVisLep3Id);
+    myTree->Book("GenVisLep4Pt",GenVisLep4Pt);
+    myTree->Book("GenVisLep4Eta",GenVisLep4Eta);
+    myTree->Book("GenVisLep4Phi",GenVisLep4Phi);
+    myTree->Book("GenVisLep4Id",GenVisLep4Id);
+
   }
 }
 
 //define this as a plug-in
 DEFINE_FWK_MODULE(ZNtupleMaker);
-

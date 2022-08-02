@@ -11,6 +11,8 @@ enum Channel {MMMM=0,
 	      LLTT=4, // tau final states (L=e,mu,tau); obsolete.
 	      llTT=27,// tau final states (L=e,mu)
 	      TTTT=28,// 4tau
+	      MMTT=29,
+	      EETT=30,
 	      ZLL=18, // Generic label for a CR (used in job configuration)
 	      ZZOnShell = 26,
 	      CRMMMMss=5, // AA CRs (ss loose letptons; os ones are for x-check)

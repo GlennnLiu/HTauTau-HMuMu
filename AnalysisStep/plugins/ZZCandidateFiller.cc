@@ -289,9 +289,10 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     int iZ1 = 0;
     int iZ2 = 1;
     if (ZRolesByMass) {
-      //if(std::abs(myCand.userFloat("d0.goodMass")-ZmassValue)>=std::abs(myCand.userFloat("d1.goodMass")-ZmassValue)){
+      if(std::abs(myCand.userFloat("d0.goodMass")-ZmassValue)>=std::abs(myCand.userFloat("d1.goodMass")-ZmassValue)){
       //if (myCand.daughter(0)->daughter(0)->pt()+myCand.daughter(0)->daughter(1)->pt() < myCand.daughter(1)->daughter(0)->pt()+myCand.daughter(1)->daughter(1)->pt()) {
-    if (myCand.userFloat("d0.ptSum")<myCand.userFloat("d1.ptSum")) {
+    //if (myCand.userFloat("d0.ptSum")<myCand.userFloat("d1.ptSum")) {
+    //if (myCand.daughter(0)->et() < myCand.daughter(1)->et()) {
         swap(iZ1,iZ2);
         ZRoles = &rolesZ2Z1;
       }
