@@ -36,6 +36,8 @@ std::string finalState(int iFS) {
 					"ZZOnShell", //26
 					"llTT",      //27
 					"TTTT"       //28
+					"MMTT"	     //29
+					"EETT"	     //30
   };
   return finalStates[iFS];			     	
 }

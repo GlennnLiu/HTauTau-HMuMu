@@ -1367,6 +1367,14 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     if (abs(id0)==13 && abs(id1)==15 && !myCand.userFloat("d1.isGood_Mu"))
         goodTau=false;
     myCand.addUserFloat("isGoodTau",goodTau);
+    if (abs(id0)*abs(id1)!=225) {
+        myCand.addUserFloat("d0.isGoodTau",abs(id0)==15?goodTau:true);
+        myCand.addUserFloat("d1.isGoodTau",abs(id1)==15?goodTau:true);
+    }
+    else {
+	myCand.addUserFloat("d0.isGoodTau",myCand.userFloat("d0.isGood_Tau"));
+	myCand.addUserFloat("d1.isGoodTau",myCand.userFloat("d1.isGood_Tau"));
+    }
 
     //HLTMatch
     //The candidate passes HLTMatch if at least one lepton daughter matches the single trigger or both matches to the double trigger

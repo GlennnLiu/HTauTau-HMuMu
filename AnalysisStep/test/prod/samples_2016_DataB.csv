@@ -1,0 +1,9 @@
+identifier,process,crossSection=-1,BR=1,execute=True,dataset,prefix,pattern,splitLevel,::variables,::pyFragments,comment
+
+
+###,,,,,,,,,,,Data
+DoubleMu2016B,, -1, ,, /DoubleMuon/Run2016B-17Jul2018_ver2-v1/MINIAOD,dbs,,2,PD=DoubleMu;PROCESS_CR=True;LEPTON_SETUP=2016;ADDZTREE=True,json_2016.py;RecoProbabilities.py,
+DoubleEG2016B,, -1, ,, /DoubleEG/Run2016B-17Jul2018_ver2-v1/MINIAOD,dbs,,2,PD=DoubleEle;PROCESS_CR=True;LEPTON_SETUP=2016;ADDZTREE=True,json_2016.py;RecoProbabilities.py,
+MuonEG2016B,,   -1, ,, /MuonEG/Run2016B-17Jul2018_ver2-v1/MINIAOD,dbs,,2,PD=MuEG;PROCESS_CR=True;LEPTON_SETUP=2016;ADDZTREE=True,json_2016.py;RecoProbabilities.py,
+SingleEle2016B,,-1, ,, /SingleElectron/Run2016B-17Jul2018_ver2-v1/MINIAOD,dbs,,5,PD=SingleElectron;PROCESS_CR=True;LEPTON_SETUP=2016;ADDZTREE=True,json_2016.py;RecoProbabilities.py,
+SingleMuon2016B,,-1,,, /SingleMuon/Run2016B-17Jul2018_ver2-v1/MINIAOD,dbs,,5,PD=SingleMuon;PROCESS_CR=True;LEPTON_SETUP=2016;ADDZTREE=True,json_2016.py;RecoProbabilities.py,
