@@ -21,7 +21,7 @@ int main( int argc, char *argv[] )
 {
    setTDRStyle();
    
-   TString path = "";
+   TString path = "/eos/home-g/geliu/LepUni/BigTrees/Simp/";
    TString file_name = "/ZZ4lAnalysis.root";
    
    TString Data    = path + "AllData" + file_name;
@@ -38,8 +38,8 @@ int main( int argc, char *argv[] )
    float pT_bins[] = {5, 7, 10, 20, 30, 40, 50, 80};
    
    OSmethod *os = new OSmethod();
-   //os->SetLumi(35.92); //2016
-   os->SetLumi(41.53);   //2017
+   os->SetLumi(35.92); //2016
+   //os->SetLumi(41.53);   //2017
    //os->SetLumi(59.74); //2018
 
    ///////////////////////////////////
@@ -50,35 +50,35 @@ int main( int argc, char *argv[] )
    os->FillDataMCPlots(ZZ);
    os->FillDataMCPlots(ttbar);
    os->FillDataMCPlots(DY);
-   os->SaveDataMCHistos("DataMC_OS_Moriond19.root");
+   os->SaveDataMCHistos("/eos/home-g/geliu/LepUni/FakeRates/DataMC_OS.root");
 
    ///////////////////////////////////
    // Fill passing/failling histos  //
    ///////////////////////////////////
    os->FillFRHistos(Data);
    os->FillFRHistos(WZ);
-   os->SaveFRHistos("Histos_OS_Moriond19.root", SubtractWZ, Remove_NegBins_FR);
+   os->SaveFRHistos("/eos/home-g/geliu/LepUni/FakeRates/Histos_OS.root", SubtractWZ, Remove_NegBins_FR);
 
    ///////////////////////////////////
    // Calculate fake rates          //
    ///////////////////////////////////
-   os->GetFRHistos("Histos_OS_Moriond19.root");
+   os->GetFRHistos("/eos/home-g/geliu/LepUni/FakeRates/Histos_OS.root");
    os->Set_pT_binning(8, pT_bins);
-   os->ProduceFakeRates("FakeRates_OS_Moriond19.root");
+   os->ProduceFakeRates("/eos/home-g/geliu/LepUni/FakeRates/FakeRates_OS.root");
 
    ///////////////////////////////////
    // Fill ZX contributions histos  //
    ///////////////////////////////////
-   os->MakeHistogramsZX(Data, "FakeRates_OS_Moriond19.root");
-   os->MakeZXMCContribution(ZZ, "FakeRates_OS_Moriond19.root");
-   os->SaveZXHistos("ZXHistos_OS_Moriond19.root", Remove_NegBins_ZX);
+   os->MakeHistogramsZX(Data, "/eos/home-g/geliu/LepUni/FakeRates/FakeRates_OS.root");
+   os->MakeZXMCContribution(ZZ, "/eos/home-g/geliu/LepUni/FakeRates/FakeRates_OS.root");
+   os->SaveZXHistos("/eos/home-g/geliu/LepUni/FakeRates/ZXHistos_OS.root", Remove_NegBins_ZX);
 
    ///////////////////////////////////
    // Plot control plots            //
    ///////////////////////////////////
-   os->GetZXHistos("ZXHistos_OS_Moriond19.root");
+   os->GetZXHistos("/eos/home-g/geliu/LepUni/FakeRates/ZXHistos_OS.root");
    os->PrintZXYields();
-   os->GetDataMCHistos("DataMC_OS_Moriond19.root");
+   os->GetDataMCHistos("/eos/home-g/geliu/LepUni/FakeRates/DataMC_OS.root");
    os->PlotDataMC("M4l", "Plots");
    os->PlotDataMC_2P2F( "M4l", "Plots" );
    os->PlotDataMC_3P1F( "M4l", "Plots" );
@@ -86,7 +86,7 @@ int main( int argc, char *argv[] )
    ///////////////////////////////////
    // Plot Z+X plots                //
    ///////////////////////////////////
-   os->GetZXHistos("ZXHistos_OS_Moriond19.root");
+   os->GetZXHistos("/eos/home-g/geliu/LepUni/FakeRates/ZXHistos_OS.root");
    os->PlotZXContributions("Plots");
    os->FitZX("Plots");
 	
