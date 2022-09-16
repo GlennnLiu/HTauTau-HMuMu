@@ -496,7 +496,7 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   int bestLLidx = -1;
 
   //--- Loop over LL Candidates
-  cout<<LLCands->size()<<" bare Z candidates"<<endl;
+  //cout<<LLCands->size()<<" bare Z candidates"<<endl;
   for(unsigned int i = 0; i < LLCands->size(); ++i) {
     const CompositeCandidate& c = (*LLCands)[i];
     pat::CompositeCandidate myCand(c); 
@@ -960,8 +960,8 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
         SVetaUnc               = static_cast<classic_svFit::DiTauSystemHistogramAdapter*>(algo.getHistogramAdapter())->getEtaErr();
         SVphiUnc               = static_cast<classic_svFit::DiTauSystemHistogramAdapter*>(algo.getHistogramAdapter())->getPhiErr();
      
-        cout << "--- SVFit Output Debug ---" << endl;
-        cout << "SVfitMass           = " << SVfitMass << endl;
+        //cout << "--- SVFit Output Debug ---" << endl;
+        //cout << "SVfitMass           = " << SVfitMass << endl;
         //cout << "SVfitTransverseMass = " << SVfitTransverseMass << endl;
         //cout << "SVpt 	             = " << SVpt << endl;
         //cout << "SVeta	             = " << SVeta << endl;
@@ -1515,7 +1515,7 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     }    
 
   }
-  cout<<result->size()<<" Z candidates"<<endl;
+  //cout<<result->size()<<" Z candidates"<<endl;
   iEvent.put(std::move(result));
 }
 

@@ -14,6 +14,7 @@ declareDefault("IsMC", True, globals())
 # Set of effective areas, rho corrections, etc. (can be 2011, 2012, 2015 or 2016)
 declareDefault("LEPTON_SETUP", 2016, globals())
 
+declareDefault("OLDPATTRIGGER", False, globals())
 # Flag that reflects the actual sqrts of the sample (can be 2011, 2012, 2015 or 2016)
 # Can differ from SAMPLE_TYPE for samples that are rescaled to a different sqrts.
 declareDefault("SAMPLE_TYPE", LEPTON_SETUP, globals())
@@ -218,7 +219,7 @@ process.triggerDiMu   = cms.Path(process.hltFilterDiMu)
 process.triggerDiEle  = cms.Path(process.hltFilterDiEle)
 #process.triggerMuEle  = cms.Path(process.hltFilterMuEle)
 
-if IsMC:
+if OLDPATTRIGGER:
    TRIGGERSET="selectedPatTrigger"
 else:
    TRIGGERSET="slimmedPatTrigger"
@@ -542,7 +543,7 @@ SOSOTAU      = "decayMode()!=5 && decayMode()!=6 && tauID('decayModeFindingNewDM
 GOODTAU      = SOSOTAU + " && tauID('byVVVLooseDeepTau2017v2p1VSjet') == 1 && tauID('byVVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byVLooseDeepTau2017v2p1VSmu') == 1"
 GOODTAU_MU   = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byTightDeepTau2017v2p1VSjet') == 1"
 GOODTAU_ELE  = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byMediumDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
-GOODTAU_TAU  = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byMediumDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
+GOODTAU_TAU  = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byTightDeepTau2017v2p1VSjet') == 1"
 
 import RecoTauTag.RecoTau.tools.runTauIdMVA as tauIdConfig
 
@@ -903,7 +904,7 @@ ZLEPTONSEL     = TWOGOODLEPTONS # Note: this is without ISO
 
 Z1PRESEL    = (ZLEPTONSEL + " && userFloat('goodMass') >= 81.1876 && userFloat('goodMass') <= 101.1876") # Note: this is without ISO
 
-FLAVOUR	    = "(daughter(0).pdgId()*daughter(1).pdgId()==-121 ||  daughter(0).pdgId()*daughter(1).pdgId()==-169)"
+FLAVOUR	    = "((daughter(0).pdgId()*daughter(1).pdgId()==-121 && userFloat('eleHLTMatch')) ||  (daughter(0).pdgId()*daughter(1).pdgId()==-169 && userFloat('muHLTMatch')))"
 
 BESTZ_AMONG = ( Z1PRESEL + "&&" + TWOISOLEPTONS + "&&" + FLAVOUR)
 
@@ -1048,8 +1049,8 @@ FOURGOODLEPTONS    =  ("( userFloat('d0.GoodLeptons') && userFloat('d1.GoodLepto
                        "&& userFloat('d1.worstMuIso') <" + str(MUISOCUT) + ")"
                        ) #ZZ made of 4 tight leptons passing SIP and ISO 
 
-Z1MASS            = "( daughter('Z1').masterClone().userFloat('goodMass')>4 && daughter('Z1').masterClone().userFloat('goodMass')<200 )"
-Z2MASS            = "( daughter('Z2').masterClone().userFloat('goodMass')>4 && daughter('Z2').masterClone().userFloat('goodMass')<140 )" # (was > 4 in Synch) to deal with m12 cut at gen level
+Z1MASS            = "( daughter('Z1').mass()>4 && daughter('Z1').mass()<200 )"
+Z2MASS            = "( daughter('Z2').mass()>4 && daughter('Z2').mass()<140 )" # (was > 4 in Synch) to deal with m12 cut at gen level
 #MLL3On4_12        = "userFloat('mZa')>12" # mll>12 on 3/4 pairs;
 #MLLALLCOMB        = "userFloat('mLL6')>4" # mll>4 on 6/6 AF/AS pairs;
 MLLALLCOMB        = "userFloat('mLL4')>4" # mll>4 on 4/4 AF/OS pairs;
@@ -1228,7 +1229,7 @@ Z2TT_OS = Z2TT + "&& daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdg
 Z2TT_SS = Z2TT + "&& daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()>0"		#Z2 = etau, mutau, tautau, SS
 Z2ID    = "userFloat('d1.d0.ID')     && userFloat('d1.d1.ID')"                    		#ID on LL leptons
 Z2SIP   = "userFloat('d1.d0.SIP')< 4 && userFloat('d1.d1.SIP')< 4"                		#SIP on LL leptons, probably need to be modified because taus don't have SIP.
-CR_Z2MASS = "daughter(1).mass()>4  && daughter(1).masterClone().mass()<120"	#Mass on LL; cut at 4
+CR_Z2MASS = "daughter(1).mass()>4  && daughter(1).mass()<140"	#Mass on LL; cut at 4
 
 
 # Define cuts for selection of the candidates among which the best one is chosen.
@@ -1251,14 +1252,14 @@ elif SELSETUP == "allCutsAtOnce":
 elif SELSETUP == "allCutsAtOncePlusMZb":
     CR_BESTZLLss = CR_BESTCANDBASE_AA + "&&" + Z2LL_SS + "&&" +CR_Z2MASS + "&&" + MLLALLCOMB + "&&" + PT20_10 + "&&" + "mass>70" + "&&" + "daughter(1).mass>12" + "&&" + "userFloat('mZb')>12"
 elif SELSETUP == "allCutsAtOncePlusSmart":
-    CR_BESTZLLss = CR_BESTCANDBASE_AA + "&& (" + Z2LL_SS + ") && (" +CR_Z2MASS + ") && (" + MLLALLCOMB + ") && (" + PT20_10 + ") &&" + "mass()>70" + "&&" + "daughter(1).mass()>12" + "&&" + SMARTMALLCOMB + "&&" + HLTMATCH + "&&" + BESTZ1
+    CR_BESTZLLss = CR_BESTCANDBASE_AA + "&& (" + Z2LL_SS + ") && (" +CR_Z2MASS + ") && (" + MLLALLCOMB + ") && (" + PT20_10 + ") &&" + "mass()>70" + "&&" + "daughter(1).mass()>0" + "&&" + SMARTMALLCOMB + "&&" + HLTMATCH + "&&" + BESTZ1
 
 
 # Base for the selection cut applied on the best candidate. This almost fully (except for M4l100) overlaps with the cuts defined above, except for startegies where the best candidate is chosen at the beginning (Legacy, allCutsAtOnceButMZ2).
 CR_BASESEL = (CR_Z2MASS + "&&" +              # mass cuts on LL
               MLLALLCOMB + "&&" +             # mass cut on all lepton pairs
               PT20_10    + "&&" +             # pT> 20/10 over all 4 l
-              "daughter(1).mass()>12 &&" +      # mZ2 >12
+#              "daughter(1).mass()>12 &&" +      # mZ2 >12
               "mass()>70" )                     # m4l cut
 
 ##### CR based on Z+2 opposite sign leptons that pass the loose selection #####

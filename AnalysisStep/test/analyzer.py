@@ -44,6 +44,8 @@ declareDefault("FAILED_TREE_LEVEL", 1, globals())
 #ggF uncertainties for HTXS
 declareDefault("APPLY_QCD_GGF_UNCERT", False, globals() )
 
+declareDefault("OLDPATTRIGGER", False, globals() )
+
 if FAILED_TREE_LEVEL and not SKIP_EMPTY_EVENTS:
     raise ValueError(
                      "Inconsistent options: FAILED_TREE_LEVEL={}, SKIP_EMPTY_EVENTS={}\n"

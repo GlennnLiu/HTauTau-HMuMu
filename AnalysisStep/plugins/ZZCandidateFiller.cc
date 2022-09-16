@@ -272,7 +272,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
   //----------------------------------------------------------------------
   //--- Loop over input candidates
   if (debug) cout<<"Loop over candidates"<<endl;
-  cout<<LLLLCands->size()<<" bare ZZ candidates"<<endl;
+  //cout<<LLLLCands->size()<<" bare ZZ candidates"<<endl;
   for( View<CompositeCandidate>::const_iterator cand = LLLLCands->begin(); cand != LLLLCands->end(); ++ cand ) {
     int icand = distance(LLLLCands->begin(),cand);
 
@@ -1077,7 +1077,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
   if (debug) cout<<"Best candidate"<<endl;
   Comparators::BestCandComparator myComp(*result, bestCandType);
   for (int iCRname=0; iCRname<(int)preSelCands.size(); ++iCRname) {
-    cout<<preSelCands[iCRname].size()<<" bestCandAmong"<<endl;
+    //cout<<preSelCands[iCRname].size()<<" bestCandAmong"<<endl;
     if (preSelCands[iCRname].size() > 0) {
       bestCandIdx[iCRname] = *std::min_element( preSelCands[iCRname].begin(), preSelCands[iCRname].end(), myComp);
       cout<<"iCRname "<<iCRname<<", bestCandIdx "<<bestCandIdx[iCRname]<<endl;
@@ -1102,7 +1102,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
       myCand.addUserFloat(cut->first,int((*(cut->second))(myCand)));
     }
   }
-  cout<<result->size()<<" ZZ candidates"<<endl;
+  //cout<<result->size()<<" ZZ candidates"<<endl;
   iEvent.put(std::move(result));
 
 }

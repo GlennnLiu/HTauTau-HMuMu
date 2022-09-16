@@ -429,7 +429,7 @@ MuFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       
       result->push_back(l);
    }
-   cout<<result->size()<<" soft muons"<<endl;
+   //cout<<result->size()<<" soft muons"<<endl;
    iEvent.put(std::move(result));
 }
 
