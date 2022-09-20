@@ -119,7 +119,7 @@ private:
    float _pT_bins[99];
    
    int _current_process, _current_final_state, _current_category, _current_category_stxs, _n_pT_bins;
-   float _lumi, _yield_SR, _k_factor;
+   float _lumi, _yield_SR, _k_factor, _TauIDSF;
    double gen_sum_weights, _event_weight, _f3, _f4, _f3_Up, _f3_Dn, _f4_Up, _f4_Dn;
    vector< vector <float> > _expected_yield_SR, _number_of_events_CR;
 

@@ -18,13 +18,16 @@ OSmethod::OSmethod():Tree()
    
    _s_flavour.push_back("ele");
    _s_flavour.push_back("mu");
+   _s_flavour.push_back("tauE");
+   _s_flavour.push_back("tauMu");
+   _s_flavour.push_back("tauTau");
    
    _s_final_state.push_back("4mu");
-   _s_final_state.push_back("4e");
+   _s_final_state.push_back("2mu2tau");
    _s_final_state.push_back("2e2mu");
-   _s_final_state.push_back("2mu2e");
+   _s_final_state.push_back("2e2tau");
    _s_final_state.push_back("4l");
-   
+  /* 
    _s_category.push_back("UnTagged");
    _s_category.push_back("VBF1jTagged");
    _s_category.push_back("VBF2jTagged");
@@ -58,7 +61,7 @@ OSmethod::OSmethod():Tree()
    _s_category_stxs.push_back("ttH_Lep");
    _s_category_stxs.push_back("ttH_Had");
    _s_category_stxs.push_back("Inclusive");
-   
+   */
    _s_region.push_back("2P2F");
    _s_region.push_back("3P1F");
    _s_region.push_back("OS");
@@ -112,6 +115,13 @@ void OSmethod::FillFRHistos( TString input_file_data_name )
 	Int_t _passingSelection = 0;
 	Int_t _faillingSelection = 0;
 	Int_t _faillingJPsiMassCut = 0;
+//tau
+	Int_t _passingSelectionMu = 0;
+        Int_t _passingSelectionE = 0;
+        Int_t _passingSelectionTau = 0;
+        Int_t _faillingSelectionMu = 0;
+        Int_t _faillingSelectionE = 0;
+        Int_t _faillingSelectionTau = 0;
 
    for (Long64_t jentry=0; jentry<nentries;jentry++)
    {
@@ -130,9 +140,12 @@ void OSmethod::FillFRHistos( TString input_file_data_name )
       if ( abs(Z1Mass - 91.2) > 7. ) {_failZ1MassCut++; continue;}
       if ( (LepPt->at(0) > LepPt->at(1)) && (LepPt->at(0) < 20. || LepPt->at(1) < 10.) ) {_failLepPtCut++; continue;}
       if ( (LepPt->at(1) > LepPt->at(0)) && (LepPt->at(1) < 20. || LepPt->at(0) < 10.) ) {_failLepPtCut++; continue;}
+      if ( (lepPt->at(2) < 20. && abs(LepLepId->at(2)) == 15 ) ) {_failLepPtCut++; continue;}
       if ( (fabs(LepEta->at(2)) > 2.5 ) && ( fabs(LepLepId->at(2)) == 11 || fabs(LepLepId->at(2)) == 13 )) {_failEtaCut++; continue;}
+      if ( (fabs(LepEta->at(2)) > 2.3 ) && ( fbas(LepLepId->at(2)) == 15 )) {_failEtaCut++; continue;}
       if ( (LepSIP->at(2) > 4. || Lepdxy->at(2) > 0.5 || Lepdz->at(2) > 1.0) && (fabs(LepLepId->at(2)) == 11)) { _failSipVtxCut++; continue;} // Included dxy/dz cuts for ele       
       if ( (LepSIP->at(2) > 4. || Lepdxy->at(2) > 0.5 || Lepdz->at(2) > 1.0) && (fabs(LepLepId->at(2)) == 13)) { _failSipVtxCut++; continue;} // Included dxy/dz cuts for mu   
+      if ( (Lepdz->at(2) > 10) && (fabs(LepLepId->at(2)) == 15)) { _failSipVtxCut++; continue;}
       // NB: Included SIP cut on muons that was removed when it was included in the muon BDT
       if ( PFMET > 25. ) {_failMETCut++; continue;}
       if ( (LepLepId->at(2) < 0 && LepLepId->at(0) > 0 && (p1+p3).M() < 4.) || (LepLepId->at(2) < 0 && LepLepId->at(1) > 0 && (p2+p3).M() < 4.) ) {_faillingJPsiMassCut++; continue;}
@@ -141,10 +154,12 @@ void OSmethod::FillFRHistos( TString input_file_data_name )
       {
          // Final event weight
          _k_factor = calculate_K_factor(input_file_data_name);
+	 //_TauIDSF = calculate_TauIDSF(input_file_data_name);
          _event_weight = (_lumi * 1000 * xsec * _k_factor * overallEventWeight * L1prefiringWeight) / gen_sum_weights;
 
-         //if( LepisID->at(2) ) // Changed because we are not using BDT-based muon ID but PF+ISO            
-         if(LepisID->at(2) && ((fabs(LepLepId->at(2)) == 11) ? LepCombRelIsoPF->at(2) < 999999. : LepCombRelIsoPF->at(2) < 0.35))
+         //if( LepisID->at(2) ) // Changed because we are not using BDT-based muon ID but PF+ISO 
+         if(fabs(LepLepId->at(2)) == 11 || fabs(LepLepId->at(2)) == 13) {           
+         if(LepisID->at(2) && ((fabs(LepLepId->at(2)) == 13) ? LepCombRelIsoPF->at(2) < 0.35 : LepCombRelIsoPF->at(2) < 999999.))
          {
 	   _passingSelection++;
 	   if(fabs(LepLepId->at(2)) == 11 ) passing[_current_process][Settings::ele]->Fill(LepPt->at(2), (abs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight);
@@ -156,7 +171,38 @@ void OSmethod::FillFRHistos( TString input_file_data_name )
 	     if(fabs(LepLepId->at(2)) == 11 ) failing[_current_process][Settings::ele]->Fill(LepPt->at(2), (abs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight);
 	     else if(fabs(LepLepId->at(2)) == 13 ) failing[_current_process][Settings::mu]->Fill(LepPt->at(2), (abs(LepEta->at(2)) < 1.2) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight);
 	   }
+	 }
+	 else {
+	 if (LepisID->at(2) && TauVSmu->at(2)>=4 && TauVSe->at(2)>=3 && TauVSjet->at(2)>=6) {
+	     _passingSelectionMu++;
+	     _passingSelectionTau++;
+	     TString WP[3]={"Tight","VLoose","Tight"};
+	     _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), WP);
+	     passing[_current_process][Settings::tauMu]->Fill(LepPt->at(2), (abs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
+	     passing[_current_process][Settings::tauTau]->Fill(LepPt->at(2), (abs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
+	 }
+	 else {
+	     _faillingSelectionMu++;
+	     _faillingSelectionTau++;
+	     TString WP[3]={"Tight","VLoose","Tight"};
+             _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), WP);
+	     failing[_current_process][Settings::tauMu]->Fill(LepPt->at(2), (abs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
+	     failing[_current_process][Settings::tauTau]->Fill(LepPt->at(2), (abs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
+	 }
+	 if (LepisID->at(2) && TauVSmu->at(2)>=4 && TauVSe->at(2)>=5 && TauVSjet->at(2)>=5) {
+	    _passingSelectionE++;
+	    TString WP[3]={"Medium","Medium","Tight"};
+	    _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), WP);
+	    passing[_current_process][Settings::tauE]->Fill(LepPt->at(2), (abs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
+	 }
+	 else {
+	    _faillingSelectionE++;
+	    TString WP[3]={"Medium","Medium","Tight"};
+            _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), WP);
+	    failing[_current_process][Settings::tauE]->Fill(LepPt->at(2), (abs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
+	 }
       }
+	
    } // END events loop
 	
 	// OS method: control printout for ele/mu in Z+L CR 
@@ -215,7 +261,7 @@ void OSmethod::FillDataMCPlots( TString input_file_data_name )
       if (!(test_bit(CRflag, CRZLLos_2P2F)) && !(test_bit(CRflag, CRZLLos_3P1F))) continue;
       
       _current_final_state = FindFinalState();
-      
+/*      
       for ( int j = 0; j < nCleanedJetsPt30; j++)
       {
          jetPt[j] = JetPt->at(j);
@@ -253,13 +299,14 @@ void OSmethod::FillDataMCPlots( TString input_file_data_name )
                                                  ZZPt,
                                                  _current_category,
                                                  ZZjjPt);
-      
+*/    
       _k_factor = calculate_K_factor(input_file_data_name);
-      _event_weight = (_lumi * 1000 * xsec * _k_factor * overallEventWeight * L1prefiringWeight) / gen_sum_weights;
+      _TauIDSF = calculate_TauIDSF(input_file_data_name);
+      _event_weight = (_lumi * 1000 * xsec * _k_factor * _TauIDSF * overallEventWeight * L1prefiringWeight) / gen_sum_weights;
       
-      if ( test_bit(CRflag, CRZLLos_2P2F) ) histos_1D[Settings::reg2P2F][_current_process][_current_final_state][_current_category_stxs]->Fill(ZZMass, (_current_process == Settings::Data) ? 1 :  _event_weight);
-      if ( test_bit(CRflag, CRZLLos_3P1F) ) histos_1D[Settings::reg3P1F][_current_process][_current_final_state][_current_category_stxs]->Fill(ZZMass, (_current_process == Settings::Data) ? 1 :  _event_weight);
-      if ( Z1Flav < 0 && Z2Flav < 0 )       histos_1D[Settings::regOS][_current_process][_current_final_state][_current_category_stxs]->Fill(ZZMass, (_current_process == Settings::Data) ? 1 :  _event_weight);
+      if ( test_bit(CRflag, CRZLLos_2P2F) ) histos_1D[Settings::reg2P2F][_current_process][_current_final_state]->Fill(ZZMass, (_current_process == Settings::Data) ? 1 :  _event_weight);
+      if ( test_bit(CRflag, CRZLLos_3P1F) ) histos_1D[Settings::reg3P1F][_current_process][_current_final_state]->Fill(ZZMass, (_current_process == Settings::Data) ? 1 :  _event_weight);
+      if ( Z1Flav < 0 && Z2Flav < 0 )       histos_1D[Settings::regOS][_current_process][_current_final_state]->Fill(ZZMass, (_current_process == Settings::Data) ? 1 :  _event_weight);
    
    } // END events loop
    
@@ -540,12 +587,12 @@ void OSmethod::DeclareDataMCHistos()
       {
          for (int i_fs = 0; i_fs < num_of_final_states; i_fs++)
          {
-            for (int i_cat = 0; i_cat < num_of_categories_stxs; i_cat++)
-            {
-               _histo_name = "M4l_" + _s_region.at(i_reg) + "_" + _s_process.at(i_proc) + "_" + _s_final_state.at(i_fs) + "_" + _s_category_stxs.at(i_cat);
+            //for (int i_cat = 0; i_cat < num_of_categories_stxs; i_cat++)
+            //{
+               _histo_name = "M4l_" + _s_region.at(i_reg) + "_" + _s_process.at(i_proc) + "_" + _s_final_state.at(i_fs);// + "_" + _s_category_stxs.at(i_cat);
                _histo_labels = ";" + Plots::M4l().var_X_label + ";" + Plots::M4l().var_Y_label;
-               histos_1D[i_reg][i_proc][i_fs][i_cat] = new TH1F(_histo_name, _histo_labels, Plots::M4l().var_N_bin, Plots::M4l().var_min, Plots::M4l().var_max);
-            }
+               histos_1D[i_reg][i_proc][i_fs] = new TH1F(_histo_name, _histo_labels, Plots::M4l().var_N_bin, Plots::M4l().var_min, Plots::M4l().var_max);
+            //}
          }
       }
    }
@@ -558,37 +605,37 @@ void OSmethod::DeclareZXHistos()
 {
    for (int i_fs = 0; i_fs < num_of_final_states; i_fs++)
    {
-      for (int i_cat = 0; i_cat < num_of_categories_stxs; i_cat++)
-      {
+      //for (int i_cat = 0; i_cat < num_of_categories_stxs; i_cat++)
+      //{
       	for(int i_var = 0; i_var < num_of_fr_variations; i_var++)
       	{
-				_histo_name = "h_from2P2F_SR_" + _s_variation.at(i_var) + "_" + _s_final_state.at(i_fs) + "_" + _s_category_stxs.at(i_cat);
+				_histo_name = "h_from2P2F_SR_" + _s_variation.at(i_var) + "_" + _s_final_state.at(i_fs);// + "_" + _s_category_stxs.at(i_cat);
 				_histo_labels = ";" + Plots::M4l().var_X_label + ";" + Plots::M4l().var_Y_label;
-				h_from2P2F_SR[i_var][i_fs][i_cat] = new TH1F(_histo_name, _histo_labels, Plots::M4l().var_N_bin, Plots::M4l().var_min, Plots::M4l().var_max);
+				h_from2P2F_SR[i_var][i_fs] = new TH1F(_histo_name, _histo_labels, Plots::M4l().var_N_bin, Plots::M4l().var_min, Plots::M4l().var_max);
 				
-				_histo_name = "h_from2P2F_3P1F_" + _s_variation.at(i_var) + "_" + _s_final_state.at(i_fs) + "_" + _s_category_stxs.at(i_cat);
+				_histo_name = "h_from2P2F_3P1F_" + _s_variation.at(i_var) + "_" + _s_final_state.at(i_fs);// + "_" + _s_category_stxs.at(i_cat);
 				_histo_labels = ";" + Plots::M4l().var_X_label + ";" + Plots::M4l().var_Y_label;
-				h_from2P2F_3P1F[i_var][i_fs][i_cat] = new TH1F(_histo_name, _histo_labels, Plots::M4l().var_N_bin, Plots::M4l().var_min, Plots::M4l().var_max);
+				h_from2P2F_3P1F[i_var][i_fs] = new TH1F(_histo_name, _histo_labels, Plots::M4l().var_N_bin, Plots::M4l().var_min, Plots::M4l().var_max);
 				
-				_histo_name = "h_from3P1F_SR_final_" + _s_variation.at(i_var) + "_" + _s_final_state.at(i_fs) + "_" + _s_category_stxs.at(i_cat);
+				_histo_name = "h_from3P1F_SR_final_" + _s_variation.at(i_var) + "_" + _s_final_state.at(i_fs);// + "_" + _s_category_stxs.at(i_cat);
 				_histo_labels = ";" + Plots::M4l().var_X_label + ";" + Plots::M4l().var_Y_label;
-				h_from3P1F_SR_final[i_var][i_fs][i_cat] = new TH1F(_histo_name, _histo_labels, Plots::M4l().var_N_bin, Plots::M4l().var_min, Plots::M4l().var_max);
+				h_from3P1F_SR_final[i_var][i_fs] = new TH1F(_histo_name, _histo_labels, Plots::M4l().var_N_bin, Plots::M4l().var_min, Plots::M4l().var_max);
 				
-				_histo_name = "h_from3P1F_SR_" + _s_variation.at(i_var) + "_" + _s_final_state.at(i_fs) + "_" + _s_category_stxs.at(i_cat);
+				_histo_name = "h_from3P1F_SR_" + _s_variation.at(i_var) + "_" + _s_final_state.at(i_fs);// + "_" + _s_category_stxs.at(i_cat);
 				_histo_labels = ";" + Plots::M4l().var_X_label + ";" + Plots::M4l().var_Y_label;
-				h_from3P1F_SR[i_var][i_fs][i_cat] = new TH1F(_histo_name, _histo_labels, Plots::M4l().var_N_bin, Plots::M4l().var_min, Plots::M4l().var_max);
+				h_from3P1F_SR[i_var][i_fs] = new TH1F(_histo_name, _histo_labels, Plots::M4l().var_N_bin, Plots::M4l().var_min, Plots::M4l().var_max);
 				
-				_histo_name = "h_from3P1F_SR_ZZonly_" + _s_variation.at(i_var) + "_" + _s_final_state.at(i_fs) + "_" + _s_category_stxs.at(i_cat);
+				_histo_name = "h_from3P1F_SR_ZZonly_" + _s_variation.at(i_var) + "_" + _s_final_state.at(i_fs);// + "_" + _s_category_stxs.at(i_cat);
 				_histo_labels = ";" + Plots::M4l().var_X_label + ";" + Plots::M4l().var_Y_label;
-				h_from3P1F_SR_ZZonly[i_var][i_fs][i_cat] = new TH1F(_histo_name, _histo_labels, Plots::M4l().var_N_bin, Plots::M4l().var_min, Plots::M4l().var_max);
+				h_from3P1F_SR_ZZonly[i_var][i_fs] = new TH1F(_histo_name, _histo_labels, Plots::M4l().var_N_bin, Plots::M4l().var_min, Plots::M4l().var_max);
 				
-				_histo_name = "ZX_" + _s_variation.at(i_var) + "_" + _s_final_state.at(i_fs) + "_" + _s_category_stxs.at(i_cat);
+				_histo_name = "ZX_" + _s_variation.at(i_var) + "_" + _s_final_state.at(i_fs);// + "_" + _s_category_stxs.at(i_cat);
 				_histo_labels = ";" + Plots::M4l().var_X_label + ";" + Plots::M4l().var_Y_label;
-				histos_ZX[i_var][i_fs][i_cat] = new TH1F(_histo_name, _histo_labels, Plots::M4l().var_N_bin, Plots::M4l().var_min, Plots::M4l().var_max);
+				histos_ZX[i_var][i_fs] = new TH1F(_histo_name, _histo_labels, Plots::M4l().var_N_bin, Plots::M4l().var_min, Plots::M4l().var_max);
 				
 			}
 			
-      }
+      //}
    }
 }
 //===============================================================
@@ -652,10 +699,10 @@ void OSmethod::SaveDataMCHistos( TString file_name )
       {
          for (int i_fs = 0; i_fs < num_of_final_states; i_fs++)
          {
-            for (int i_cat = 0; i_cat < num_of_categories_stxs; i_cat++)
-            {
-               histos_1D[i_reg][i_proc][i_fs][i_cat]->Write();
-            }
+            //for (int i_cat = 0; i_cat < num_of_categories_stxs; i_cat++)
+            //{
+               histos_1D[i_reg][i_proc][i_fs]->Write();
+            //}
          }
       }
    }
@@ -670,28 +717,28 @@ void OSmethod::SaveDataMCHistos( TString file_name )
 //===============================================================
 void OSmethod::FillDataMCInclusive( )
 {
-   for (int i_reg = 0; i_reg < num_of_regions_os; i_reg ++)
+/*   for (int i_reg = 0; i_reg < num_of_regions_os; i_reg ++)
    {
       for (int i_proc = 0; i_proc < Settings::Total; i_proc++)
       {
          for (int i_fs = 0; i_fs < Settings::fs4l; i_fs++)
          {
-            for (int i_cat = 0; i_cat < Settings::inclusive_stxs; i_cat++)
-            {
-               histos_1D[i_reg][i_proc][i_fs][Settings::inclusive_stxs]->Add(histos_1D[i_reg][i_proc][i_fs][i_cat]);
+            //for (int i_cat = 0; i_cat < Settings::inclusive_stxs; i_cat++)
+            //{
+               histos_1D[i_reg][i_proc][i_fs]->Add(histos_1D[i_reg][i_proc][i_fs][i_cat]);
                histos_1D[i_reg][i_proc][Settings::fs4l][i_cat]    ->Add(histos_1D[i_reg][i_proc][i_fs][i_cat]);
-            }
+            //}
          }
       }
    }
-   
+*/   
    for (int i_reg = 0; i_reg < num_of_regions_os; i_reg ++)
    {
       for (int i_proc = 0; i_proc < Settings::Total; i_proc++)
       {
          for (int i_fs = 0; i_fs < Settings::fs4l; i_fs++)
          {
-            histos_1D[i_reg][i_proc][Settings::fs4l][Settings::inclusive_stxs]->Add(histos_1D[i_reg][i_proc][i_fs][Settings::inclusive_stxs]);
+            histos_1D[i_reg][i_proc][Settings::fs4l]->Add(histos_1D[i_reg][i_proc][i_fs]);
          }
       }
    }
@@ -1330,6 +1377,7 @@ void OSmethod::ProduceFakeRates( TString file_name )
       for (int i_flav = 0; i_flav < num_of_flavours; i_flav++)
       {
          if ( i_flav == Settings::ele && i_pT_bin == 0) continue; // electrons do not have 5 - 7 GeV bin
+	 if ( (i_flav == Settings::tauE || i_flav == Settings::tauMu || i_flav == Settings::tauTau) && i_pT_bin <= 2) continue; //hadronic taus do not have 5 - 20 GeV bin
          temp_NP = passing[Settings::Total][i_flav]->IntegralAndError(passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 1, temp_error_NP);
          temp_NF = failing[Settings::Total][i_flav]->IntegralAndError(failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 1, temp_error_NF);
          
@@ -1391,7 +1439,7 @@ void OSmethod::ProduceFakeRates( TString file_name )
 
       }
    }
-   
+//corrected
    FR_OS_electron_EB = new TGraphErrors (vector_X[Settings::corrected][Settings::EB][Settings::ele].size(),
                                          &(vector_X[Settings::corrected][Settings::EB][Settings::ele][0]),
                                          &(vector_Y[Settings::corrected][Settings::EB][Settings::ele][0]),
@@ -1419,7 +1467,50 @@ void OSmethod::ProduceFakeRates( TString file_name )
                                      &(vector_EX[Settings::corrected][Settings::EE][Settings::mu][0]),
                                      &(vector_EY[Settings::corrected][Settings::EE][Settings::mu][0]));
    FR_OS_muon_EE->SetName("FR_OS_muon_EE");
-   
+
+   FR_OS_tauE_EB = new TGraphErrors (vector_X[Settings::corrected][Settings::EB][Settings::tauE].size(),
+                                     &(vector_X[Settings::corrected][Settings::EB][Settings::tauE][0]),
+                                     &(vector_Y[Settings::corrected][Settings::EB][Settings::tauE][0]),
+                                     &(vector_EX[Settings::corrected][Settings::EB][Settings::tauE][0]),
+                                     &(vector_EY[Settings::corrected][Settings::EB][Settings::tauE][0]));
+   FR_OS_tauE_EB->SetName("FR_OS_tauE_EB");
+
+   FR_OS_tauE_EE = new TGraphErrors (vector_X[Settings::corrected][Settings::EE][Settings::tauE].size(),
+                                     &(vector_X[Settings::corrected][Settings::EE][Settings::tauE][0]),
+                                     &(vector_Y[Settings::corrected][Settings::EE][Settings::tauE][0]),
+                                     &(vector_EX[Settings::corrected][Settings::EE][Settings::tauE][0]),
+                                     &(vector_EY[Settings::corrected][Settings::EE][Settings::tauE][0]));
+   FR_OS_tauE_EE->SetName("FR_OS_tauE_EE");
+
+   FR_OS_tauMu_EB = new TGraphErrors (vector_X[Settings::corrected][Settings::EB][Settings::tauMu].size(),
+                                     &(vector_X[Settings::corrected][Settings::EB][Settings::tauMu][0]),
+                                     &(vector_Y[Settings::corrected][Settings::EB][Settings::tauMu][0]),
+                                     &(vector_EX[Settings::corrected][Settings::EB][Settings::tauMu][0]),
+                                     &(vector_EY[Settings::corrected][Settings::EB][Settings::tauMu][0]));
+   FR_OS_tauMu_EB->SetName("FR_OS_tauMu_EB");
+
+   FR_OS_tauMu_EE = new TGraphErrors (vector_X[Settings::corrected][Settings::EE][Settings::tauMu].size(),
+                                     &(vector_X[Settings::corrected][Settings::EE][Settings::tauMu][0]),
+                                     &(vector_Y[Settings::corrected][Settings::EE][Settings::tauMu][0]),
+                                     &(vector_EX[Settings::corrected][Settings::EE][Settings::tauMu][0]),
+                                     &(vector_EY[Settings::corrected][Settings::EE][Settings::tauMu][0]));
+   FR_OS_tauMu_EE->SetName("FR_OS_tauMu_EE");
+
+   FR_OS_tauTau_EB = new TGraphErrors (vector_X[Settings::corrected][Settings::EB][Settings::tauTau].size(),
+                                     &(vector_X[Settings::corrected][Settings::EB][Settings::tauTau][0]),
+                                     &(vector_Y[Settings::corrected][Settings::EB][Settings::tauTau][0]),
+                                     &(vector_EX[Settings::corrected][Settings::EB][Settings::tauTau][0]),
+                                     &(vector_EY[Settings::corrected][Settings::EB][Settings::tauTau][0]));
+   FR_OS_tauTau_EB->SetName("FR_OS_tauTau_EB");
+
+   FR_OS_tauTau_EE = new TGraphErrors (vector_X[Settings::corrected][Settings::EE][Settings::tauTau].size(),
+                                     &(vector_X[Settings::corrected][Settings::EE][Settings::tauTau][0]),
+                                     &(vector_Y[Settings::corrected][Settings::EE][Settings::tauTau][0]),
+                                     &(vector_EX[Settings::corrected][Settings::EE][Settings::tauTau][0]),
+                                     &(vector_EY[Settings::corrected][Settings::EE][Settings::tauTau][0]));
+   FR_OS_tauTau_EE->SetName("FR_OS_tauTau_EE");   
+
+//uncorrected
    FR_OS_electron_EB_unc = new TGraphErrors (vector_X[Settings::uncorrected][Settings::EB][Settings::ele].size(),
                                          &(vector_X[Settings::uncorrected][Settings::EB][Settings::ele][0]),
                                          &(vector_Y[Settings::uncorrected][Settings::EB][Settings::ele][0]),
@@ -1447,7 +1538,50 @@ void OSmethod::ProduceFakeRates( TString file_name )
                                      &(vector_EX[Settings::uncorrected][Settings::EE][Settings::mu][0]),
                                      &(vector_EY[Settings::uncorrected][Settings::EE][Settings::mu][0]));
    FR_OS_muon_EE_unc->SetName("FR_OS_muon_EE_unc");
+
+   FR_OS_tauE_EB_unc = new TGraphErrors (vector_X[Settings::uncorrected][Settings::EB][Settings::tauE].size(),
+                                     &(vector_X[Settings::uncorrected][Settings::EB][Settings::tauE][0]),
+                                     &(vector_Y[Settings::uncorrected][Settings::EB][Settings::tauE][0]),
+                                     &(vector_EX[Settings::uncorrected][Settings::EB][Settings::tauE][0]),
+                                     &(vector_EY[Settings::uncorrected][Settings::EB][Settings::tauE][0]));
+   FR_OS_tauE_EB_unc->SetName("FR_OS_tauE_EB_unc");
+
+   FR_OS_tauE_EE_unc = new TGraphErrors (vector_X[Settings::uncorrected][Settings::EE][Settings::tauE].size(),
+                                     &(vector_X[Settings::uncorrected][Settings::EE][Settings::tauE][0]),
+                                     &(vector_Y[Settings::uncorrected][Settings::EE][Settings::tauE][0]),
+                                     &(vector_EX[Settings::uncorrected][Settings::EE][Settings::tauE][0]),
+                                     &(vector_EY[Settings::uncorrected][Settings::EE][Settings::tauE][0]));
+   FR_OS_tauE_EE_unc->SetName("FR_OS_tauE_EE_unc");
+
+   FR_OS_tauMu_EB_unc = new TGraphErrors (vector_X[Settings::uncorrected][Settings::EB][Settings::tauMu].size(),
+                                     &(vector_X[Settings::uncorrected][Settings::EB][Settings::tauMu][0]),
+                                     &(vector_Y[Settings::uncorrected][Settings::EB][Settings::tauMu][0]),
+                                     &(vector_EX[Settings::uncorrected][Settings::EB][Settings::tauMu][0]),
+                                     &(vector_EY[Settings::uncorrected][Settings::EB][Settings::tauMu][0]));
+   FR_OS_tauMu_EB_unc->SetName("FR_OS_tauMu_EB_unc");
+
+   FR_OS_tauMu_EE_unc = new TGraphErrors (vector_X[Settings::uncorrected][Settings::EE][Settings::tauMu].size(),
+                                     &(vector_X[Settings::uncorrected][Settings::EE][Settings::tauMu][0]),
+                                     &(vector_Y[Settings::uncorrected][Settings::EE][Settings::tauMu][0]),
+                                     &(vector_EX[Settings::uncorrected][Settings::EE][Settings::tauMu][0]),
+                                     &(vector_EY[Settings::uncorrected][Settings::EE][Settings::tauMu][0]));
+   FR_OS_tauMu_EE_unc->SetName("FR_OS_tauMu_EE_unc");
+
+   FR_OS_tauTau_EB_unc = new TGraphErrors (vector_X[Settings::uncorrected][Settings::EB][Settings::tauTau].size(),
+                                     &(vector_X[Settings::uncorrected][Settings::EB][Settings::tauTau][0]),
+                                     &(vector_Y[Settings::uncorrected][Settings::EB][Settings::tauTau][0]),
+                                     &(vector_EX[Settings::uncorrected][Settings::EB][Settings::tauTau][0]),
+                                     &(vector_EY[Settings::uncorrected][Settings::EB][Settings::tauTau][0]));
+   FR_OS_tauTau_EB_unc->SetName("FR_OS_tauTau_EB_unc");
+
+   FR_OS_tauTau_EE_unc = new TGraphErrors (vector_X[Settings::uncorrected][Settings::EE][Settings::tauTau].size(),
+                                     &(vector_X[Settings::uncorrected][Settings::EE][Settings::tauTau][0]),
+                                     &(vector_Y[Settings::uncorrected][Settings::EE][Settings::tauTau][0]),
+                                     &(vector_EX[Settings::uncorrected][Settings::EE][Settings::tauTau][0]),
+                                     &(vector_EY[Settings::uncorrected][Settings::EE][Settings::tauTau][0]));
+   FR_OS_tauTau_EE_unc->SetName("FR_OS_tauTau_EE_unc");
    
+
    PlotFR();
    
    TFile* fOutHistos = TFile::Open(file_name, "recreate");
@@ -1457,7 +1591,13 @@ void OSmethod::ProduceFakeRates( TString file_name )
    FR_OS_electron_EE->Write();
    FR_OS_muon_EB->Write();
    FR_OS_muon_EE->Write();
-   
+   FR_OS_tauE_EB->Write();
+   FR_OS_tauE_EE->Write();
+   FR_OS_tauMu_EB->Write();
+   FR_OS_tauMu_EE->Write();
+   FR_OS_tauTau_EB->Write();
+   FR_OS_tauTau_EE->Write();
+
    fOutHistos->Close();
    delete fOutHistos;
    
@@ -1468,13 +1608,19 @@ void OSmethod::ProduceFakeRates( TString file_name )
 //===============================================================
 void OSmethod::PlotFR()
 {
-   TCanvas *c_ele, *c_mu;
+   TCanvas *c_ele, *c_mu, *c_tauE, *c_tauMu, *c_tauTau;
    c_ele = new TCanvas("FR_ele", "FR_ele", 600, 600);
    c_mu  = new TCanvas("FR_mu", "FR_mu", 600, 600);
+   c_tauE = new TCanvas("FR_tauE", "FR_tauMu", 600, 600);
+   c_tauMu = new TCanvas("FR_tauMu", "FR_tauMu", 600, 600);
+   c_tauTau = new TCanvas("FR_tauTau", "FR_tauTau", 600, 600);
    
    mg_electrons = new TMultiGraph();
    mg_muons = new TMultiGraph();
-   
+   mg_tauE = new TMultiGraph();
+   mg_tauMu = new TMultiGraph();
+   mg_tauTau = new TMultiGraph();
+
    mg_electrons->Add(FR_OS_electron_EB);
    FR_OS_electron_EB->SetLineColor(kBlue);
    FR_OS_electron_EB->SetLineStyle(2);
@@ -1517,10 +1663,72 @@ void OSmethod::PlotFR()
    FR_OS_muon_EE_unc->SetMarkerSize(0);
    FR_OS_muon_EE_unc->SetTitle("endcap uncorrected");
    
-   
+   mg_tauE->Add(FR_OS_tauE_EB);
+   FR_OS_tauE_EB->SetLineColor(kBlue);
+   FR_OS_tauE_EB->SetLineStyle(2);
+   FR_OS_tauE_EB->SetMarkerSize(0);
+   FR_OS_tauE_EB->SetTitle("barel corrected");
+   mg_tauE->Add(FR_OS_tauE_EE);
+   FR_OS_tauE_EE->SetLineColor(kRed);
+   FR_OS_tauE_EE->SetLineStyle(2);
+   FR_OS_tauE_EE->SetMarkerSize(0);
+   FR_OS_tauE_EE->SetTitle("endcap corrected");
+   mg_tauE->Add(FR_OS_tauE_EB_unc);
+   FR_OS_tauE_EB_unc->SetLineColor(kBlue);
+   FR_OS_tauE_EB_unc->SetLineStyle(1);
+   FR_OS_tauE_EB_unc->SetMarkerSize(0);
+   FR_OS_tauE_EB_unc->SetTitle("barel uncorrected");
+   mg_tauE->Add(FR_OS_tauE_EE_unc);
+   FR_OS_tauE_EE_unc->SetLineColor(kRed);
+   FR_OS_tauE_EE_unc->SetLineStyle(1);
+   FR_OS_tauE_EE_unc->SetMarkerSize(0);
+   FR_OS_tauE_EE_unc->SetTitle("endcap uncorrected");
+
+   mg_tauMu->Add(FR_OS_tauMu_EB);
+   FR_OS_tauMu_EB->SetLineColor(kBlue);
+   FR_OS_tauMu_EB->SetLineStyle(2);
+   FR_OS_tauMu_EB->SetMarkerSize(0);
+   FR_OS_tauMu_EB->SetTitle("barel corrected");
+   mg_tauMu->Add(FR_OS_tauMu_EE);
+   FR_OS_tauMu_EE->SetLineColor(kRed);
+   FR_OS_tauMu_EE->SetLineStyle(2);
+   FR_OS_tauMu_EE->SetMarkerSize(0);
+   FR_OS_tauMu_EE->SetTitle("endcap corrected");
+   mg_tauMu->Add(FR_OS_tauMu_EB_unc);
+   FR_OS_tauMu_EB_unc->SetLineColor(kBlue);
+   FR_OS_tauMu_EB_unc->SetLineStyle(1);
+   FR_OS_tauMu_EB_unc->SetMarkerSize(0);
+   FR_OS_tauMu_EB_unc->SetTitle("barel uncorrected");
+   mg_tauMu->Add(FR_OS_tauMu_EE_unc);
+   FR_OS_tauMu_EE_unc->SetLineColor(kRed);
+   FR_OS_tauMu_EE_unc->SetLineStyle(1);
+   FR_OS_tauMu_EE_unc->SetMarkerSize(0);
+   FR_OS_tauMu_EE_unc->SetTitle("endcap uncorrected");
+
+   mg_tauTau->Add(FR_OS_tauTau_EB);
+   FR_OS_tauTau_EB->SetLineColor(kBlue);
+   FR_OS_tauTau_EB->SetLineStyle(2);
+   FR_OS_tauTau_EB->SetMarkerSize(0);
+   FR_OS_tauTau_EB->SetTitle("barel corrected");
+   mg_tauTau->Add(FR_OS_tauTau_EE);
+   FR_OS_tauTau_EE->SetLineColor(kRed);
+   FR_OS_tauTau_EE->SetLineStyle(2);
+   FR_OS_tauTau_EE->SetMarkerSize(0);
+   FR_OS_tauTau_EE->SetTitle("endcap corrected");
+   mg_tauTau->Add(FR_OS_tauTau_EB_unc);
+   FR_OS_tauTau_EB_unc->SetLineColor(kBlue);
+   FR_OS_tauTau_EB_unc->SetLineStyle(1);
+   FR_OS_tauTau_EB_unc->SetMarkerSize(0);
+   FR_OS_tauTau_EB_unc->SetTitle("barel uncorrected");
+   mg_tauTau->Add(FR_OS_tauTau_EE_unc);
+   FR_OS_tauTau_EE_unc->SetLineColor(kRed);
+   FR_OS_tauTau_EE_unc->SetLineStyle(1);
+   FR_OS_tauTau_EE_unc->SetMarkerSize(0);
+   FR_OS_tauTau_EE_unc->SetTitle("endcap uncorrected");  
+ 
    gStyle->SetEndErrorSize(0);
    
-   TLegend *leg_ele,*leg_mu;
+   TLegend *leg_ele,*leg_mu,*leg_tauE,*leg_tauMu,*leg_tauTau;
    CMS_lumi *lumi = new CMS_lumi;
 
    c_ele->cd();
@@ -1544,7 +1752,40 @@ void OSmethod::PlotFR()
    leg_mu = CreateLegend_FR("left",FR_OS_muon_EB_unc,FR_OS_muon_EB,FR_OS_muon_EE_unc,FR_OS_muon_EE);
    leg_mu->Draw();
    SavePlots(c_mu, "Plots/FR_OS_muons");
-   
+
+   c_tauE->cd();
+   lumi->set_lumi(c_tauE, _lumi, 0);
+   mg_tauE->Draw("AP");
+   mg_tauE->GetXaxis()->SetTitle("p_{T} [GeV]");
+   mg_tauE->GetYaxis()->SetTitle("Fake Rate");
+   mg_tauE->SetTitle("#tau fake rate, #tau_{e}#tau_{h} channel");
+   mg_tauE->SetMaximum(0.35);
+   leg_tauE = CreateLegend_FR("left",FR_OS_tauE_EB_unc,FR_OS_tauE_EB,FR_OS_tauE_EE_unc,FR_OS_tauE_EE);
+   leg_tauE->Draw();
+   SavePlots(c_tauE, "Plots/FR_OS_tauE");
+
+   c_tauMu->cd();
+   lumi->set_lumi(c_tauMu, _lumi, 0);
+   mg_tauMu->Draw("AP");
+   mg_tauMu->GetXaxis()->SetTitle("p_{T} [GeV]");
+   mg_tauMu->GetYaxis()->SetTitle("Fake Rate");
+   mg_tauMu->SetTitle("#tau fake rate, #tau_{e}#tau_{h} channel");
+   mg_tauMu->SetMaximum(0.35);
+   leg_tauMu = CreateLegend_FR("left",FR_OS_tauMu_EB_unc,FR_OS_tauMu_EB,FR_OS_tauMu_EE_unc,FR_OS_tauMu_EE);
+   leg_tauMu->Draw();
+   SavePlots(c_tauMu, "Plots/FR_OS_tauMu");
+
+   c_tauTau->cd();
+   lumi->set_lumi(c_tauTau, _lumi, 0);
+   mg_tauTau->Draw("AP");
+   mg_tauTau->GetXaxis()->SetTitle("p_{T} [GeV]");
+   mg_tauTau->GetYaxis()->SetTitle("Fake Rate");
+   mg_tauTau->SetTitle("#tau fake rate, #tau_{e}#tau_{h} channel");
+   mg_tauTau->SetMaximum(0.35);
+   leg_tauTau = CreateLegend_FR("left",FR_OS_tauTau_EB_unc,FR_OS_tauTau_EB,FR_OS_tauTau_EE_unc,FR_OS_tauTau_EE);
+   leg_tauTau->Draw();
+   SavePlots(c_tauTau, "Plots/FR_OS_tauTau");  
+
 }
 //===============================================================
 
@@ -1663,6 +1904,67 @@ float OSmethod::calculate_K_factor(TString input_file_name)
    return k_factor;
 }
 //=================================
+//DeepTau ID scale factors
+int OSmethod::GENMatch(int ileg,TString input_file_name)
+{
+   if (abs(LepLepId->at(ileg))!=15) {
+      cout<<"Only applicable to pdgId = 15, not "<<ileg<<endl;
+      return 6;
+   }
+   if ( input_file_name.Contains("ZZ") || input_file_name.Contains("H") || input_file_name.Contains("ggTo") ) {
+      if (TauTES_p_up->at(ileg)>0)
+	 return 5;
+      else if (TauFES_p_up->at(ileg)>0)
+	 return 1;
+      else
+	 return 2;
+   }
+   else {// if ( input_file_name.Contains("WW") || input_file_name.Contains("TTZ") ) {
+      if (TauTES_p_up->at(ileg)>0)
+         return 5;
+      else if (TauFES_p_up->at(ileg)>0)
+         return 1;
+      else
+         return 6;
+   }
+}
+
+float OSmethod::calculate_TauIDSF_OneLeg(short DM, float pt, float eta, int genmatch, TString WP)
+{
+   if (genmatch==6)
+      return 1.;
+   else if (genmatch==5) {
+      TauIDSFTool *DeepTauSF = new TauIDSFTool("2016Legacy","DeepTau2017v2p1VSjet",WP[0]);
+      return DeepTauSF->GetSFvsPT(pt,genmatch);
+   }
+   else if (genmatch==1) {
+      TauIDSFTool *DeepTauSF = new TauIDSFTool("2016Legacy","DeepTau2017v2p1VSe",WP[1]);
+      return DeepTauSF->GetSFvsEta(eta,genmatch);
+   }
+   else if (genmatch==2) {
+      TauIDSFTool *DeepTauSF = new TauIDSFTool("2016Legacy","DeepTau2017v2p1VSmu",WP[2]);
+      return DeepTauSF->GetSFvsEta(eta,genmatch);
+   }
+}
+
+float OSmethod::calculate_TauIDSF(TString input_file_name)
+{
+   float SF = 1;
+   TString WP[3];
+   if (Z2Flav==-165) {
+      WP[0]="Medium";WP[1]="Medium";WP[2]="Tight";
+   }
+   else if (Z2Flav==-195 || Z2Flav==-225) {
+      WP[0]="Tight";WP[1]="VLoose";WP[2]="Tight";
+   }
+   for (size_t ileg=2;ileg<=3;ileg++) {
+      if (abs(LepLepId->at(ileg)!=15)
+	 continue;
+      int genmatch=GENMatch(ileg,input_file_name);
+      SF=SF*calculate_TauIDSF_OneLeg(TauDecayMode->at(ileg),LepPt->at(ileg),LepEta->at(ileg),genmatch,WP);
+   }
+   return SF;
+}
 
 //===================================================
 bool OSmethod::GetVarLogX ( TString variable_name )

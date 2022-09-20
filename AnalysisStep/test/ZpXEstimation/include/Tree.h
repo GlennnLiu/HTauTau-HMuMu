@@ -85,6 +85,11 @@ public :
    vector<float>   *LepBDT;
    vector<char>    *LepMissingHit;
    vector<float>   *LepCombRelIsoPF;
+//tau
+   vector<short>   *TauVSmu;
+   vector<short>   *TauVSe;
+   vector<short>   *TauVSjet;
+   vector<float>   *TauDecayMode;
    vector<float>   *fsrPt;
    vector<float>   *fsrEta;
    vector<float>   *fsrPhi;
@@ -248,6 +253,12 @@ public :
    TBranch        *b_LepBDT;   //!
    TBranch        *b_LepMissingHit;   //!
    TBranch        *b_LepCombRelIsoPF;   //!
+//tau
+   TBranch        *b_TauVSmu;
+   TBranch        *b_TauVSe;
+   TBranch        *b_TauVSjet;
+   TBranch        *b_TauDecayMode;
+
    TBranch        *b_fsrPt;   //!
    TBranch        *b_fsrEta;   //!
    TBranch        *b_fsrPhi;   //!
@@ -417,6 +428,12 @@ void Tree::Init(TTree *tree, TString input_file_name, bool notZLregion)
    LepBDT = 0;
    LepMissingHit = 0;
    LepCombRelIsoPF = 0;
+//tau
+   TauVSmu = 0;
+   TauVSe = 0;
+   TauVSjet = 0;
+   TauDecayMode = 0;
+
    fsrPt = 0;
    fsrEta = 0;
    fsrPhi = 0;
@@ -506,6 +523,12 @@ void Tree::Init(TTree *tree, TString input_file_name, bool notZLregion)
    fChain->SetBranchAddress("LepBDT", &LepBDT, &b_LepBDT);
    fChain->SetBranchAddress("LepMissingHit", &LepMissingHit, &b_LepMissingHit);
    fChain->SetBranchAddress("LepCombRelIsoPF", &LepCombRelIsoPF, &b_LepCombRelIsoPF);
+//tau
+   fChain->SetBranchAddress("TauVSmu", &TauVSmu, &b_TauVSmu);
+   fChain->SetBranchAddress("TauVSe", &TauVSe, &b_TauVSe);
+   fChain->SetBranchAddress("TauVSjet", &TauVSjet, &b_TauVSjet);
+   fChain->SetBranchAddress("TauDecayMode", &TauDecayMode, &b_TauDecayMode);
+
    fChain->SetBranchAddress("fsrPt", &fsrPt, &b_fsrPt);
    fChain->SetBranchAddress("fsrEta", &fsrEta, &b_fsrEta);
    fChain->SetBranchAddress("fsrPhi", &fsrPhi, &b_fsrPhi);

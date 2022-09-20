@@ -36,9 +36,9 @@ public:
    enum _final_state
 	{
 		fs4mu = 0,
-		fs4e = 1,
+		fs2mu2tau = 1,
 		fs2e2mu = 2,
-		fs2mu2e = 3,
+		fs2e2tau = 3,
 		fs4l = 4,
 		MAX_NUM_OF_FINAL_STATES
 	};
