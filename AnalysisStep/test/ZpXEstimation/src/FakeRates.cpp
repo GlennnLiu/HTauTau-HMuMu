@@ -17,12 +17,12 @@ FakeRates::FakeRates( TString input_file_FR_name )
       g_FR_mu_EE = (TGraph*)input_file_FR->Get("FR_OS_muon_EE");
       g_FR_e_EB  = (TGraph*)input_file_FR->Get("FR_OS_electron_EB");
       g_FR_e_EE  = (TGraph*)input_file_FR->Get("FR_OS_electron_EE");
-      g_FR_tauE_EB = (TGraph*)input_file_FR->Get("FR_OS_tau_TauE_EB");
-      g_FR_tauE_EE = (TGraph*)input_file_FR->Get("FR_OS_tau_TauE_EE");
-      g_FR_tauMu_EB = (TGraph*)input_file_FR->Get("FR_OS_tau_TauMu_EB");
-      g_FR_tauMu_EE = (TGraph*)input_file_FR->Get("FR_OS_tau_TauMu_EE");
-      g_FR_tauTau_EB = (TGraph*)input_file_FR->Get("FR_OS_tau_TauTau_EB");
-      g_FR_tauTau_EE = (TGraph*)input_file_FR->Get("FR_OS_tau_TauTau_EE");
+      g_FR_tauE_EB = (TGraph*)input_file_FR->Get("FR_OS_tauE_EB");
+      g_FR_tauE_EE = (TGraph*)input_file_FR->Get("FR_OS_tauE_EE");
+      g_FR_tauMu_EB = (TGraph*)input_file_FR->Get("FR_OS_tauMu_EB");
+      g_FR_tauMu_EE = (TGraph*)input_file_FR->Get("FR_OS_tauMu_EE");
+      g_FR_tauTau_EB = (TGraph*)input_file_FR->Get("FR_OS_tauTau_EB");
+      g_FR_tauTau_EE = (TGraph*)input_file_FR->Get("FR_OS_tauTau_EE");
    }
    
    // for SS FR files
@@ -32,12 +32,12 @@ FakeRates::FakeRates( TString input_file_FR_name )
       g_FR_mu_EE = (TGraph*)input_file_FR->Get("FR_SS_muon_EE");
       g_FR_e_EB  = (TGraph*)input_file_FR->Get("FR_SS_electron_EB");
       g_FR_e_EE  = (TGraph*)input_file_FR->Get("FR_SS_electron_EE");
-      g_FR_tauE_EB = (TGraph*)input_file_FR->Get("FR_SS_tau_TauE_EB");
-      g_FR_tauE_EE = (TGraph*)input_file_FR->Get("FR_SS_tau_TauE_EE");
-      g_FR_tauMu_EB = (TGraph*)input_file_FR->Get("FR_SS_tau_TauMu_EB");
-      g_FR_tauMu_EE = (TGraph*)input_file_FR->Get("FR_SS_tau_TauMu_EE");
-      g_FR_tauTau_EB = (TGraph*)input_file_FR->Get("FR_SS_tau_TauTau_EB");
-      g_FR_tauTau_EE = (TGraph*)input_file_FR->Get("FR_SS_tau_TauTau_EE");
+      g_FR_tauE_EB = (TGraph*)input_file_FR->Get("FR_SS_tauE_EB");
+      g_FR_tauE_EE = (TGraph*)input_file_FR->Get("FR_SS_tauE_EE");
+      g_FR_tauMu_EB = (TGraph*)input_file_FR->Get("FR_SS_tauMu_EB");
+      g_FR_tauMu_EE = (TGraph*)input_file_FR->Get("FR_SS_tauMu_EE");
+      g_FR_tauTau_EB = (TGraph*)input_file_FR->Get("FR_SS_tauTau_EB");
+      g_FR_tauTau_EE = (TGraph*)input_file_FR->Get("FR_SS_tauTau_EE");
    }
 
 }
@@ -57,7 +57,7 @@ float FakeRates::GetFakeRate(float lep_Pt, float lep_eta, int lep_ID, int tauCha
 
    float my_lep_Pt = lep_Pt >= 80. ? 79. : lep_Pt;
    int   my_lep_ID = abs(lep_ID);
-
+   //cout<<lep_Pt<<","<<lep_ID<<","<<tauChannel<<endl;
    int bin = 0;
    if ( my_lep_Pt > 5 && my_lep_Pt <= 7 ) bin = 0;
    else if ( my_lep_Pt >  7 && my_lep_Pt <= 10 ) bin = 1;
@@ -68,8 +68,8 @@ float FakeRates::GetFakeRate(float lep_Pt, float lep_eta, int lep_ID, int tauCha
    else if ( my_lep_Pt > 50 && my_lep_Pt <= 80 ) bin = 6;
    
    if ( fabs(my_lep_ID) == 11 ) bin = bin-1; // there is no [5, 7] bin in the electron fake rate
-   if ( fabs(my_lep_ID) == 15 ) bin = bin-2; // there is no [5, 10] bin in the hadronic tau fake rate
-
+   if ( fabs(my_lep_ID) == 15 ) bin = bin-3; // there is no [5, 10] bin in the hadronic tau fake rate
+   //cout<<bin<<endl;
    if ( my_lep_ID == 11 ) {
       if ( fabs(lep_eta) < 1.479 ) return (g_FR_e_EB->GetY())[bin];
       else return (g_FR_e_EE->GetY())[bin];
@@ -120,7 +120,7 @@ float FakeRates::GetFakeRate_Up(float lep_Pt, float lep_eta, int lep_ID, int tau
    else if ( my_lep_Pt > 50 && my_lep_Pt <= 80 ) bin = 6;
 	
    if ( fabs(my_lep_ID) == 11 ) bin = bin-1; // there is no [5, 7] bin in the electron fake rate
-   if ( fabs(my_lep_ID) == 15 ) bin = bin-2; // there is no [5, 10] bin in the hadronic tau fake rate
+   if ( fabs(my_lep_ID) == 15 ) bin = bin-3; // there is no [5, 20] bin in the hadronic tau fake rate
 
    if ( my_lep_ID == 11 ) {
       if ( fabs(lep_eta) < 1.479 )
@@ -176,6 +176,7 @@ float FakeRates::GetFakeRate_Dn(float lep_Pt, float lep_eta, int lep_ID, int tau
    else if ( my_lep_Pt > 50 && my_lep_Pt <= 80 ) bin = 6;
 	
    if ( fabs(my_lep_ID) == 11 ) bin = bin-1; // there is no [5, 7] bin in the electron fake rate
+   if ( fabs(my_lep_ID) == 15 ) bin = bin-3; // there is no [5, 20] bin in the hadronic tau fake rate
 
    if ( my_lep_ID == 11 ) {
       if ( fabs(lep_eta) < 1.479 )

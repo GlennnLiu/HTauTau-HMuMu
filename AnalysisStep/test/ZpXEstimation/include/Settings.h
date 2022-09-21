@@ -36,10 +36,14 @@ public:
    enum _final_state
 	{
 		fs4mu = 0,
-		fs2mu2tau = 1,
-		fs2e2mu = 2,
-		fs2e2tau = 3,
-		fs4l = 4,
+		fs2muetau = 1,
+		fs2mumutau = 2,
+		fs2mutautau = 3,
+		fs2e2mu = 4,
+		fs2eetau = 5,
+		fs2emutau = 6,
+		fs2etautau = 7,
+		fs4l = 8,
 		MAX_NUM_OF_FINAL_STATES
 	};
 /*

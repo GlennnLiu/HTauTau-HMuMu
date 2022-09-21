@@ -23,9 +23,13 @@ OSmethod::OSmethod():Tree()
    _s_flavour.push_back("tauTau");
    
    _s_final_state.push_back("4mu");
-   _s_final_state.push_back("2mu2tau");
+   _s_final_state.push_back("2muetau");
+   _s_final_state.push_back("2mumutau");
+   _s_final_state.push_back("2mutautau");
    _s_final_state.push_back("2e2mu");
-   _s_final_state.push_back("2e2tau");
+   _s_final_state.push_back("2eetau");
+   _s_final_state.push_back("2emutau");
+   _s_final_state.push_back("2etautau");
    _s_final_state.push_back("4l");
   /* 
    _s_category.push_back("UnTagged");
@@ -69,7 +73,19 @@ OSmethod::OSmethod():Tree()
    _s_variation.push_back("nominal");
    _s_variation.push_back("Up");
    _s_variation.push_back("Dn");
-   
+  
+   std::string year="2016Legacy";
+
+   DeepTauSF_VSe_ETau = new TauIDSFTool(year,"DeepTau2017v2p1VSe","Medium");
+   DeepTauSF_VSmu_ETau = new TauIDSFTool(year,"DeepTau2017v2p1VSmu","Tight");
+   DeepTauSF_VSjet_ETau = new TauIDSFTool(year,"DeepTau2017v2p1VSjet","Medium");
+   DeepTauSF_VSe_MuTau = new TauIDSFTool(year,"DeepTau2017v2p1VSe","VLoose");
+   DeepTauSF_VSmu_MuTau = new TauIDSFTool(year,"DeepTau2017v2p1VSmu","Tight");
+   DeepTauSF_VSjet_MuTau = new TauIDSFTool(year,"DeepTau2017v2p1VSjet","Tight");
+   DeepTauSF_VSe_TauTau = new TauIDSFTool(year,"DeepTau2017v2p1VSe","VLoose");
+   DeepTauSF_VSmu_TauTau = new TauIDSFTool(year,"DeepTau2017v2p1VSmu","Tight");
+   DeepTauSF_VSjet_TauTau = new TauIDSFTool(year,"DeepTau2017v2p1VSjet","Tight");
+ 
    DeclareFRHistos();
    DeclareDataMCHistos();
    DeclareZXHistos();
@@ -102,7 +118,7 @@ void OSmethod::FillFRHistos( TString input_file_data_name )
    if (fChain == 0) return;
 
    Long64_t nentries = fChain->GetEntriesFast();
-   cout<<"Processing "<<input_file_data_name<<", total event: "<<nentries<<endl;
+   cout<<"[INFO] Processing "<<input_file_data_name<<", total event: "<<nentries<<endl;
    Long64_t nbytes = 0, nb = 0;
 	
 	// Define some counters for control print out
@@ -138,15 +154,15 @@ void OSmethod::FillFRHistos( TString input_file_data_name )
       p2.SetPtEtaPhiM(LepPt->at(1), LepEta->at(1), LepPhi->at(1), 0.);
       p3.SetPtEtaPhiM(LepPt->at(2), LepEta->at(2), LepPhi->at(2), 0.);
 	   
-      if ( abs(Z1Mass - 91.2) > 7. ) {_failZ1MassCut++; continue;}
+      if ( fabs(Z1Mass - 91.2) > 7. ) {_failZ1MassCut++; continue;}
       if ( (LepPt->at(0) > LepPt->at(1)) && (LepPt->at(0) < 20. || LepPt->at(1) < 10.) ) {_failLepPtCut++; continue;}
       if ( (LepPt->at(1) > LepPt->at(0)) && (LepPt->at(1) < 20. || LepPt->at(0) < 10.) ) {_failLepPtCut++; continue;}
       if ( (LepPt->at(2) < 20. && abs(LepLepId->at(2)) == 15 ) ) {_failLepPtCut++; continue;}
-      if ( (fabs(LepEta->at(2)) > 2.5 ) && ( fabs(LepLepId->at(2)) == 11 || fabs(LepLepId->at(2)) == 13 )) {_failEtaCut++; continue;}
-      if ( (fabs(LepEta->at(2)) > 2.3 ) && ( fabs(LepLepId->at(2)) == 15 )) {_failEtaCut++; continue;}
-      if ( (LepSIP->at(2) > 4. || Lepdxy->at(2) > 0.5 || Lepdz->at(2) > 1.0) && (fabs(LepLepId->at(2)) == 11)) { _failSipVtxCut++; continue;} // Included dxy/dz cuts for ele       
-      if ( (LepSIP->at(2) > 4. || Lepdxy->at(2) > 0.5 || Lepdz->at(2) > 1.0) && (fabs(LepLepId->at(2)) == 13)) { _failSipVtxCut++; continue;} // Included dxy/dz cuts for mu   
-      if ( (Lepdz->at(2) > 10) && (fabs(LepLepId->at(2)) == 15)) { _failSipVtxCut++; continue;}
+      if ( (fabs(LepEta->at(2)) > 2.5 ) && ( abs(LepLepId->at(2)) == 11 || abs(LepLepId->at(2)) == 13 )) {_failEtaCut++; continue;}
+      if ( (fabs(LepEta->at(2)) > 2.3 ) && ( abs(LepLepId->at(2)) == 15 )) {_failEtaCut++; continue;}
+      if ( (LepSIP->at(2) > 4. || Lepdxy->at(2) > 0.5 || Lepdz->at(2) > 1.0) && (abs(LepLepId->at(2)) == 11)) { _failSipVtxCut++; continue;} // Included dxy/dz cuts for ele       
+      if ( (LepSIP->at(2) > 4. || Lepdxy->at(2) > 0.5 || Lepdz->at(2) > 1.0) && (abs(LepLepId->at(2)) == 13)) { _failSipVtxCut++; continue;} // Included dxy/dz cuts for mu   
+      if ( (Lepdz->at(2) > 10) && (abs(LepLepId->at(2)) == 15)) { _failSipVtxCut++; continue;}
       // NB: Included SIP cut on muons that was removed when it was included in the muon BDT
       if ( PFMET > 25. ) {_failMETCut++; continue;}
       if ( (LepLepId->at(2) < 0 && LepLepId->at(0) > 0 && (p1+p3).M() < 4.) || (LepLepId->at(2) < 0 && LepLepId->at(1) > 0 && (p2+p3).M() < 4.) ) {_faillingJPsiMassCut++; continue;}
@@ -159,48 +175,48 @@ void OSmethod::FillFRHistos( TString input_file_data_name )
          _event_weight = (_lumi * 1000 * xsec * _k_factor * overallEventWeight * L1prefiringWeight) / gen_sum_weights;
 
          //if( LepisID->at(2) ) // Changed because we are not using BDT-based muon ID but PF+ISO 
-         if(fabs(LepLepId->at(2)) == 11 || fabs(LepLepId->at(2)) == 13) {           
-         if(LepisID->at(2) && ((fabs(LepLepId->at(2)) == 13) ? LepCombRelIsoPF->at(2) < 0.35 : LepCombRelIsoPF->at(2) < 999999.))
+         if(abs(LepLepId->at(2)) == 11 || abs(LepLepId->at(2)) == 13) {           
+         if(LepisID->at(2) && ((abs(LepLepId->at(2)) == 13) ? LepCombRelIsoPF->at(2) < 0.35 : LepCombRelIsoPF->at(2) < 999999.))
          {
 	   _passingSelection++;
-	   if(fabs(LepLepId->at(2)) == 11 ) passing[_current_process][Settings::ele]->Fill(LepPt->at(2), (abs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight);
-	   else if(fabs(LepLepId->at(2)) == 13 ) passing[_current_process][Settings::mu]->Fill(LepPt->at(2), (abs(LepEta->at(2)) < 1.2) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight);
+	   if(abs(LepLepId->at(2)) == 11 ) passing[_current_process][Settings::ele]->Fill(LepPt->at(2), (fabs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight);
+	   else if(abs(LepLepId->at(2)) == 13 ) passing[_current_process][Settings::mu]->Fill(LepPt->at(2), (fabs(LepEta->at(2)) < 1.2) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight);
          }
          else
 	   {
 	     _faillingSelection++;
-	     if(fabs(LepLepId->at(2)) == 11 ) failing[_current_process][Settings::ele]->Fill(LepPt->at(2), (abs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight);
-	     else if(fabs(LepLepId->at(2)) == 13 ) failing[_current_process][Settings::mu]->Fill(LepPt->at(2), (abs(LepEta->at(2)) < 1.2) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight);
+	     if(abs(LepLepId->at(2)) == 11 ) failing[_current_process][Settings::ele]->Fill(LepPt->at(2), (fabs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight);
+	     else if(abs(LepLepId->at(2)) == 13 ) failing[_current_process][Settings::mu]->Fill(LepPt->at(2), (fabs(LepEta->at(2)) < 1.2) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight);
 	   }
 	 }
 	 else {
 	 if (LepisID->at(2) && TauVSmu->at(2)>=4 && TauVSe->at(2)>=3 && TauVSjet->at(2)>=6) {
 	     _passingSelectionMu++;
 	     _passingSelectionTau++;
-	     TString WP[3]={"Tight","VLoose","Tight"};
-	     _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), WP);
-	     passing[_current_process][Settings::tauMu]->Fill(LepPt->at(2), (abs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
-	     passing[_current_process][Settings::tauTau]->Fill(LepPt->at(2), (abs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
+	     //TString WP[3]={"Tight","VLoose","Tight"};
+	     _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), abs(Z2Flav));
+	     passing[_current_process][Settings::tauMu]->Fill(LepPt->at(2), (fabs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
+	     passing[_current_process][Settings::tauTau]->Fill(LepPt->at(2), (fabs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
 	 }
 	 else {
 	     _faillingSelectionMu++;
 	     _faillingSelectionTau++;
-	     TString WP[3]={"Tight","VLoose","Tight"};
-             _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), WP);
-	     failing[_current_process][Settings::tauMu]->Fill(LepPt->at(2), (abs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
-	     failing[_current_process][Settings::tauTau]->Fill(LepPt->at(2), (abs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
+	     //TString WP[3]={"Tight","VLoose","Tight"};
+             _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), abs(Z2Flav));
+	     failing[_current_process][Settings::tauMu]->Fill(LepPt->at(2), (fabs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
+	     failing[_current_process][Settings::tauTau]->Fill(LepPt->at(2), (fabs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
 	 }
 	 if (LepisID->at(2) && TauVSmu->at(2)>=4 && TauVSe->at(2)>=5 && TauVSjet->at(2)>=5) {
 	    _passingSelectionE++;
-	    TString WP[3]={"Medium","Medium","Tight"};
-	    _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), WP);
-	    passing[_current_process][Settings::tauE]->Fill(LepPt->at(2), (abs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
+	    //TString WP[3]={"Medium","Medium","Tight"};
+	    _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), abs(Z2Flav));
+	    passing[_current_process][Settings::tauE]->Fill(LepPt->at(2), (fabs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
 	 }
 	 else {
 	    _faillingSelectionE++;
-	    TString WP[3]={"Medium","Medium","Tight"};
-            _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), WP);
-	    failing[_current_process][Settings::tauE]->Fill(LepPt->at(2), (abs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
+	    //TString WP[3]={"Medium","Medium","Tight"};
+            _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), abs(Z2Flav));
+	    failing[_current_process][Settings::tauE]->Fill(LepPt->at(2), (fabs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
 	 }
 	 }
       }
@@ -250,7 +266,7 @@ void OSmethod::FillDataMCPlots( TString input_file_data_name )
    if (fChain == 0) return;
    
    Long64_t nentries = fChain->GetEntriesFast();
-   cout<<"Processing "<<input_file_data_name<<", total event: "<<nentries<<endl;
+   cout<<"[INFO] Processing "<<input_file_data_name<<", total event: "<<nentries<<endl;
 
    Long64_t nbytes = 0, nb = 0;
    
@@ -261,12 +277,13 @@ void OSmethod::FillDataMCPlots( TString input_file_data_name )
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);
       nbytes += nb;
-      
+      //cout<<"step1"<<endl;
       if (!(test_bit(CRflag, CRZLLos_2P2F)) && !(test_bit(CRflag, CRZLLos_3P1F))) continue;
-      
+      //cout<<"step2"<<endl;
       _current_final_state = FindFinalState();
       if (_current_final_state<0) {continue;}
-/*      
+      //cout<<"step3"<<endl;
+/*    
       for ( int j = 0; j < nCleanedJetsPt30; j++)
       {
          jetPt[j] = JetPt->at(j);
@@ -304,15 +321,19 @@ void OSmethod::FillDataMCPlots( TString input_file_data_name )
                                                  ZZPt,
                                                  _current_category,
                                                  ZZjjPt);
-*/    
+*/    //cout<<"step4"<<endl;
       _k_factor = calculate_K_factor(input_file_data_name);
+      //cout<<"step5"<<endl;
       _TauIDSF = calculate_TauIDSF(input_file_data_name);
+      //cout<<"step6"<<endl;
       _event_weight = (_lumi * 1000 * xsec * _k_factor * _TauIDSF * overallEventWeight * L1prefiringWeight) / gen_sum_weights;
-      
+      //cout<<test_bit(CRflag, CRZLLos_2P2F)<<","<<_current_process<<","<<_current_final_state<<endl; 
       if ( test_bit(CRflag, CRZLLos_2P2F) ) histos_1D[Settings::reg2P2F][_current_process][_current_final_state]->Fill(ZZMass, (_current_process == Settings::Data) ? 1 :  _event_weight);
+      //cout<<"step7"<<endl;
       if ( test_bit(CRflag, CRZLLos_3P1F) ) histos_1D[Settings::reg3P1F][_current_process][_current_final_state]->Fill(ZZMass, (_current_process == Settings::Data) ? 1 :  _event_weight);
+      //cout<<"step8"<<endl;
       if ( Z1Flav < 0 && Z2Flav < 0 )       histos_1D[Settings::regOS][_current_process][_current_final_state]->Fill(ZZMass, (_current_process == Settings::Data) ? 1 :  _event_weight);
-   
+      //cout<<"step9"<<endl;   
    } // END events loop
    
    cout << "[INFO] Processing of " << input_file_data_name << " done." << endl;
@@ -335,7 +356,7 @@ void OSmethod::MakeHistogramsZX( TString input_file_data_name, TString  input_fi
    if (fChain == 0) return;
    
    Long64_t nentries = fChain->GetEntriesFast();
-   cout<<"Processing "<<input_file_data_name<<", total event: "<<nentries<<endl;
+   cout<<"[INFO] Processing "<<input_file_data_name<<", total event: "<<nentries<<endl;
    
    Long64_t nbytes = 0, nb = 0;
    // FOR DEBUG
@@ -357,12 +378,12 @@ void OSmethod::MakeHistogramsZX( TString input_file_data_name, TString  input_fi
 
       // Included SIP and dxy/dz cuts for 3rd and 4th lepton                                                                                                                         
       if ( (fabs(LepEta->at(2)) > 2.5) || (fabs(LepEta->at(3)) > 2.5) ) {continue;}
-      if ( (fabs(LepLepId->at(2))==15 && fabs(LepEta->at(2)) > 2.3) || (fabs(LepLepId->at(3))==15 && fabs(LepEta->at(3)) > 2.3) ) {continue;}
-      if ( ( LepSIP->at(2) > 4. || Lepdxy->at(2) > 0.5 || Lepdz->at(2) > 1.0) && (fabs(LepLepId->at(2)) == 11 || fabs(LepLepId->at(2)) == 13)) {continue;}
-      if ( ( LepSIP->at(3) > 4. || Lepdxy->at(3) > 0.5 || Lepdz->at(3) > 1.0) && (fabs(LepLepId->at(3)) == 11 || fabs(LepLepId->at(3)) == 13)) {continue;}
-		
+      if ( (abs(LepLepId->at(2))==15 && fabs(LepEta->at(2)) > 2.3) || (abs(LepLepId->at(3))==15 && fabs(LepEta->at(3)) > 2.3) ) {continue;}
+      if ( ( LepSIP->at(2) > 4. || Lepdxy->at(2) > 0.5 || Lepdz->at(2) > 1.0) && (abs(LepLepId->at(2)) == 11 || abs(LepLepId->at(2)) == 13)) {continue;}
+      if ( ( LepSIP->at(3) > 4. || Lepdxy->at(3) > 0.5 || Lepdz->at(3) > 1.0) && (abs(LepLepId->at(3)) == 11 || abs(LepLepId->at(3)) == 13)) {continue;}
+      if ( ( Lepdz->at(2) > 10 || LepPt->at(2) < 20) && abs(LepLepId->at(2))==15 ) {continue;}
+      if ( ( Lepdz->at(3) > 10 || LepPt->at(3) < 20) && abs(LepLepId->at(3))==15 ) {continue;}
       if ( ZZMass < 70. ) continue;
-
       _current_final_state = FindFinalState();
       if (_current_final_state<0) {continue;}
       
@@ -408,13 +429,17 @@ void OSmethod::MakeHistogramsZX( TString input_file_data_name, TString  input_fi
       if (Z2Flav==-165) tauChannel=0;
       else if (Z2Flav==-195) tauChannel=1;
       else if (Z2Flav==-225) tauChannel=2;
+      //cout<<"step1"<<endl;
       _f3    = FR->GetFakeRate(LepPt->at(2),LepEta->at(2),LepLepId->at(2),tauChannel);
+      //cout<<"step2"<<endl;
       _f3_Up = FR->GetFakeRate_Up(LepPt->at(2),LepEta->at(2),LepLepId->at(2),tauChannel);
       _f3_Dn = FR->GetFakeRate_Dn(LepPt->at(2),LepEta->at(2),LepLepId->at(2),tauChannel);
       _f4    = FR->GetFakeRate(LepPt->at(3),LepEta->at(3),LepLepId->at(3),tauChannel);
+      //cout<<"step2.05"<<endl;
       _f4_Up = FR->GetFakeRate_Up(LepPt->at(3),LepEta->at(3),LepLepId->at(3),tauChannel);
+      //cout<<"step2.1"<<endl;
       _f4_Dn = FR->GetFakeRate_Dn(LepPt->at(3),LepEta->at(3),LepLepId->at(3),tauChannel);
-
+      //cout<<"step2.2, "<<test_bit(CRflag, CRZLLos_2P2F)<<test_bit(CRflag, CRZLLos_3P1F)<<endl;
       if ( test_bit(CRflag, CRZLLos_2P2F) )
       {
 	//nevents_CRLLos_2P2F += 1;	
@@ -424,8 +449,9 @@ void OSmethod::MakeHistogramsZX( TString input_file_data_name, TString  input_fi
 	//cout << "weight = " << (_f3/(1-_f3))*(_f4/(1-_f4)) << endl;
 	//cout << "weight_up = " << (_f3_Up/(1-_f3_Up))*(_f4_Up/(1-_f4_Up)) << endl;
 	//cout << "weight_dn = " << (_f3_Dn/(1-_f3_Dn))*(_f4_Dn/(1-_f4_Dn)) << endl;
-			
+	 //cout<<"step3"<<endl;		
          h_from2P2F_SR[Settings::nominal][_current_final_state]->Fill(ZZMass, (_f3/(1-_f3))*(_f4/(1-_f4)) );
+	 //cout<<"step4"<<endl;
          h_from2P2F_3P1F[Settings::nominal][_current_final_state]->Fill(ZZMass, (_f3/(1-_f3))+(_f4/(1-_f4)) );
 			
          h_from2P2F_SR[Settings::Up][_current_final_state]->Fill(ZZMass, (_f3_Up/(1-_f3_Up))*(_f4_Up/(1-_f4_Up)) );
@@ -437,13 +463,14 @@ void OSmethod::MakeHistogramsZX( TString input_file_data_name, TString  input_fi
       if ( test_bit(CRflag, CRZLLos_3P1F) )
       {
 	//nevents_CRLLos_3P1F += 1;
-	bool tightLep3;
+	bool tightLep3=false;
 	if (abs(LepLepId->at(3))==11) tightLep3=LepisID->at(3);
 	else if (abs(LepLepId->at(3))==13) tightLep3=LepisID->at(3) && LepCombRelIsoPF->at(3) < 0.35;
 	else if (abs(LepLepId->at(3))==15) {
-	  if (tauChannel==0) tightLep3=LepisID->at(3) && TauVSmu->at(3)>=4 && TauVSe->at(3)>=5 && TauVSjet->at(3)>=5;
-	  else tightLep3=LepisID->at(3) && TauVSmu->at(3)>=4 && TauVSe->at(3)>=3 && TauVSjet->at(3)>=6;
+	  if (tauChannel==0) tightLep3=(LepisID->at(3) && TauVSmu->at(3)>=4 && TauVSe->at(3)>=5 && TauVSjet->at(3)>=5);
+	  else tightLep3=(LepisID->at(3) && TauVSmu->at(3)>=4 && TauVSe->at(3)>=3 && TauVSjet->at(3)>=6);
 	}
+	//cout<<"tightLep3"<<tightLep3<<endl;
 	if(tightLep3)//(LepisID->at(3))
 	  {
 	    _f4    = FR->GetFakeRate(LepPt->at(2),LepEta->at(2),LepLepId->at(2),tauChannel);
@@ -491,7 +518,7 @@ void OSmethod::MakeZXMCContribution( TString input_file_data_name, TString  inpu
    if (fChain == 0) return;
    
    Long64_t nentries = fChain->GetEntriesFast();
-   cout<<"Processing "<<input_file_data_name<<", total event: "<<nentries<<endl;
+   cout<<"[INFO] Processing "<<input_file_data_name<<", total event: "<<nentries<<endl;
    
    Long64_t nbytes = 0, nb = 0;
    
@@ -1086,9 +1113,13 @@ void OSmethod::PlotDataMC_2P2F( TString variable_name, TString folder )
       
       TString _fs_label;
       if ( i_fs == Settings::fs4mu) _fs_label = "m_{4#font[12]{#mu}} (GeV)";
-      if ( i_fs == Settings::fs2mu2tau) _fs_label = "m_{2#font[12]{#mu}2#font[12]{#tau}} (GeV)";
+      if ( i_fs == Settings::fs2muetau) _fs_label = "m_{2#font[12]{#mu}#font[12]{#tau_{e}#tau_{h}}} (GeV)";
+      if ( i_fs == Settings::fs2mumutau) _fs_label = "m_{2#font[12]{#mu}#font[12]{#tau_{#mu}#tau_{h}}} (GeV)";
+      if ( i_fs == Settings::fs2mutautau) _fs_label = "m_{2#font[12]{#mu}#font[12]{#tau_{h}#tau_{h}}} (GeV)";
       if ( i_fs == Settings::fs2e2mu) _fs_label = "m_{2#font[12]{e}2#font[12]{#mu}} (GeV)";
-      if ( i_fs == Settings::fs2e2tau) _fs_label = "m_{2#font[12]{e}2#font[12]{#tau}} (GeV)";
+      if ( i_fs == Settings::fs2eetau) _fs_label = "m_{2#font[12]{e}#font[12]{#tau_{e}#tau_{h}}} (GeV)";
+      if ( i_fs == Settings::fs2emutau) _fs_label = "m_{2#font[12]{e}#font[12]{#tau_{#mu}#tau_{h}}} (GeV)";
+      if ( i_fs == Settings::fs2etautau) _fs_label = "m_{2#font[12]{e}#font[12]{#tau_{h}#tau_{h}}} (GeV)";
       stack->GetXaxis()->SetTitle(_fs_label);
       stack->GetXaxis()->SetTitleSize(0.04);
       stack->GetXaxis()->SetLabelSize(0.04);
@@ -1164,9 +1195,13 @@ void OSmethod::PlotDataMC_3P1F( TString variable_name, TString folder )
       
       TString _fs_label;
       if ( i_fs == Settings::fs4mu) _fs_label = "m_{4#font[12]{#mu}} (GeV)";
-      if ( i_fs == Settings::fs2mu2tau) _fs_label = "m_{2#font[12]{#mu}2#font[12]{#tau}} (GeV)";
+      if ( i_fs == Settings::fs2muetau) _fs_label = "m_{2#font[12]{#mu}#font[12]{#tau_{e}#tau_{h}}} (GeV)";
+      if ( i_fs == Settings::fs2mumutau) _fs_label = "m_{2#font[12]{#mu}#font[12]{#tau_{#mu}#tau_{h}}} (GeV)";
+      if ( i_fs == Settings::fs2mutautau) _fs_label = "m_{2#font[12]{#mu}#font[12]{#tau_{h}#tau_{h}}} (GeV)";
       if ( i_fs == Settings::fs2e2mu) _fs_label = "m_{2#font[12]{e}2#font[12]{#mu}} (GeV)";
-      if ( i_fs == Settings::fs2e2tau) _fs_label = "m_{2#font[12]{e}2#font[12]{#tau}} (GeV)";
+      if ( i_fs == Settings::fs2eetau) _fs_label = "m_{2#font[12]{e}#font[12]{#tau_{e}#tau_{h}}} (GeV)";
+      if ( i_fs == Settings::fs2emutau) _fs_label = "m_{2#font[12]{e}#font[12]{#tau_{#mu}#tau_{h}}} (GeV)";
+      if ( i_fs == Settings::fs2etautau) _fs_label = "m_{2#font[12]{e}#font[12]{#tau_{h}#tau_{h}}} (GeV)";
       stack->GetXaxis()->SetTitle(_fs_label);
       stack->GetXaxis()->SetTitleSize(0.04);
       stack->GetXaxis()->SetLabelSize(0.04);
@@ -1237,9 +1272,13 @@ void OSmethod::PlotDataMC( TString variable_name, TString folder )
 		
       TString _fs_label;
       if ( i_fs == Settings::fs4mu) _fs_label = "m_{4#font[12]{#mu}} (GeV)";
-      if ( i_fs == Settings::fs2mu2tau) _fs_label = "m_{2#font[12]{#mu}2#font[12]{#tau}} (GeV)";
+      if ( i_fs == Settings::fs2muetau) _fs_label = "m_{2#font[12]{#mu}#font[12]{#tau_{e}#tau_{h}}} (GeV)";
+      if ( i_fs == Settings::fs2mumutau) _fs_label = "m_{2#font[12]{#mu}#font[12]{#tau_{#mu}#tau_{h}}} (GeV)";
+      if ( i_fs == Settings::fs2mutautau) _fs_label = "m_{2#font[12]{#mu}#font[12]{#tau_{h}#tau_{h}}} (GeV)";
       if ( i_fs == Settings::fs2e2mu) _fs_label = "m_{2#font[12]{e}2#font[12]{#mu}} (GeV)";
-      if ( i_fs == Settings::fs2e2tau) _fs_label = "m_{2#font[12]{e}2#font[12]{#tau}} (GeV)";
+      if ( i_fs == Settings::fs2eetau) _fs_label = "m_{2#font[12]{e}#font[12]{#tau_{e}#tau_{h}}} (GeV)";
+      if ( i_fs == Settings::fs2emutau) _fs_label = "m_{2#font[12]{e}#font[12]{#tau_{#mu}#tau_{h}}} (GeV)";
+      if ( i_fs == Settings::fs2etautau) _fs_label = "m_{2#font[12]{e}#font[12]{#tau_{h}#tau_{h}}} (GeV)";
       stack->GetXaxis()->SetTitle(_fs_label);
       stack->GetXaxis()->SetTitleSize(0.04);
       stack->GetXaxis()->SetLabelSize(0.04);
@@ -1301,9 +1340,13 @@ void OSmethod::PlotZXContributions( TString folder )
 			
 			TString _fs_label;
 		        if ( i_fs == Settings::fs4mu) _fs_label = "m_{4#font[12]{#mu}} (GeV)";
-  		        if ( i_fs == Settings::fs2mu2tau) _fs_label = "m_{2#font[12]{#mu}2#font[12]{#tau}} (GeV)";
+		        if ( i_fs == Settings::fs2muetau) _fs_label = "m_{2#font[12]{#mu}#font[12]{#tau_{e}#tau_{h}}} (GeV)";
+		        if ( i_fs == Settings::fs2mumutau) _fs_label = "m_{2#font[12]{#mu}#font[12]{#tau_{#mu}#tau_{h}}} (GeV)";
+		        if ( i_fs == Settings::fs2mutautau) _fs_label = "m_{2#font[12]{#mu}#font[12]{#tau_{h}#tau_{h}}} (GeV)";
 		        if ( i_fs == Settings::fs2e2mu) _fs_label = "m_{2#font[12]{e}2#font[12]{#mu}} (GeV)";
- 		        if ( i_fs == Settings::fs2e2tau) _fs_label = "m_{2#font[12]{e}2#font[12]{#tau}} (GeV)";
+		        if ( i_fs == Settings::fs2eetau) _fs_label = "m_{2#font[12]{e}#font[12]{#tau_{e}#tau_{h}}} (GeV)";
+		        if ( i_fs == Settings::fs2emutau) _fs_label = "m_{2#font[12]{e}#font[12]{#tau_{#mu}#tau_{h}}} (GeV)";
+		        if ( i_fs == Settings::fs2etautau) _fs_label = "m_{2#font[12]{e}#font[12]{#tau_{h}#tau_{h}}} (GeV)";
 			if ( i_fs == Settings::fs4l)    _fs_label = "m_{4#font[12]{l}} (GeV)";
 			h_from3P1F_SR[Settings::nominal][i_fs]->GetXaxis()->SetTitle(_fs_label);
 			h_from3P1F_SR[Settings::nominal][i_fs]->GetXaxis()->SetTitleSize(0.04);
@@ -1796,7 +1839,7 @@ void OSmethod::PlotFR()
    mg_tauE->GetXaxis()->SetTitle("p_{T} [GeV]");
    mg_tauE->GetYaxis()->SetTitle("Fake Rate");
    mg_tauE->SetTitle("#tau fake rate, #tau_{e}#tau_{h} channel");
-   mg_tauE->SetMaximum(0.35);
+   mg_tauE->SetMaximum(0.05);
    leg_tauE = CreateLegend_FR("left",FR_OS_tauE_EB_unc,FR_OS_tauE_EB,FR_OS_tauE_EE_unc,FR_OS_tauE_EE);
    leg_tauE->Draw();
    SavePlots(c_tauE, "Plots/FR_OS_tauE");
@@ -1807,7 +1850,7 @@ void OSmethod::PlotFR()
    mg_tauMu->GetXaxis()->SetTitle("p_{T} [GeV]");
    mg_tauMu->GetYaxis()->SetTitle("Fake Rate");
    mg_tauMu->SetTitle("#tau fake rate, #tau_{e}#tau_{h} channel");
-   mg_tauMu->SetMaximum(0.35);
+   mg_tauMu->SetMaximum(0.05);
    leg_tauMu = CreateLegend_FR("left",FR_OS_tauMu_EB_unc,FR_OS_tauMu_EB,FR_OS_tauMu_EE_unc,FR_OS_tauMu_EE);
    leg_tauMu->Draw();
    SavePlots(c_tauMu, "Plots/FR_OS_tauMu");
@@ -1818,7 +1861,7 @@ void OSmethod::PlotFR()
    mg_tauTau->GetXaxis()->SetTitle("p_{T} [GeV]");
    mg_tauTau->GetYaxis()->SetTitle("Fake Rate");
    mg_tauTau->SetTitle("#tau fake rate, #tau_{e}#tau_{h} channel");
-   mg_tauTau->SetMaximum(0.35);
+   mg_tauTau->SetMaximum(0.05);
    leg_tauTau = CreateLegend_FR("left",FR_OS_tauTau_EB_unc,FR_OS_tauTau_EB,FR_OS_tauTau_EE_unc,FR_OS_tauTau_EE);
    leg_tauTau->Draw();
    SavePlots(c_tauTau, "Plots/FR_OS_tauTau");  
@@ -1898,19 +1941,19 @@ int OSmethod::FindFinalState()
 
    if ( Z1Flav == -121 )
    {
-      if ( Z2Flav == -169 )
-         final_state = Settings::fs2e2mu;
-      else if ( Z2Flav != -169 && Z2Flav != -121)
-         final_state = Settings::fs2e2tau;
+      if ( Z2Flav == -169 ) final_state = Settings::fs2e2mu;
+      else if (Z2Flav == -165) final_state = Settings::fs2eetau;
+      else if (Z2Flav == -195) final_state = Settings::fs2emutau;
+      else if (Z2Flav == -225) final_state = Settings::fs2etautau;
       else
          final_state = -1;//cerr << "[ERROR] in event " << RunNumber << ":" << LumiNumber << ":" << EventNumber << ", Z2Flav = " << Z2Flav << endl;
       }
    else if ( Z1Flav == -169 )
    {
-      if ( Z2Flav == -169 )
-         final_state = Settings::fs4mu;
-      else if ( Z2Flav != -169 && Z2Flav != -121 )
-         final_state = Settings::fs2mu2tau;
+      if ( Z2Flav == -169 ) final_state = Settings::fs4mu;
+      else if (Z2Flav == -165) final_state = Settings::fs2muetau;
+      else if (Z2Flav == -195) final_state = Settings::fs2mumutau;
+      else if (Z2Flav == -225) final_state = Settings::fs2mutautau;
       else
          final_state = -1;//cerr << "[ERROR] in event " << RunNumber << ":" << LumiNumber << ":" << EventNumber << ", Z2Flav = " << Z2Flav << endl;
    }
@@ -1966,21 +2009,30 @@ int OSmethod::GENMatch(int ileg,TString input_file_name)
    }
 }
 
-float OSmethod::calculate_TauIDSF_OneLeg(short DM, float pt, float eta, int genmatch, TString* WP)
+float OSmethod::calculate_TauIDSF_OneLeg(short DM, float pt, float eta, int genmatch, int flav)
 {
    if (genmatch==6)
       return 1.;
    else if (genmatch==5) {
-      TauIDSFTool *DeepTauSF = new TauIDSFTool("2016Legacy","DeepTau2017v2p1VSjet",WP[0].Data());
-      return DeepTauSF->getSFvsPT(pt,genmatch);
+      //TauIDSFTool *DeepTauSF = new TauIDSFTool("2016Legacy","DeepTau2017v2p1VSjet",WP[0].Data());
+      if (flav==165) return DeepTauSF_VSjet_ETau->getSFvsPT(pt,genmatch);
+      else if (flav==195) return DeepTauSF_VSjet_MuTau->getSFvsPT(pt,genmatch);
+      else if (flav==225) return DeepTauSF_VSjet_TauTau->getSFvsPT(pt,genmatch);
+      else return 1.;
    }
    else if (genmatch==1 || genmatch==3) {
-      TauIDSFTool *DeepTauSF = new TauIDSFTool("2016Legacy","DeepTau2017v2p1VSe",WP[1].Data());
-      return DeepTauSF->getSFvsEta(eta,genmatch);
+      //TauIDSFTool *DeepTauSF = new TauIDSFTool("2016Legacy","DeepTau2017v2p1VSe",WP[1].Data());
+      if (flav==165) return DeepTauSF_VSe_ETau->getSFvsEta(eta,genmatch);
+      else if (flav==195) return DeepTauSF_VSe_MuTau->getSFvsEta(eta,genmatch);
+      else if (flav==225) return DeepTauSF_VSe_TauTau->getSFvsEta(eta,genmatch);
+      else return 1.;
    }
    else if (genmatch==2 || genmatch==4) {
-      TauIDSFTool *DeepTauSF = new TauIDSFTool("2016Legacy","DeepTau2017v2p1VSmu",WP[2].Data());
-      return DeepTauSF->getSFvsEta(eta,genmatch);
+      //TauIDSFTool *DeepTauSF = new TauIDSFTool("2016Legacy","DeepTau2017v2p1VSmu",WP[2].Data());
+      if (flav==165) return DeepTauSF_VSmu_ETau->getSFvsEta(eta,genmatch);
+      else if (flav==195) return DeepTauSF_VSmu_MuTau->getSFvsEta(eta,genmatch);
+      else if (flav==225) return DeepTauSF_VSmu_TauTau->getSFvsEta(eta,genmatch);
+      else return 1.;
    }
    else {
       cout<<"The genmatch "<<genmatch<<" is wrong"<<endl;
@@ -1991,18 +2043,18 @@ float OSmethod::calculate_TauIDSF_OneLeg(short DM, float pt, float eta, int genm
 float OSmethod::calculate_TauIDSF(TString input_file_name)
 {
    float SF = 1;
-   TString WP[3];
+/*   TString WP[3];
    if (Z2Flav==-165) {
       WP[0]="Medium";WP[1]="Medium";WP[2]="Tight";
    }
    else if (Z2Flav==-195 || Z2Flav==-225) {
       WP[0]="Tight";WP[1]="VLoose";WP[2]="Tight";
-   }
+   }*/
    for (size_t ileg=2;ileg<=3;ileg++) {
       if (abs(LepLepId->at(ileg))!=15)
 	 continue;
       int genmatch=GENMatch(ileg,input_file_name);
-      SF=SF*calculate_TauIDSF_OneLeg(TauDecayMode->at(ileg),LepPt->at(ileg),LepEta->at(ileg),genmatch,WP);
+      SF=SF*calculate_TauIDSF_OneLeg(TauDecayMode->at(ileg),LepPt->at(ileg),LepEta->at(ileg),genmatch,abs(Z2Flav));
    }
    return SF;
 }

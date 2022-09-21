@@ -91,7 +91,7 @@ private:
    int FindFinalState();
    float calculate_K_factor( TString );
    int GENMatch(int, TString );
-   float calculate_TauIDSF_OneLeg(short, float, float, int, TString*);
+   float calculate_TauIDSF_OneLeg(short, float, float, int, int);
    float calculate_TauIDSF(TString);
    bool GetVarLogX( TString );
    bool GetVarLogY( TString );
@@ -128,7 +128,6 @@ private:
    vector< vector <float> > _expected_yield_SR, _number_of_events_CR;
 
    TH1F *histos_1D[num_of_regions_os][num_of_processes][num_of_final_states];//[num_of_categories_stxs];
-   
    TH1F *histos_ZX[num_of_fr_variations][num_of_final_states];//[num_of_categories_stxs];
    TH1F *h_from2P2F_SR[num_of_fr_variations][num_of_final_states];//[num_of_categories_stxs];
    TH1F *h_from2P2F_3P1F[num_of_fr_variations][num_of_final_states];//[num_of_categories_stxs];
@@ -146,6 +145,8 @@ private:
    vector<Float_t> vector_Y[num_of_fake_rates][num_of_eta_bins][num_of_flavours];
    vector<Float_t> vector_EX[num_of_fake_rates][num_of_eta_bins][num_of_flavours];
    vector<Float_t> vector_EY[num_of_fake_rates][num_of_eta_bins][num_of_flavours];
-   
+  
+   TauIDSFTool *DeepTauSF_VSe_ETau, *DeepTauSF_VSmu_ETau, *DeepTauSF_VSjet_ETau, *DeepTauSF_VSe_MuTau, *DeepTauSF_VSmu_MuTau, *DeepTauSF_VSjet_MuTau, *DeepTauSF_VSe_TauTau, *DeepTauSF_VSmu_TauTau, *DeepTauSF_VSjet_TauTau;
+ 
 };
 #endif
