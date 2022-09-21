@@ -90,6 +90,9 @@ public :
    vector<short>   *TauVSe;
    vector<short>   *TauVSjet;
    vector<float>   *TauDecayMode;
+   vector<float>   *TauTES_p_Up;
+   vector<float>   *TauFES_p_Up;
+
    vector<float>   *fsrPt;
    vector<float>   *fsrEta;
    vector<float>   *fsrPhi;
@@ -258,6 +261,8 @@ public :
    TBranch        *b_TauVSe;
    TBranch        *b_TauVSjet;
    TBranch        *b_TauDecayMode;
+   TBranch	  *b_TauTES_p_Up;
+   TBranch	  *b_TauFES_p_Up;
 
    TBranch        *b_fsrPt;   //!
    TBranch        *b_fsrEta;   //!
@@ -433,6 +438,8 @@ void Tree::Init(TTree *tree, TString input_file_name, bool notZLregion)
    TauVSe = 0;
    TauVSjet = 0;
    TauDecayMode = 0;
+   TauTES_p_Up = 0;
+   TauFES_p_Up = 0;
 
    fsrPt = 0;
    fsrEta = 0;
@@ -528,6 +535,8 @@ void Tree::Init(TTree *tree, TString input_file_name, bool notZLregion)
    fChain->SetBranchAddress("TauVSe", &TauVSe, &b_TauVSe);
    fChain->SetBranchAddress("TauVSjet", &TauVSjet, &b_TauVSjet);
    fChain->SetBranchAddress("TauDecayMode", &TauDecayMode, &b_TauDecayMode);
+   fChain->SetBranchAddress("TauTES_p_Up", &TauTES_p_Up, &b_TauTES_p_Up);
+   fChain->SetBranchAddress("TauFES_p_Up", &TauFES_p_Up, &b_TauFES_p_Up);
 
    fChain->SetBranchAddress("fsrPt", &fsrPt, &b_fsrPt);
    fChain->SetBranchAddress("fsrEta", &fsrEta, &b_fsrEta);

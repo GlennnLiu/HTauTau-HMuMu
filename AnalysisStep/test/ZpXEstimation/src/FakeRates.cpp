@@ -17,12 +17,12 @@ FakeRates::FakeRates( TString input_file_FR_name )
       g_FR_mu_EE = (TGraph*)input_file_FR->Get("FR_OS_muon_EE");
       g_FR_e_EB  = (TGraph*)input_file_FR->Get("FR_OS_electron_EB");
       g_FR_e_EE  = (TGraph*)input_file_FR->Get("FR_OS_electron_EE");
-      g_FR_tauE_EB =  = (TGraph*)input_file_FR->Get("FR_OS_tau_TauE_EB");
-      g_FR_tauE_EE =  = (TGraph*)input_file_FR->Get("FR_OS_tau_TauE_EE");
-      g_FR_tauMu_EB =  = (TGraph*)input_file_FR->Get("FR_OS_tau_TauMu_EB");
-      g_FR_tauMu_EE =  = (TGraph*)input_file_FR->Get("FR_OS_tau_TauMu_EE");
-      g_FR_tauTau_EB =  = (TGraph*)input_file_FR->Get("FR_OS_tau_TauTau_EB");
-      g_FR_tauTau_EE =  = (TGraph*)input_file_FR->Get("FR_OS_tau_TauTau_EE");
+      g_FR_tauE_EB = (TGraph*)input_file_FR->Get("FR_OS_tau_TauE_EB");
+      g_FR_tauE_EE = (TGraph*)input_file_FR->Get("FR_OS_tau_TauE_EE");
+      g_FR_tauMu_EB = (TGraph*)input_file_FR->Get("FR_OS_tau_TauMu_EB");
+      g_FR_tauMu_EE = (TGraph*)input_file_FR->Get("FR_OS_tau_TauMu_EE");
+      g_FR_tauTau_EB = (TGraph*)input_file_FR->Get("FR_OS_tau_TauTau_EB");
+      g_FR_tauTau_EE = (TGraph*)input_file_FR->Get("FR_OS_tau_TauTau_EE");
    }
    
    // for SS FR files
@@ -32,12 +32,12 @@ FakeRates::FakeRates( TString input_file_FR_name )
       g_FR_mu_EE = (TGraph*)input_file_FR->Get("FR_SS_muon_EE");
       g_FR_e_EB  = (TGraph*)input_file_FR->Get("FR_SS_electron_EB");
       g_FR_e_EE  = (TGraph*)input_file_FR->Get("FR_SS_electron_EE");
-      g_FR_tauE_EB =  = (TGraph*)input_file_FR->Get("FR_SS_tau_TauE_EB");
-      g_FR_tauE_EE =  = (TGraph*)input_file_FR->Get("FR_SS_tau_TauE_EE");
-      g_FR_tauMu_EB =  = (TGraph*)input_file_FR->Get("FR_SS_tau_TauMu_EB");
-      g_FR_tauMu_EE =  = (TGraph*)input_file_FR->Get("FR_SS_tau_TauMu_EE");
-      g_FR_tauTau_EB =  = (TGraph*)input_file_FR->Get("FR_SS_tau_TauTau_EB");
-      g_FR_tauTau_EE =  = (TGraph*)input_file_FR->Get("FR_SS_tau_TauTau_EE");
+      g_FR_tauE_EB = (TGraph*)input_file_FR->Get("FR_SS_tau_TauE_EB");
+      g_FR_tauE_EE = (TGraph*)input_file_FR->Get("FR_SS_tau_TauE_EE");
+      g_FR_tauMu_EB = (TGraph*)input_file_FR->Get("FR_SS_tau_TauMu_EB");
+      g_FR_tauMu_EE = (TGraph*)input_file_FR->Get("FR_SS_tau_TauMu_EE");
+      g_FR_tauTau_EB = (TGraph*)input_file_FR->Get("FR_SS_tau_TauTau_EB");
+      g_FR_tauTau_EE = (TGraph*)input_file_FR->Get("FR_SS_tau_TauTau_EE");
    }
 
 }
@@ -104,7 +104,7 @@ float FakeRates::GetFakeRate(float lep_Pt, float lep_eta, int lep_ID, int tauCha
 //==================================================================
 
 //==================================================================
-float FakeRates::GetFakeRate_Up(float lep_Pt, float lep_eta, int lep_ID)
+float FakeRates::GetFakeRate_Up(float lep_Pt, float lep_eta, int lep_ID, int tauChannel)
 {
 
    float my_lep_Pt = lep_Pt >= 80. ? 79. : lep_Pt;
@@ -160,7 +160,7 @@ float FakeRates::GetFakeRate_Up(float lep_Pt, float lep_eta, int lep_ID)
 //==================================================================
 
 //==================================================================
-float FakeRates::GetFakeRate_Dn(float lep_Pt, float lep_eta, int lep_ID)
+float FakeRates::GetFakeRate_Dn(float lep_Pt, float lep_eta, int lep_ID, int tauChannel)
 {
 
    float my_lep_Pt = lep_Pt >= 80. ? 79. : lep_Pt;

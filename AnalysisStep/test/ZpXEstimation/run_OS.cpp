@@ -22,11 +22,11 @@ int main( int argc, char *argv[] )
    setTDRStyle();
    
    TString path = "/eos/home-g/geliu/LepUni/BigTrees/Simp/";
-   TString file_name = "/ZZ4lAnalysis.root";
+   TString file_name = "/HTauTauHMuMu.root";
    
    TString Data    = path + "AllData" + file_name;
    TString WZ      = path + "WZTo3LNu"       + file_name;
-   TString ZZ      = path + "ZZTo4lext"      + file_name;
+   TString ZZ      = path + "ZZTo4l"      + file_name;
    TString ttbar   = path + "TTTo2L2Nu"      + file_name;
    TString DY      = path + "DYJetsToLL_M50" + file_name;
 	
@@ -37,11 +37,13 @@ int main( int argc, char *argv[] )
    
    float pT_bins[] = {5, 7, 10, 20, 30, 40, 50, 80};
    
+   cout<<"Begin"<<endl;
    OSmethod *os = new OSmethod();
+   cout<<"Luminosity"<<endl;
    os->SetLumi(35.92); //2016
    //os->SetLumi(41.53);   //2017
    //os->SetLumi(59.74); //2018
-
+   cout<<"Begin"<<endl;
    ///////////////////////////////////
    // Fill control histos           //
    ///////////////////////////////////

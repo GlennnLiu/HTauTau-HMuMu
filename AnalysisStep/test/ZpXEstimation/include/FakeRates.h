@@ -27,7 +27,7 @@ public:
    
    TFile *input_file_FR;
    
-   TGraph *g_FR_mu_EB, *g_FR_mu_EE, *g_FR_e_EB, *g_FR_e_EE, *g_FR_tauE_EB, *g_FR_tauE_EE, *g_FR_tauMu_EB, *g_FR_tauMu_EE, *g_FR_tauTau_EB, *g_FR_tauTaub;
+   TGraph *g_FR_mu_EB, *g_FR_mu_EE, *g_FR_e_EB, *g_FR_e_EE, *g_FR_tauE_EB, *g_FR_tauE_EE, *g_FR_tauMu_EB, *g_FR_tauMu_EE, *g_FR_tauTau_EB, *g_FR_tauTau_EE;
 
 };
 
