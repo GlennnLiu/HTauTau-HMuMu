@@ -19,7 +19,7 @@ using namespace std;
 int main( int argc, char *argv[] )
 {
    setTDRStyle();
-   
+
    TString path = "/eos/home-g/geliu/LepUni/BigTrees/Simp/";
    TString file_name = "/HTauTauHMuMu.root";
      	
@@ -43,26 +43,26 @@ int main( int argc, char *argv[] )
    ///////////////////////////////////
    // Fill control histos           //
    ///////////////////////////////////
-   ss->FillDataMCPlots(Data);
+  /* ss->FillDataMCPlots(Data);
    ss->FillDataMCPlots(WZ);
    ss->FillDataMCPlots(ZZ);
    ss->FillDataMCPlots(ttbar);
    ss->FillDataMCPlots(DY);
-   ss->SaveDataMCHistos("DataMC_SS_Moriond19.root");
+   ss->SaveDataMCHistos("DataMC_SS.root");
    
    ///////////////////////////////////
    // Fill passing/failling histos  //
    ///////////////////////////////////
    ss->FillFRHistos(Data);
    ss->FillFRHistos(WZ);
-   ss->SaveFRHistos("Histos_SS_Moriond19.root", SubtractWZ, Remove_NegBins_FR);
-
+   ss->SaveFRHistos("Histos_SS.root", SubtractWZ, Remove_NegBins_FR);
+*/
    ///////////////////////////////////
    // Calculate fake rates          //
    ///////////////////////////////////
-   ss->GetFRHistos("Histos_SS_Moriond19.root");
+   ss->GetFRHistos("Histos_SS.root");
    ss->Set_pT_binning(8, pT_bins);
-   ss->ProduceFakeRates("FakeRates_SS_Moriond19.root", Data);
+   ss->ProduceFakeRates("FakeRates_SS.root", Data);
 
    ///////////////////////////////////
    // Calculate OS/SS ratios        //
@@ -72,19 +72,19 @@ int main( int argc, char *argv[] )
    ///////////////////////////////////
    // Fill ZX contributions histos  //
    ///////////////////////////////////
-   ss->MakeHistogramsZX(Data, "FakeRates_SS_Moriond19.root");
-   ss->SaveZXHistos("ZXHistos_SS_Moriond19.root");
+   ss->MakeHistogramsZX(Data, "FakeRates_SS.root");
+   ss->SaveZXHistos("ZXHistos_SS.root");
 
    ///////////////////////////////////
    // Plot control plots            //
    ///////////////////////////////////
-   ss->GetDataMCHistos("DataMC_SS_Moriond19.root");
+   ss->GetDataMCHistos("DataMC_SS.root");
    ss->PlotDataMC( "M4l", "Plots" );
 
    ///////////////////////////////////
    // Plot and fit Z+X              //
    ///////////////////////////////////
-   ss->GetZXHistos("ZXHistos_SS_Moriond19.root");
+   ss->GetZXHistos("ZXHistos_SS.root");
    ss->PlotZX("M4l", "Plots");
    ss->FitZX("M4l", "Plots");
 	

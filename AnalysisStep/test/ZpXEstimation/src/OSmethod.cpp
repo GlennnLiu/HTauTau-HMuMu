@@ -194,7 +194,7 @@ void OSmethod::FillFRHistos( TString input_file_data_name )
 	     _passingSelectionMu++;
 	     _passingSelectionTau++;
 	     //TString WP[3]={"Tight","VLoose","Tight"};
-	     _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), abs(Z2Flav));
+	     _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), 225);
 	     passing[_current_process][Settings::tauMu]->Fill(LepPt->at(2), (fabs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
 	     passing[_current_process][Settings::tauTau]->Fill(LepPt->at(2), (fabs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
 	 }
@@ -202,20 +202,20 @@ void OSmethod::FillFRHistos( TString input_file_data_name )
 	     _faillingSelectionMu++;
 	     _faillingSelectionTau++;
 	     //TString WP[3]={"Tight","VLoose","Tight"};
-             _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), abs(Z2Flav));
+             _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), abs(225));
 	     failing[_current_process][Settings::tauMu]->Fill(LepPt->at(2), (fabs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
 	     failing[_current_process][Settings::tauTau]->Fill(LepPt->at(2), (fabs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
 	 }
 	 if (LepisID->at(2) && TauVSmu->at(2)>=4 && TauVSe->at(2)>=5 && TauVSjet->at(2)>=5) {
 	    _passingSelectionE++;
 	    //TString WP[3]={"Medium","Medium","Tight"};
-	    _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), abs(Z2Flav));
+	    _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), 165);
 	    passing[_current_process][Settings::tauE]->Fill(LepPt->at(2), (fabs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
 	 }
 	 else {
 	    _faillingSelectionE++;
 	    //TString WP[3]={"Medium","Medium","Tight"};
-            _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), abs(Z2Flav));
+            _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), 165);
 	    failing[_current_process][Settings::tauE]->Fill(LepPt->at(2), (fabs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
 	 }
 	 }
@@ -1436,6 +1436,8 @@ void OSmethod::SubtractWZ()
    {
       passing[Settings::Total][i_flav]->Add(passing[Settings::WZ][i_flav], -1.);
       failing[Settings::Total][i_flav]->Add(failing[Settings::WZ][i_flav], -1.);
+      //passing[Settings::Total][i_flav]->Add(passing[Settings::qqZZ][i_flav], -1.);
+      //failing[Settings::Total][i_flav]->Add(failing[Settings::qqZZ][i_flav], -1.);
    }
 
    cout << "[INFO] WZ contribution subtracted." << endl;
@@ -1677,6 +1679,17 @@ void OSmethod::ProduceFakeRates( TString file_name )
    FR_OS_tauMu_EE->Write();
    FR_OS_tauTau_EB->Write();
    FR_OS_tauTau_EE->Write();
+
+   FR_OS_electron_EB_unc->Write();
+   FR_OS_electron_EE_unc->Write();
+   FR_OS_muon_EB_unc->Write();
+   FR_OS_muon_EE_unc->Write();
+   FR_OS_tauE_EB_unc->Write();
+   FR_OS_tauE_EE_unc->Write();
+   FR_OS_tauMu_EB_unc->Write();
+   FR_OS_tauMu_EE_unc->Write();
+   FR_OS_tauTau_EB_unc->Write();
+   FR_OS_tauTau_EE_unc->Write();
 
    fOutHistos->Close();
    delete fOutHistos;
@@ -1991,7 +2004,7 @@ int OSmethod::GENMatch(int ileg,TString input_file_name)
       cout<<"Only applicable to pdgId = 15, not "<<ileg<<endl;
       return 6;
    }
-   if ( input_file_name.Contains("ZZ") || input_file_name.Contains("H") || input_file_name.Contains("ggTo") ) {
+   if ( input_file_name.Contains("WZTo") || input_file_name.Contains("ZZ") || input_file_name.Contains("H") || input_file_name.Contains("ggTo") ) {
       if (TauTES_p_Up->at(ileg)>0)
 	 return 5;
       else if (TauFES_p_Up->at(ileg)>0)

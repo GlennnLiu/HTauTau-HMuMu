@@ -128,10 +128,10 @@ public:
 	
 	enum _Z_mass_windows
 	{
-		_40_MZ1_120 = 0 ,
-		_MZ1mMZtrue_7 = 1,
-		_60_MZ1_120 = 2,
-		_MZ1EmMZtrue_5 = 3,
+		_Window5_10 = 0,//_40_MZ1_120 = 0 ,
+		_Window2_5  = 1,//_MZ1mMZtrue_7 = 1,
+		_Window0_2  = 2,//_60_MZ1_120 = 2,
+		//_Window0_2  = 3,//_MZ1EmMZtrue_5 = 3,
 		MAX_NUM_OF_Z_MASS_WINDOWS
 	};
    static const int num_of_processes         = MAX_NUM_OF_PROCESSES;

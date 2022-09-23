@@ -32,11 +32,12 @@
 #include <HTauTauHMuMu/AnalysisStep/test/ZpXEstimation/include/Tree.h>
 #include <HTauTauHMuMu/AnalysisStep/test/ZpXEstimation/include/Settings.h>
 #include <HTauTauHMuMu/AnalysisStep/test/ZpXEstimation/include/Plots.h>
-#include <HTauTauHMuMu/AnalysisStep/interface/Category.h>
+//#include <HTauTauHMuMu/AnalysisStep/interface/Category.h>
 #include <HTauTauHMuMu/AnalysisStep/interface/FinalStates.h>
 #include <HTauTauHMuMu/AnalysisStep/test/ZpXEstimation/include/FakeRates.h>
 #include <HTauTauHMuMu/AnalysisStep/interface/bitops.h>
 #include <HTauTauHMuMu/AnalysisStep/test/ZpXEstimation/include/CMS_lumi.h>
+#include <HTauTauHMuMu/AnalysisStep/interface/TauIDSFTool.h>
 
 using namespace std;
 
@@ -88,6 +89,9 @@ private:
    int find_current_process( TString );
    int FindFinalState();
    float calculate_K_factor( TString );
+   int GENMatch(int, TString );
+   float calculate_TauIDSF_OneLeg(short, float, float, int, int);
+   float calculate_TauIDSF(TString);
    bool GetVarLogX( TString );
    bool GetVarLogY( TString );
    void SavePlots( TCanvas*, TString );
@@ -113,7 +117,7 @@ private:
    
    vector<string> _s_process, _s_flavour, _s_final_state, _s_category, _s_category_stxs, _s_region;
    vector<float> _fs_ROS_SS;
-   vector< vector <float> > _expected_yield_SR,_expected_yield_SR_up,_expected_yield_SR_dn, _number_of_events_CR;
+   vector<float> _expected_yield_SR,_expected_yield_SR_up,_expected_yield_SR_dn, _number_of_events_CR;
    
    TString _histo_name, _histo_labels;
    
@@ -131,7 +135,7 @@ private:
    
    int _current_process, _current_final_state, _current_category, _current_category_stxs, _n_pT_bins, _current_pT_bin, _current_eta_bin;
    float _lumi, _yield_SR, _yield_SR_up, _yield_SR_dn , _k_factor;
-   double gen_sum_weights, _event_weight, _f3, _f4;
+   double gen_sum_weights, _event_weight, _f3, _f4, _TauIDSF;
 
    TH1F *histos_1D[num_of_regions_ss][num_of_processes][num_of_final_states];//[num_of_categories_stxs];
    
@@ -139,9 +143,9 @@ private:
    
    TH2F *passing[num_of_processes][num_of_flavours], *failing[num_of_processes][num_of_flavours];
    
-   TGraphErrors *FR_SS_electron_EB, *FR_SS_electron_EE, *FR_SS_muon_EB, *FR_SS_muon_EE;
-   TGraphErrors *FR_SS_electron_EB_unc, *FR_SS_electron_EE_unc, *FR_SS_muon_EB_unc, *FR_SS_muon_EE_unc;
-   TMultiGraph *mg_electrons, *mg_muons;
+   TGraphErrors *FR_SS_electron_EB, *FR_SS_electron_EE, *FR_SS_muon_EB, *FR_SS_muon_EE, *FR_SS_tauE_EB, *FR_SS_tauE_EE, *FR_SS_tauMu_EB, *FR_SS_tauMu_EE, *FR_SS_tauTau_EB, *FR_SS_tauTau_EE;
+   TGraphErrors *FR_SS_electron_EB_unc, *FR_SS_electron_EE_unc, *FR_SS_muon_EB_unc, *FR_SS_muon_EE_unc, *FR_SS_tauE_EB_unc, *FR_SS_tauE_EE_unc, *FR_SS_tauMu_EB_unc, *FR_SS_tauMu_EE_unc, *FR_SS_tauTau_EB_unc, *FR_SS_tauTau_EE_unc;
+   TMultiGraph *mg_electrons, *mg_muons, *mg_tauE, *mg_tauMu, *mg_tauTau;
    
    vector<Float_t> vector_X[num_of_fake_rates][num_of_eta_bins][num_of_flavours];
    vector<Float_t> vector_Y[num_of_fake_rates][num_of_eta_bins][num_of_flavours];
@@ -154,7 +158,7 @@ private:
 	
 	TF1 *Ele_FR_correction_function[num_of_eta_bins][99];
 
-	
+   TauIDSFTool *DeepTauSF_VSe_ETau, *DeepTauSF_VSmu_ETau, *DeepTauSF_VSjet_ETau, *DeepTauSF_VSe_MuTau, *DeepTauSF_VSmu_MuTau, *DeepTauSF_VSjet_MuTau, *DeepTauSF_VSe_TauTau, *DeepTauSF_VSmu_TauTau, *DeepTauSF_VSjet_TauTau;	
    
 };
 #endif

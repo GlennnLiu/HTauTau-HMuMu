@@ -47,7 +47,7 @@ int main( int argc, char *argv[] )
    ///////////////////////////////////
    // Fill control histos           //
    ///////////////////////////////////
-/*   os->FillDataMCPlots(Data);
+   os->FillDataMCPlots(Data);
    os->FillDataMCPlots(WZ);
    os->FillDataMCPlots(ZZ);
    os->FillDataMCPlots(ttbar);
@@ -59,8 +59,9 @@ int main( int argc, char *argv[] )
    ///////////////////////////////////
    os->FillFRHistos(Data);
    os->FillFRHistos(WZ);
+//   os->FillFRHistos(ZZ);
    os->SaveFRHistos("/eos/home-g/geliu/LepUni/FakeRates/Histos_OS.root", SubtractWZ, Remove_NegBins_FR);
-*/
+
    ///////////////////////////////////
    // Calculate fake rates          //
    ///////////////////////////////////
@@ -71,7 +72,7 @@ int main( int argc, char *argv[] )
    ///////////////////////////////////
    // Fill ZX contributions histos  //
    ///////////////////////////////////
-/*   os->MakeHistogramsZX(Data, "/eos/home-g/geliu/LepUni/FakeRates/FakeRates_OS.root");
+   os->MakeHistogramsZX(Data, "/eos/home-g/geliu/LepUni/FakeRates/FakeRates_OS.root");
    os->MakeZXMCContribution(ZZ, "/eos/home-g/geliu/LepUni/FakeRates/FakeRates_OS.root");
    os->SaveZXHistos("/eos/home-g/geliu/LepUni/FakeRates/ZXHistos_OS.root", Remove_NegBins_ZX);
 
@@ -91,6 +92,6 @@ int main( int argc, char *argv[] )
    os->GetZXHistos("/eos/home-g/geliu/LepUni/FakeRates/ZXHistos_OS.root");
    os->PlotZXContributions("Plots");
    os->FitZX("Plots");
-*/	
+	
    delete os;
 }
