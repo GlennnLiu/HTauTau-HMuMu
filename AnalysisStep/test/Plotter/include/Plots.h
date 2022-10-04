@@ -27,12 +27,12 @@ public:
    //=============
    struct M4l
    {
-      TString var_X_label = "m_{2#font[12]{Z}} (GeV)";
+      TString var_X_label = "m_{#font[12]{ZZ}} (GeV)";
       TString var_Y_label = "Events / 20 GeV";
       TString var_cut_label = "";
-      Int_t var_N_bin = 40;
+      Int_t var_N_bin = 15;
       Float_t var_min = 70;
-      Float_t var_max = 870;
+      Float_t var_max = 370;
       Bool_t var_log_x = 0;
       Bool_t var_log_y = 0;
       Int_t restrict_count_var = 0;
@@ -45,9 +45,9 @@ public:
    struct Z1Mass
    {
       TString var_X_label = "m_{Z_{#font[12]{tag}}} (GeV)";
-      TString var_Y_label = "Events / GeV";
+      TString var_Y_label = "Events / 2 GeV";
       TString var_cut_label = "";
-      Int_t var_N_bin = 20;
+      Int_t var_N_bin = 10;
       Float_t var_min = 81.1876;
       Float_t var_max = 101.1876;
       Bool_t var_log_x = 0;
@@ -62,9 +62,9 @@ public:
    struct Z2Mass
    {
       TString var_X_label = "m_{Z_{#font[12]{prob}}} (GeV)";
-      TString var_Y_label = "Events / 4 GeV";
+      TString var_Y_label = "Events / 10 GeV";
       TString var_cut_label = "";
-      Int_t var_N_bin = 35;
+      Int_t var_N_bin = 14;
       Float_t var_min = 0;
       Float_t var_max = 140;
       Bool_t var_log_x = 0;
@@ -81,9 +81,9 @@ public:
       TString var_X_label = "P_{t,Z_{#font[12]{prob}}} (GeV)";
       TString var_Y_label = "Events / 10 GeV";
       TString var_cut_label = "";
-      Int_t var_N_bin = 30;
+      Int_t var_N_bin = 20;
       Float_t var_min = 0;
-      Float_t var_max = 300;
+      Float_t var_max = 200;
       Bool_t var_log_x = 0;
       Bool_t var_log_y = 0;
       Int_t restrict_count_var = 0;

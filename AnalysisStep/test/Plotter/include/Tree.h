@@ -58,7 +58,7 @@ public :
    Float_t         ZZMassRefit;
    Float_t         ZZMassRefitErr;
    Float_t         ZZMassUnrefitErr;
-   Float_t         Z2Mass;
+   Float_t         Z2GoodMass;
    Float_t         Z2Pt;
    Short_t         Z2Flav;
    Float_t         costhetastar;
@@ -227,7 +227,7 @@ public :
    TBranch        *b_ZZMassRefit;   //!
    TBranch        *b_ZZMassRefitErr;   //!
    TBranch        *b_ZZMassUnrefitErr;   //!
-   TBranch        *b_Z2Mass;   //!
+   TBranch        *b_Z2GoodMass;   //!
    TBranch        *b_Z2Pt;   //!
    TBranch        *b_Z2Flav;   //!
    TBranch        *b_costhetastar;   //!
@@ -499,7 +499,7 @@ void Tree::Init(TTree *tree, TString input_file_name, bool notZLregion)
    fChain->SetBranchAddress("ZZMassRefit", &ZZMassRefit, &b_ZZMassRefit);
    fChain->SetBranchAddress("ZZMassRefitErr", &ZZMassRefitErr, &b_ZZMassRefitErr);
    fChain->SetBranchAddress("ZZMassUnrefitErr", &ZZMassUnrefitErr, &b_ZZMassUnrefitErr);
-   fChain->SetBranchAddress("Z2Mass", &Z2Mass, &b_Z2Mass);
+   fChain->SetBranchAddress("Z2GoodMass", &Z2GoodMass, &b_Z2GoodMass);
    fChain->SetBranchAddress("Z2Pt", &Z2Pt, &b_Z2Pt);
    fChain->SetBranchAddress("Z2Flav", &Z2Flav, &b_Z2Flav);
    fChain->SetBranchAddress("costhetastar", &costhetastar, &b_costhetastar);

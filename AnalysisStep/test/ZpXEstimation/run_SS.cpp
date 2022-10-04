@@ -56,19 +56,19 @@ int main( int argc, char *argv[] )
    ss->FillFRHistos(Data);
    ss->FillFRHistos(WZ);
    ss->SaveFRHistos("Histos_SS.root", SubtractWZ, Remove_NegBins_FR);
-*/
+
    ///////////////////////////////////
    // Calculate fake rates          //
    ///////////////////////////////////
    ss->GetFRHistos("Histos_SS.root");
    ss->Set_pT_binning(8, pT_bins);
    ss->ProduceFakeRates("FakeRates_SS.root", Data);
-
+*/
    ///////////////////////////////////
    // Calculate OS/SS ratios        //
    ///////////////////////////////////
    ss->Calculate_SSOS_Ratio( Data, ZZ, SubtractMCContribution);
-
+/*
    ///////////////////////////////////
    // Fill ZX contributions histos  //
    ///////////////////////////////////
@@ -87,6 +87,6 @@ int main( int argc, char *argv[] )
    ss->GetZXHistos("ZXHistos_SS.root");
    ss->PlotZX("M4l", "Plots");
    ss->FitZX("M4l", "Plots");
-	
+*/	
    delete ss;
 }

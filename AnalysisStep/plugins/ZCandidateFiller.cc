@@ -1468,7 +1468,7 @@ ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     myCand.addUserFloat("OSSF",OS && SF);
     //--- Find "best Z" (closest to mZ) among those passing the "bestZAmong" selection (2011 PRL logic), now deprecated!!!
     if (preBestZSelection(myCand)) {
-      float diffZmass = fabs(ZmassValue - myCand.userFloat("goodMass"));
+      float diffZmass = fabs(ZmassValue - myCand.mass());//userFloat("goodMass"));
       if (diffZmass < closestLLMassDiff) { // Best among any ll in the collection
         bestLLidx = i;
         closestLLMassDiff = diffZmass;
