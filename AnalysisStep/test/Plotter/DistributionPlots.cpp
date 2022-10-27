@@ -50,28 +50,28 @@ int main( int argc, char *argv[] )
     
     TH->SetPaths(path,file_name,savepath);
     
-    TH->ToHistos(H,size(H),Settings::H,true);
-    TH->ToHistos(qqZZ,size(qqZZ),Settings::qqZZ,true);
-    TH->ToHistos(ggZZ,size(ggZZ),Settings::ggZZ,true);
-    TH->ToHistos(rare,size(rare),Settings::rare,false);
-    TH->ToHistos(WZ,size(WZ),Settings::WZ,false);
-    TH->ToHistosZX(Data,Settings::ZX,false,"/eos/home-g/geliu/LepUni/FakeRates/FakeRates_SS.root");
+    //TH->ToHistos(H,size(H),Settings::H,true);
+    //TH->ToHistos(qqZZ,size(qqZZ),Settings::qqZZ,true);
+    //TH->ToHistos(ggZZ,size(ggZZ),Settings::ggZZ,true);
+    //TH->ToHistos(rare,size(rare),Settings::rare,false);
+    //TH->ToHistos(WZ,size(WZ),Settings::WZ,false);
+    //TH->ToHistosZX(Data,Settings::ZX,false,"/eos/home-g/geliu/LepUni/FakeRates/FakeRates_SS.root");
 
-    TH->ToHistos(Data,size(Data),Settings::Data,false);
+    //TH->ToHistos(Data,size(Data),Settings::Data,false);
     
-    TH->SumTotalMC();
+    //TH->SumTotalMC();
     
     //TH->ToHistos(ZX,size(ZX),Settings::ZX,false);
     
-    //TH->GetHistos(H,size(H),Settings::H,true);
-    //TH->GetHistos(qqZZ,size(qqZZ),Settings::qqZZ,true);
-    //TH->GetHistos(ggZZ,size(ggZZ),Settings::ggZZ,true);
-    //TH->GetHistos(rare,size(rare),Settings::rare,false);
-    //TH->GetHistos(ZX,size(ZX),Settings::ZX,false);
-    //TH->GetHistos(WZ,size(WZ),Settings::WZ,false);
-    //TH->GetHistos(Data,1,Settings::ZX,false);
+    TH->GetHistos(H,size(H),Settings::H,true);
+    TH->GetHistos(qqZZ,size(qqZZ),Settings::qqZZ,true);
+    TH->GetHistos(ggZZ,size(ggZZ),Settings::ggZZ,true);
+    TH->GetHistos(rare,size(rare),Settings::rare,false);
+    TH->GetHistos(ZX,size(ZX),Settings::ZX,false);
+    TH->GetHistos(WZ,size(WZ),Settings::WZ,false);
+    TH->GetHistos(Data,1,Settings::ZX,false);
     //TH->GetHistos(Data,1,Settings::TotalMC,false);
-    //TH->GetHistos(Data,size(Data),Settings::Data,false);
+    TH->GetHistos(Data,size(Data),Settings::Data,false);
     //TH->SumTotalMC();
 
     bool addData=true;

@@ -111,7 +111,7 @@ void TreeToHist::ToHistos(string* process, int n_proc, int i_proc, bool Signal)
             nb = fChain->GetEntry(jentry);
             nbytes += nb;
 	    bool cut=true;
-            for (int ilep=0;ilep<4;ilep++)
+            for (size_t ilep=0;ilep<4;ilep++)
                 if (abs(LepLepId->at(ilep))==15 && (fabs(LepEta->at(ilep))>2.3 || LepPt->at(ilep)<20)) cut=false;
 	    if (!cut) continue;
             _current_final_state = FindFinalState();
@@ -376,7 +376,7 @@ void TreeToHist::ToPlots(bool addData)
             base->GetYaxis()->SetTitleOffset(0.9);
             base->GetYaxis()->SetLabelSize(0.045);
             if (addData)
-                base->SetMaximum(histos_1D[Settings::Data][i_fs][Settings::gfsall][0][i_var]->GetMaximum()*1.2);
+                base->SetMaximum(max(histos_1D[Settings::Data][i_fs][Settings::gfsall][0][i_var]->GetMaximum(),histos_1D[Settings::TotalMC][i_fs][Settings::gfsall][0][i_var]->GetMaximum())*1.2);
             else
                 base->SetMaximum(histos_1D[Settings::TotalMC][i_fs][Settings::gfsall][0][i_var]->GetMaximum()*1.3);
 
@@ -458,7 +458,7 @@ void TreeToHist::ToPlotsMC(bool addData)
             base->GetYaxis()->SetTitleOffset(0.9);
             base->GetYaxis()->SetLabelSize(0.045);
             if (addData)
-                base->SetMaximum(histos_1D[Settings::Data][i_fs][Settings::gfsall][0][i_var]->GetMaximum()*1.2);
+                base->SetMaximum(max(histos_1D[Settings::Data][i_fs][Settings::gfsall][0][i_var]->GetMaximum(),mc->GetMaximum())*1.2);
             else
                 base->SetMaximum(histos_1D[Settings::TotalMC][i_fs][Settings::gfsall][0][i_var]->GetMaximum()*1.3);
 
