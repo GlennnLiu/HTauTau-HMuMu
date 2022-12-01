@@ -93,6 +93,10 @@ public:
 	{
 		EB = 0,
 		EE = 1,
+        Decay0 = 2,
+        Decay1 = 3,
+        Decay10 = 4,
+        Decay11 = 5,
 		MAX_NUM_OF_ETA_BINS
 	};
    

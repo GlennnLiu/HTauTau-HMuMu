@@ -50,7 +50,9 @@ public:
     
     void SetPaths(string,string,string);
     void ToHistos(string*,int,int,bool);
-    void ToHistosZX(string*,int,bool,TString);
+    void ToHistosCR(string*,int,bool,TString);
+    void ToHistosZXSS(string*,int,bool,TString);
+    void ToHistosZXOS(string*,int,bool,TString);
     void GetHistos(string*,int,int,bool);
     void SumTotalMC();
     void ToPlots(bool);

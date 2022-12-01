@@ -541,9 +541,13 @@ process.cleanSoftElectrons = cms.EDProducer("PATElectronCleaner",
 TAUCUT       = "pt>10 & abs(eta)<2.4"#"tauID('byCombinedIsolationDeltaBetaCorrRaw3Hits') < 1000.0 && pt>18"
 SOSOTAU      = "decayMode()!=5 && decayMode()!=6 && tauID('decayModeFindingNewDMs') == 1 && userFloat('dz') < 10"
 GOODTAU      = SOSOTAU + " && tauID('byVVVLooseDeepTau2017v2p1VSjet') == 1 && tauID('byVVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byVLooseDeepTau2017v2p1VSmu') == 1"
-GOODTAU_MU   = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byTightDeepTau2017v2p1VSjet') == 1"
-GOODTAU_ELE  = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byMediumDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
-GOODTAU_TAU  = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byTightDeepTau2017v2p1VSjet') == 1"
+GOODTAU_MU   = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
+GOODTAU_ELE  = SOSOTAU + " && tauID('byVLooseDeepTau2017v2p1VSmu') == 1 && tauID('byTightDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
+GOODTAU_TAU  = SOSOTAU + " && tauID('byVLooseDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
+
+#GOODTAU_MU   = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byTightDeepTau2017v2p1VSjet') == 1"
+#GOODTAU_ELE  = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byMediumDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
+#GOODTAU_TAU  = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byTightDeepTau2017v2p1VSjet') == 1"
 
 import RecoTauTag.RecoTau.tools.runTauIdMVA as tauIdConfig
 

@@ -23,3 +23,11 @@
    <lib   name="ZZAnalysisAnalysisStepTestPlotterSrc"/>
 </bin>
 
+<bin   name="PlotterTest" file="../test/Plotter/Test.cpp">
+   <lib   name="ZZAnalysisAnalysisStepTestPlotterSrc"/>
+</bin>
+
+<bin   name="CRPlots" file="../test/Plotter/CRPlots.cpp">
+   <lib   name="ZZAnalysisAnalysisStepTestPlotterSrc"/>
+</bin>
+

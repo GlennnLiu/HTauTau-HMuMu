@@ -286,6 +286,7 @@ namespace {
   std::vector<short> TauVSe;
   std::vector<short> TauVSjet;
   std::vector<float> TauDecayMode;
+  std::vector<short> TauGenMatch;
   std::vector<float> TauTES_p_Up;
   std::vector<float> TauTES_p_Dn;
   std::vector<float> TauTES_m_Up;
@@ -1681,6 +1682,7 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
   TauVSe.clear();
   TauVSjet.clear();
   TauDecayMode.clear();
+  TauGenMatch.clear();
   TauTES_p_Up.clear();
   TauTES_p_Dn.clear();
   TauTES_m_Up.clear();
@@ -1972,6 +1974,7 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
 	TauVSjet.push_back(tauVSjet);
 
 	TauDecayMode.push_back( userdatahelpers::getUserFloat(leptons[i],"decayMode") );
+	TauGenMatch.push_back( userdatahelpers::getUserFloat(leptons[i],"genmatch") );
 	if (userdatahelpers::getUserInt(leptons[i],"isTESShifted")){
 	    TauTES_p_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"px_TauUp")/leptons[i]->px() );
 	    TauTES_p_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"px_TauDown")/leptons[i]->px() );
@@ -2007,6 +2010,7 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
 	TauVSe.push_back(-1);
 	TauVSjet.push_back(-1);
 	TauDecayMode.push_back(-1);
+	TauGenMatch.push_back(-1);
 	TauTES_p_Up.push_back(0.);
         TauTES_p_Dn.push_back(0.);
         TauTES_m_Up.push_back(0.);
@@ -2695,6 +2699,7 @@ void HZZ4lNtupleMaker::BookAllBranches(){
   myTree->Book("TauVSe",TauVSe, false);
   myTree->Book("TauVSjet",TauVSjet, false);
   myTree->Book("TauDecayMode",TauDecayMode, false);
+  myTree->Book("TauGenMatch",TauGenMatch, false);
   myTree->Book("TauTES_p_Up",TauTES_p_Up, false);
   myTree->Book("TauTES_p_Dn",TauTES_p_Dn, false);
   myTree->Book("TauTES_m_Up",TauTES_m_Up, false);

@@ -9,23 +9,23 @@ TreeToHist::TreeToHist():Tree()
     _current_final_state = -999;
     _current_gen_final_state = -999;
     
-    _fs_ROS_SS.push_back(0.954113);
-    _fs_ROS_SS.push_back(0.973494);
-    _fs_ROS_SS.push_back(0.994809);
-    _fs_ROS_SS.push_back(0.975874);
-    _fs_ROS_SS.push_back(0.984852);
-    _fs_ROS_SS.push_back(0.975405);
-    _fs_ROS_SS.push_back(0.990299);
-    _fs_ROS_SS.push_back(0.96795);
+    _fs_ROS_SS.push_back(0.954003);
+    _fs_ROS_SS.push_back(1.05603);
+    _fs_ROS_SS.push_back(1.03091);
+    _fs_ROS_SS.push_back(0.98326);
+    _fs_ROS_SS.push_back(0.985223);
+    _fs_ROS_SS.push_back(1.04867);
+    _fs_ROS_SS.push_back(1.024);
+    _fs_ROS_SS.push_back(0.994852);
 
-    _cb_ss.push_back(1.112709813);
-    _cb_ss.push_back(1.017112365);
-    _cb_ss.push_back(1.045235335);
-    _cb_ss.push_back(1.021858387);
-    _cb_ss.push_back(1.158447633);
-    _cb_ss.push_back(1.053897151);
-    _cb_ss.push_back(1.054209183);
-    _cb_ss.push_back(1.016327376);
+    _cb_ss.push_back(1);//(1.112709813);
+    _cb_ss.push_back(1);//(1.017112365);
+    _cb_ss.push_back(1);//(1.045235335);
+    _cb_ss.push_back(1);//(1.021858387);
+    _cb_ss.push_back(1);//(1.158447633);
+    _cb_ss.push_back(1);//(1.053897151);
+    _cb_ss.push_back(1);//(1.054209183);
+    _cb_ss.push_back(1);//(1.016327376);
     
     _s_process.push_back("H");
     _s_process.push_back("qqZZ");
@@ -110,10 +110,19 @@ void TreeToHist::ToHistos(string* process, int n_proc, int i_proc, bool Signal)
             if (ientry < 0) break;
             nb = fChain->GetEntry(jentry);
             nbytes += nb;
-	    bool cut=true;
+            
+            if ( fabs(LepEta->at(2)) > 2.5 || fabs(LepEta->at(3)) > 2.5) {continue;}
+            if ( (abs(LepLepId->at(2))==15 && fabs(LepEta->at(2)) > 2.3) || (abs(LepLepId->at(3))==15 && fabs(LepEta->at(3)) > 2.3) ) {continue;}
+            if ( (LepSIP->at(2) > 4. || Lepdxy->at(2) > 0.5 || Lepdz->at(2) > 1.0) && (abs(LepLepId->at(2)) == 11 || abs(LepLepId->at(2)) == 13) ) {continue;} // Included dxy/dz cuts for 3rd LEPTON (ele and mu)             
+            if ( (LepSIP->at(3) > 4. || Lepdxy->at(3) > 0.5 || Lepdz->at(3) > 1.0) && (abs(LepLepId->at(2)) == 11 || abs(LepLepId->at(2)) == 13) ) {continue;} // Included dxy/dz cuts for 4th LEPTON (ele and mu)
+            if ( ( Lepdz->at(2) > 10 || LepPt->at(2) < 20 || TauDecayMode->at(2)==5 || TauDecayMode->at(2)==6 || !LepisID->at(2)) && abs(LepLepId->at(2))==15 ) {continue;}
+            if ( ( Lepdz->at(3) > 10 || LepPt->at(3) < 20 || TauDecayMode->at(3)==5 || TauDecayMode->at(3)==6 || !LepisID->at(3)) && abs(LepLepId->at(3))==15 ) {continue;}
+            if ( ZZMass < 70. ) continue;
+            
+            /*bool cut=true;
             for (size_t ilep=0;ilep<4;ilep++)
-                if (abs(LepLepId->at(ilep))==15 && (fabs(LepEta->at(ilep))>2.3 || LepPt->at(ilep)<20)) cut=false;
-	    if (!cut) continue;
+                if (abs(LepLepId->at(ilep))==15 && (TauDecayMode->at(ilep)==5 || TauDecayMode->at(ilep)==6 || fabs(LepEta->at(ilep))>2.3 || LepPt->at(ilep)<20 || !LepisID->at(ilep))) cut=false;
+	    if (!cut) continue;*/
             _current_final_state = FindFinalState();
             if (_current_final_state<0) {continue;}
             if (Signal) _current_gen_final_state = FindGenFinalState();
@@ -135,7 +144,7 @@ void TreeToHist::ToHistos(string* process, int n_proc, int i_proc, bool Signal)
 }
 
 //===============================================================================
-void TreeToHist::ToHistosZX(string* process, int i_proc, bool Signal,TString input_file_FR_name)
+void TreeToHist::ToHistosCR(string* process, int i_proc, bool Signal,TString input_file_FR_name)
 {
     if (i_proc!=Settings::ZX) return;
     if (Signal) return;
@@ -170,8 +179,79 @@ void TreeToHist::ToHistosZX(string* process, int i_proc, bool Signal,TString inp
         if ( (abs(LepLepId->at(2))==15 && fabs(LepEta->at(2)) > 2.3) || (abs(LepLepId->at(3))==15 && fabs(LepEta->at(3)) > 2.3) ) {continue;}
         if ( (LepSIP->at(2) > 4. || Lepdxy->at(2) > 0.5 || Lepdz->at(2) > 1.0) && (abs(LepLepId->at(2)) == 11 || abs(LepLepId->at(2)) == 13) ) {continue;} // Included dxy/dz cuts for 3rd LEPTON (ele and mu)             
         if ( (LepSIP->at(3) > 4. || Lepdxy->at(3) > 0.5 || Lepdz->at(3) > 1.0) && (abs(LepLepId->at(2)) == 11 || abs(LepLepId->at(2)) == 13) ) {continue;} // Included dxy/dz cuts for 4th LEPTON (ele and mu)
-        if ( ( Lepdz->at(2) > 10 || LepPt->at(2) < 20) && abs(LepLepId->at(2))==15 ) {continue;}
-        if ( ( Lepdz->at(3) > 10 || LepPt->at(3) < 20) && abs(LepLepId->at(3))==15 ) {continue;}
+        if ( (!LepisID->at(2)) && abs(LepLepId->at(2))==11 ) {continue;}
+        if ( (!LepisID->at(3)) && abs(LepLepId->at(3))==11 ) {continue;}
+        if ( (!LepisID->at(2) || LepCombRelIsoPF->at(2) > 0.35) && abs(LepLepId->at(2))==13 ) {continue;}
+        if ( (!LepisID->at(3) || LepCombRelIsoPF->at(3) > 0.35) && abs(LepLepId->at(3))==13 ) {continue;}
+        if ( ( Lepdz->at(2) > 10 || LepPt->at(2) < 20 || TauDecayMode->at(2)==5 || TauDecayMode->at(2)==6 || !LepisID->at(2)) && abs(LepLepId->at(2))==15 ) {continue;}
+        if ( ( Lepdz->at(3) > 10 || LepPt->at(3) < 20 || TauDecayMode->at(3)==5 || TauDecayMode->at(3)==6 || !LepisID->at(3)) && abs(LepLepId->at(3))==15 ) {continue;}
+        if ( ZZMass < 70. ) continue;
+        
+        _current_final_state = FindFinalState();
+        if (_current_final_state<0) {continue;}
+        _current_gen_final_state = Settings::gfsbkg;
+        
+        if (abs(Z2Flav)==165) {
+            if (abs(LepLepId->at(2))==15 && !(TauVSmu->at(2)>=4 && TauVSe->at(2)>=5 && TauVSjet->at(2)>=5)) continue;
+            if (abs(LepLepId->at(3))==15 && !(TauVSmu->at(3)>=4 && TauVSe->at(3)>=5 && TauVSjet->at(3)>=5)) continue;
+        }
+        else if (abs(Z2Flav)==195 || abs(Z2Flav)==225) {
+            if (abs(LepLepId->at(2))==15 && !(TauVSmu->at(2)>=4 && TauVSe->at(2)>=3 && TauVSjet->at(2)>=6)) continue;
+            if (abs(LepLepId->at(3))==15 && !(TauVSmu->at(3)>=4 && TauVSe->at(3)>=3 && TauVSjet->at(3)>=6)) continue;
+        }
+        _yield_SR    = _fs_ROS_SS.at(_current_final_state);
+//         _yield_SR    = _fs_ROS_SS.at(_current_final_state)*_cb_ss.at(_current_final_state)*(abs(LepLepId->at(2))==15?1.:FR->GetFakeRate(LepPt->at(2),LepEta->at(2),TauDecayMode->at(2),LepLepId->at(2),0))*(abs(LepLepId->at(3))==15?1.:FR->GetFakeRate(LepPt->at(3),LepEta->at(3),TauDecayMode->at(3),LepLepId->at(3),0));
+            
+        histos_1D[i_proc][_current_final_state][_current_gen_final_state][0][0]->Fill(ZZMass,_yield_SR);
+        histos_1D[i_proc][_current_final_state][_current_gen_final_state][0][1]->Fill(Z1Mass,_yield_SR);
+        histos_1D[i_proc][_current_final_state][_current_gen_final_state][0][2]->Fill(Z2GoodMass,_yield_SR);
+        histos_1D[i_proc][_current_final_state][_current_gen_final_state][0][3]->Fill(Z2Pt,_yield_SR);
+    }
+    input_file->Close();
+    
+    cout<<"[INFO] Processing "<<input_file_name<<" done"<<endl;
+    SumGroups(1,i_proc);
+    saveHistos(1,i_proc);
+}
+
+//===============================================================================
+void TreeToHist::ToHistosZXSS(string* process, int i_proc, bool Signal,TString input_file_FR_name)
+{
+    if (i_proc!=Settings::ZX) return;
+    if (Signal) return;
+    
+    DeclareHistos(process,1,i_proc);
+    
+    TString input_file_name=_path+process[0]+_file_name;
+    
+    FakeRates *FR = new FakeRates( input_file_FR_name );
+    
+    input_file = TFile::Open( input_file_name);
+    input_tree = (TTree*)input_file->Get("CRZLLTree/candTree");
+    Init( input_tree, input_file_name , true);
+    
+    if (fChain == 0) return;
+    
+    Long64_t nentries = fChain->GetEntriesFast();
+    cout<<"[INFO] Processing "<<input_file_name<<", total event: "<<nentries<<endl;
+    Long64_t nbytes = 0, nb = 0;
+    
+    for (Long64_t jentry=0; jentry<nentries;jentry++) {
+        Long64_t ientry = LoadTree(jentry);
+        if (ientry%50000==0) cout<<ientry<<endl;
+        if (ientry < 0) break;
+        nb = fChain->GetEntry(jentry);
+        nbytes += nb;
+        
+        if ( !CRflag ) continue;
+        if ( !test_bit(CRflag, CRZLLss) ) continue;
+        
+        if ( fabs(LepEta->at(2)) > 2.5 || fabs(LepEta->at(3)) > 2.5) {continue;}
+        if ( (abs(LepLepId->at(2))==15 && fabs(LepEta->at(2)) > 2.3) || (abs(LepLepId->at(3))==15 && fabs(LepEta->at(3)) > 2.3) ) {continue;}
+        if ( (LepSIP->at(2) > 4. || Lepdxy->at(2) > 0.5 || Lepdz->at(2) > 1.0) && (abs(LepLepId->at(2)) == 11 || abs(LepLepId->at(2)) == 13) ) {continue;} // Included dxy/dz cuts for 3rd LEPTON (ele and mu)             
+        if ( (LepSIP->at(3) > 4. || Lepdxy->at(3) > 0.5 || Lepdz->at(3) > 1.0) && (abs(LepLepId->at(2)) == 11 || abs(LepLepId->at(2)) == 13) ) {continue;} // Included dxy/dz cuts for 4th LEPTON (ele and mu)
+        if ( ( Lepdz->at(2) > 10 || LepPt->at(2) < 20 || !LepisID->at(2)) && abs(LepLepId->at(2))==15 ) {continue;}
+        if ( ( Lepdz->at(3) > 10 || LepPt->at(3) < 20 || !LepisID->at(3)) && abs(LepLepId->at(3))==15 ) {continue;}
         if ( ZZMass < 70. ) continue;        
         
         _current_final_state = FindFinalState();
@@ -183,8 +263,88 @@ void TreeToHist::ToHistosZX(string* process, int i_proc, bool Signal,TString inp
         else if (abs(Z2Flav)==195) tauChannel=1;
         else if (abs(Z2Flav)==225) tauChannel=2;
         
-        _yield_SR    = _fs_ROS_SS.at(_current_final_state)*_cb_ss.at(_current_final_state)*FR->GetFakeRate(LepPt->at(2),LepEta->at(2),LepLepId->at(2),tauChannel)*FR->GetFakeRate(LepPt->at(3),LepEta->at(3),LepLepId->at(3),tauChannel);
+        _yield_SR    = _fs_ROS_SS.at(_current_final_state)*_cb_ss.at(_current_final_state)*FR->GetFakeRate(LepPt->at(2),PFMET,LepEta->at(2),TauDecayMode->at(2),LepLepId->at(2),tauChannel)*FR->GetFakeRate(LepPt->at(3),PFMET,LepEta->at(3),TauDecayMode->at(3),LepLepId->at(3),tauChannel);
         
+        histos_1D[i_proc][_current_final_state][_current_gen_final_state][0][0]->Fill(ZZMass,_yield_SR);
+        histos_1D[i_proc][_current_final_state][_current_gen_final_state][0][1]->Fill(Z1Mass,_yield_SR);
+        histos_1D[i_proc][_current_final_state][_current_gen_final_state][0][2]->Fill(Z2GoodMass,_yield_SR);
+        histos_1D[i_proc][_current_final_state][_current_gen_final_state][0][3]->Fill(Z2Pt,_yield_SR);
+    }
+    input_file->Close();
+    
+    cout<<"[INFO] Processing "<<input_file_name<<" done"<<endl;
+    SumGroups(1,i_proc);
+    saveHistos(1,i_proc);
+}
+
+//===============================================================================
+void TreeToHist::ToHistosZXOS(string* process, int i_proc, bool Signal,TString input_file_FR_name)
+{
+    if (i_proc!=Settings::ZX) return;
+    if (Signal) return;
+    
+    DeclareHistos(process,1,i_proc);
+    
+    TString input_file_name=_path+process[0]+_file_name;
+    
+    FakeRates *FR = new FakeRates( input_file_FR_name );
+    
+    input_file = TFile::Open( input_file_name);
+    input_tree = (TTree*)input_file->Get("CRZLLTree/candTree");
+    Init( input_tree, input_file_name , true);
+    
+    if (fChain == 0) return;
+    
+    Long64_t nentries = fChain->GetEntriesFast();
+    cout<<"[INFO] Processing "<<input_file_name<<", total event: "<<nentries<<endl;
+    Long64_t nbytes = 0, nb = 0;
+    
+    for (Long64_t jentry=0; jentry<nentries;jentry++) {
+        Long64_t ientry = LoadTree(jentry);
+        if (ientry%50000==0) cout<<ientry<<endl;
+        if (ientry < 0) break;
+        nb = fChain->GetEntry(jentry);
+        nbytes += nb;
+        
+        if ( !CRflag ) continue;
+        if (!(test_bit(CRflag, CRZLLos_2P2F)) && !(test_bit(CRflag, CRZLLos_3P1F))) continue;
+        
+        if ( fabs(LepEta->at(2)) > 2.5 || fabs(LepEta->at(3)) > 2.5) {continue;}
+        if ( (abs(LepLepId->at(2))==15 && fabs(LepEta->at(2)) > 2.3) || (abs(LepLepId->at(3))==15 && fabs(LepEta->at(3)) > 2.3) ) {continue;}
+        if ( (LepSIP->at(2) > 4. || Lepdxy->at(2) > 0.5 || Lepdz->at(2) > 1.0) && (abs(LepLepId->at(2)) == 11 || abs(LepLepId->at(2)) == 13) ) {continue;} // Included dxy/dz cuts for 3rd LEPTON (ele and mu)             
+        if ( (LepSIP->at(3) > 4. || Lepdxy->at(3) > 0.5 || Lepdz->at(3) > 1.0) && (abs(LepLepId->at(2)) == 11 || abs(LepLepId->at(2)) == 13) ) {continue;} // Included dxy/dz cuts for 4th LEPTON (ele and mu)
+        if ( ( Lepdz->at(2) > 10 || LepPt->at(2) < 20 || !LepisID->at(2)) && abs(LepLepId->at(2))==15 ) {continue;}
+        if ( ( Lepdz->at(3) > 10 || LepPt->at(3) < 20 || !LepisID->at(3)) && abs(LepLepId->at(3))==15 ) {continue;}
+        if ( ZZMass < 70. ) continue;        
+        
+        _current_final_state = FindFinalState();
+        if (_current_final_state<0) {continue;}
+        _current_gen_final_state = Settings::gfsbkg;
+        
+        int tauChannel=-1;
+        if (abs(Z2Flav)==165) tauChannel=0;
+        else if (abs(Z2Flav)==195) tauChannel=1;
+        else if (abs(Z2Flav)==225) tauChannel=2;
+        
+        if (test_bit(CRflag, CRZLLos_2P2F)) {
+            float fr3=FR->GetFakeRate(LepPt->at(2),PFMET,LepEta->at(2),TauDecayMode->at(2),LepLepId->at(2),tauChannel);
+            float fr4=FR->GetFakeRate(LepPt->at(3),PFMET,LepEta->at(3),TauDecayMode->at(3),LepLepId->at(3),tauChannel);
+            _yield_SR=-1.*fr3*fr4/(1-fr3)/(1-fr4);
+        }
+        else {
+            bool tightLep3=false;
+            if (abs(LepLepId->at(3))==11) tightLep3=LepisID->at(3);
+            else if (abs(LepLepId->at(3))==13) tightLep3=LepisID->at(3) && LepCombRelIsoPF->at(3) < 0.35;
+            else if (abs(LepLepId->at(3))==15) {
+                if (tauChannel==0) tightLep3=(LepisID->at(3) && TauVSmu->at(3)>=4 && TauVSe->at(3)>=5 && TauVSjet->at(3)>=5);
+                else tightLep3=(LepisID->at(3) && TauVSmu->at(3)>=4 && TauVSe->at(3)>=3 && TauVSjet->at(3)>=6);
+            }
+            float fr;
+            if (tightLep3) fr=FR->GetFakeRate(LepPt->at(2),PFMET,LepEta->at(2),TauDecayMode->at(2),LepLepId->at(2),tauChannel);
+            else fr=FR->GetFakeRate(LepPt->at(3),PFMET,LepEta->at(3),TauDecayMode->at(3),LepLepId->at(3),tauChannel);
+            _yield_SR=fr/(1-fr);
+        }
+       
         histos_1D[i_proc][_current_final_state][_current_gen_final_state][0][0]->Fill(ZZMass,_yield_SR);
         histos_1D[i_proc][_current_final_state][_current_gen_final_state][0][1]->Fill(Z1Mass,_yield_SR);
         histos_1D[i_proc][_current_final_state][_current_gen_final_state][0][2]->Fill(Z2GoodMass,_yield_SR);
@@ -458,7 +618,7 @@ void TreeToHist::ToPlotsMC(bool addData)
             base->GetYaxis()->SetTitleOffset(0.9);
             base->GetYaxis()->SetLabelSize(0.045);
             if (addData)
-                base->SetMaximum(max(histos_1D[Settings::Data][i_fs][Settings::gfsall][0][i_var]->GetMaximum(),mc->GetMaximum())*1.2);
+                base->SetMaximum(max(histos_1D[Settings::Data][i_fs][Settings::gfsall][0][i_var]->GetMaximum(),mc->GetMaximum())*1.3);
             else
                 base->SetMaximum(histos_1D[Settings::TotalMC][i_fs][Settings::gfsall][0][i_var]->GetMaximum()*1.3);
 
@@ -551,6 +711,7 @@ int TreeToHist::GENMatch(int ileg,TString input_file_name)
 //===============================================================================
 float TreeToHist::calculate_TauIDSF_OneLeg(short DM, float pt, float eta, int genmatch, int flav)
 {
+    eta=fabs(eta);
     if (genmatch==6)
         return 1.;
     else if (genmatch==5) {

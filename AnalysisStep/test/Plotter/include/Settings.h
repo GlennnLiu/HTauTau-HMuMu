@@ -48,6 +48,18 @@ public:
 		fs4l = 8,
 		MAX_NUM_OF_FINAL_STATES
 	};
+   
+   enum _ZL_final_state
+   {
+       fs2mue = 0,
+       fs2mumu = 1,
+       fs2mutau = 2,
+       fs2ee = 3,
+       fs2emu = 4,
+       fs2etau = 5,
+       fs3l = 6,
+       MAX_NUM_OF_ZL_FINAL_STATES
+   };
 
    enum _gen_final_state
    {
@@ -108,6 +120,7 @@ public:
    static const int num_of_processes         = MAX_NUM_OF_PROCESSES;
    static const int num_of_flavours          = MAX_NUM_OF_FLAVOURS;
    static const int num_of_final_states      = MAX_NUM_OF_FINAL_STATES;
+   static const int num_of_zl_final_states   = MAX_NUM_OF_ZL_FINAL_STATES;
    static const int num_of_gen_final_states  = MAX_NUM_OF_GEN_FINAL_STATES;
    static const int num_of_eta_bins          = MAX_NUM_OF_ETA_BINS;
    static const int num_of_regions_os        = MAX_NUM_OF_REGIONS_OS;

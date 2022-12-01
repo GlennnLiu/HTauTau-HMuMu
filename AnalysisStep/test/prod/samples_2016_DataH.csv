@@ -38,10 +38,10 @@ identifier,process,crossSection=-1,BR=1,execute=True,dataset,prefix,pattern,spli
 #SingleEle2016G,,-1, ,, /SingleElectron/Run2016G-17Jul2018-v1/MINIAOD,dbs,,5,PD=SingleElectron;PROCESS_CR=True;LEPTON_SETUP=2016;ADDZTREE=True,json_2016.py;RecoProbabilities.py,
 #SingleMuon2016G,,-1,,, /SingleMuon/Run2016G-17Jul2018-v1/MINIAOD,dbs,,5,PD=SingleMuon;PROCESS_CR=True;LEPTON_SETUP=2016;ADDZTREE=True,json_2016.py;RecoProbabilities.py,
 
-DoubleMu2016H,, -1, ,, /DoubleMuon/Run2016H-17Jul2018-v1/MINIAOD,dbs,,2,PD=DoubleMu;PROCESS_CR=True;LEPTON_SETUP=2016;ADDZTREE=True,json_2016.py;RecoProbabilities.py,
-DoubleEG2016H,, -1, ,, /DoubleEG/Run2016H-17Jul2018-v1/MINIAOD,dbs,,2,PD=DoubleEle;PROCESS_CR=True;LEPTON_SETUP=2016;ADDZTREE=True,json_2016.py;RecoProbabilities.py,
-MuonEG2016H,,   -1, ,, /MuonEG/Run2016H-17Jul2018-v1/MINIAOD,dbs,,2,PD=MuEG;PROCESS_CR=True;LEPTON_SETUP=2016;ADDZTREE=True,json_2016.py;RecoProbabilities.py,
-SingleEle2016H,,-1, ,, /SingleElectron/Run2016H-17Jul2018-v1/MINIAOD,dbs,,5,PD=SingleElectron;PROCESS_CR=True;LEPTON_SETUP=2016;ADDZTREE=True,json_2016.py;RecoProbabilities.py,
-SingleMuon2016H,,-1,,, /SingleMuon/Run2016H-17Jul2018-v1/MINIAOD,dbs,,5,PD=SingleMuon;PROCESS_CR=True;LEPTON_SETUP=2016;ADDZTREE=True,json_2016.py;RecoProbabilities.py,
+DoubleMu2016H,, -1, ,, /DoubleMuon/Run2016H-17Jul2018-v1/MINIAOD,dbs,,1,PD=DoubleMu;PROCESS_CR=True;LEPTON_SETUP=2016;ADDZTREE=True,json_2016.py;RecoProbabilities.py,
+DoubleEG2016H,, -1, ,, /DoubleEG/Run2016H-17Jul2018-v1/MINIAOD,dbs,,1,PD=DoubleEle;PROCESS_CR=True;LEPTON_SETUP=2016;ADDZTREE=True,json_2016.py;RecoProbabilities.py,
+MuonEG2016H,,   -1, ,, /MuonEG/Run2016H-17Jul2018-v1/MINIAOD,dbs,,1,PD=MuEG;PROCESS_CR=True;LEPTON_SETUP=2016;ADDZTREE=True,json_2016.py;RecoProbabilities.py,
+SingleEle2016H,,-1, ,, /SingleElectron/Run2016H-17Jul2018-v1/MINIAOD,dbs,,1,PD=SingleElectron;PROCESS_CR=True;LEPTON_SETUP=2016;ADDZTREE=True,json_2016.py;RecoProbabilities.py,
+SingleMuon2016H,,-1,,, /SingleMuon/Run2016H-17Jul2018-v1/MINIAOD,dbs,,1,PD=SingleMuon;PROCESS_CR=True;LEPTON_SETUP=2016;ADDZTREE=True,json_2016.py;RecoProbabilities.py,
 
 

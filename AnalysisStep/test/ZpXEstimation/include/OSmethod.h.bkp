@@ -18,10 +18,8 @@
 #include "TStyle.h"
 #include "TH1F.h"
 #include "TH2F.h"
-#include "TH3F.h"
 #include "TLegend.h"
 #include "TGraphErrors.h"
-#include "TGraph2DErrors.h"
 #include "TMultiGraph.h"
 #include "TROOT.h"
 #include "TSystem.h"
@@ -77,7 +75,6 @@ public:
    void FitZX( TString );
    void ProduceFakeRates( TString );
    void Set_pT_binning( int, float* );
-   void Set_MET_binning( int, float* );
    void SetLumi( float );
    
 private:
@@ -88,7 +85,6 @@ private:
    void SubtractWZ( );
    void RemoveNegativeBins1D( TH1F* );
    void RemoveNegativeBins2D( TH2F* );
-   void RemoveNegativeBins3D( TH3F* );
    void FillDataMCInclusive();
    void FillZXInclusive( bool );
    int find_current_process( TString );
@@ -101,8 +97,8 @@ private:
    bool GetVarLogY( TString );
    void SavePlots( TCanvas*, TString );
    void PlotFR();
-   TLegend* CreateLegend_FR( string , TH1F*, TH1F*,TH1F*,TH1F* );
-   TLegend* CreateLegend_FR_tau( string , TH2F*, TH2F*,TH2F*,TH2F* , TH2F*, TH2F*,TH2F*,TH2F* );
+   TLegend* CreateLegend_FR( string , TGraphErrors*, TGraphErrors*,TGraphErrors*,TGraphErrors* );
+   TLegend* CreateLegend_FR_tau( string , TGraphErrors*, TGraphErrors*,TGraphErrors*,TGraphErrors* , TGraphErrors*, TGraphErrors*,TGraphErrors*,TGraphErrors* );
    TLegend* CreateLegend_ZXcontr( string , TH1F*, TH1F*,TH1F*,TH1F*,TH1F* );
    TLegend* CreateLegend_2P2F( string , TH1F*, TH1F*,TH1F*,TH1F*,TH1F* );
    TLegend* CreateLegend_3P1F( string , TH1F*, TH1F*,TH1F*,TH1F*,TH1F* ,TH1F*);
@@ -125,9 +121,9 @@ private:
    float jetQGL[99];
    float jetPgOverPq[99];
    
-   float _pT_bins[99], _MET_bins[99];
+   float _pT_bins[99];
    
-   int _current_process, _current_final_state, _current_category, _current_category_stxs, _n_pT_bins, _n_MET_bins;
+   int _current_process, _current_final_state, _current_category, _current_category_stxs, _n_pT_bins;
    float _lumi, _yield_SR, _k_factor, _TauIDSF;
    double gen_sum_weights, _event_weight, _f3, _f4, _f3_Up, _f3_Dn, _f4_Up, _f4_Dn;
    vector< vector <float> > _expected_yield_SR, _number_of_events_CR;
@@ -140,18 +136,16 @@ private:
    TH1F *h_from3P1F_SR[num_of_fr_variations][num_of_final_states];//[num_of_categories_stxs];
    TH1F *h_from3P1F_SR_ZZonly[num_of_fr_variations][num_of_final_states];//[num_of_categories_stxs];
    
-   TH3F *passing[num_of_processes][num_of_flavours], *failing[num_of_processes][num_of_flavours];
+   TH2F *passing[num_of_processes][num_of_flavours], *failing[num_of_processes][num_of_flavours];
    
-   TH1F *FR_OS_electron_EB, *FR_OS_electron_EE, *FR_OS_muon_EB, *FR_OS_muon_EE;
-   TH2F *FR_OS_tauE_Decay0, *FR_OS_tauE_Decay1, *FR_OS_tauE_Decay10, *FR_OS_tauE_Decay11, *FR_OS_tauMu_Decay0, *FR_OS_tauMu_Decay1, *FR_OS_tauMu_Decay10, *FR_OS_tauMu_Decay11, *FR_OS_tauTau_Decay0, *FR_OS_tauTau_Decay1, *FR_OS_tauTau_Decay10, *FR_OS_tauTau_Decay11;
-   TH1F *FR_OS_electron_EB_unc, *FR_OS_electron_EE_unc, *FR_OS_muon_EB_unc, *FR_OS_muon_EE_unc;
-   TH2F *FR_OS_tauE_Decay0_unc, *FR_OS_tauE_Decay1_unc, *FR_OS_tauE_Decay10_unc, *FR_OS_tauE_Decay11_unc, *FR_OS_tauMu_Decay0_unc, *FR_OS_tauMu_Decay1_unc, *FR_OS_tauMu_Decay10_unc, *FR_OS_tauMu_Decay11_unc, *FR_OS_tauTau_Decay0_unc, *FR_OS_tauTau_Decay1_unc, *FR_OS_tauTau_Decay10_unc, *FR_OS_tauTau_Decay11_unc;
-//    TMultiGraph *mg_electrons, *mg_muons;//, *mg_tauE, *mg_tauMu, *mg_tauTau;
+   TGraphErrors *FR_OS_electron_EB, *FR_OS_electron_EE, *FR_OS_muon_EB, *FR_OS_muon_EE, *FR_OS_tauE_Decay0, *FR_OS_tauE_Decay1, *FR_OS_tauE_Decay10, *FR_OS_tauE_Decay11, *FR_OS_tauMu_Decay0, *FR_OS_tauMu_Decay1, *FR_OS_tauMu_Decay10, *FR_OS_tauMu_Decay11, *FR_OS_tauTau_Decay0, *FR_OS_tauTau_Decay1, *FR_OS_tauTau_Decay10, *FR_OS_tauTau_Decay11;
+   TGraphErrors *FR_OS_electron_EB_unc, *FR_OS_electron_EE_unc, *FR_OS_muon_EB_unc, *FR_OS_muon_EE_unc, *FR_OS_tauE_Decay0_unc, *FR_OS_tauE_Decay1_unc, *FR_OS_tauE_Decay10_unc, *FR_OS_tauE_Decay11_unc, *FR_OS_tauMu_Decay0_unc, *FR_OS_tauMu_Decay1_unc, *FR_OS_tauMu_Decay10_unc, *FR_OS_tauMu_Decay11_unc, *FR_OS_tauTau_Decay0_unc, *FR_OS_tauTau_Decay1_unc, *FR_OS_tauTau_Decay10_unc, *FR_OS_tauTau_Decay11_unc;
+   TMultiGraph *mg_electrons, *mg_muons, *mg_tauE, *mg_tauMu, *mg_tauTau;
    
-//    vector<Float_t> vector_X[num_of_fake_rates][num_of_eta_bins][num_of_flavours];
-//    vector<Float_t> vector_Y[num_of_fake_rates][num_of_eta_bins][num_of_flavours];
-//    vector<Float_t> vector_EX[num_of_fake_rates][num_of_eta_bins][num_of_flavours];
-//    vector<Float_t> vector_EY[num_of_fake_rates][num_of_eta_bins][num_of_flavours];
+   vector<Float_t> vector_X[num_of_fake_rates][num_of_eta_bins][num_of_flavours];
+   vector<Float_t> vector_Y[num_of_fake_rates][num_of_eta_bins][num_of_flavours];
+   vector<Float_t> vector_EX[num_of_fake_rates][num_of_eta_bins][num_of_flavours];
+   vector<Float_t> vector_EY[num_of_fake_rates][num_of_eta_bins][num_of_flavours];
   
    TauIDSFTool *DeepTauSF_VSe_ETau, *DeepTauSF_VSmu_ETau, *DeepTauSF_VSjet_ETau, *DeepTauSF_VSe_MuTau, *DeepTauSF_VSmu_MuTau, *DeepTauSF_VSjet_MuTau, *DeepTauSF_VSe_TauTau, *DeepTauSF_VSmu_TauTau, *DeepTauSF_VSjet_TauTau, *DeepTauSF_VSe_bare, *DeepTauSF_VSmu_bare, *DeepTauSF_VSjet_bare;
  

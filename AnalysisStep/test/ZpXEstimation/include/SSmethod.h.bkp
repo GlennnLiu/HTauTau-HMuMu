@@ -90,8 +90,8 @@ private:
    int FindFinalState();
    float calculate_K_factor( TString );
    int GENMatch(int, TString );
-   float calculate_TauIDSF_OneLeg(short, float, float, int, int);
-   float calculate_TauIDSF(TString);
+   float calculate_TauIDSF_OneLeg(short, float, float, int, int, bool);
+   float calculate_TauIDSF(TString, bool);
    bool GetVarLogX( TString );
    bool GetVarLogY( TString );
    void SavePlots( TCanvas*, TString );
@@ -104,6 +104,7 @@ private:
 	int Find_Ele_eta_bin( Float_t );
 	
    TLegend* CreateLegend_FR( string , TGraphErrors*, TGraphErrors*,TGraphErrors*,TGraphErrors* );
+   TLegend* CreateLegend_FR_tau( string , TGraphErrors*, TGraphErrors*,TGraphErrors*,TGraphErrors* , TGraphErrors*, TGraphErrors*,TGraphErrors*,TGraphErrors* );
    TLegend* CreateLegend_ZXcontr( string , TH1F*, TH1F*,TH1F*,TH1F*,TH1F* );
    TLegend* CreateLegend_ZLL( string , TH1F*, TH1F*,TH1F*,TH1F*,TH1F* );
 
@@ -143,8 +144,8 @@ private:
    
    TH2F *passing[num_of_processes][num_of_flavours], *failing[num_of_processes][num_of_flavours];
    
-   TGraphErrors *FR_SS_electron_EB, *FR_SS_electron_EE, *FR_SS_muon_EB, *FR_SS_muon_EE, *FR_SS_tauE_EB, *FR_SS_tauE_EE, *FR_SS_tauMu_EB, *FR_SS_tauMu_EE, *FR_SS_tauTau_EB, *FR_SS_tauTau_EE;
-   TGraphErrors *FR_SS_electron_EB_unc, *FR_SS_electron_EE_unc, *FR_SS_muon_EB_unc, *FR_SS_muon_EE_unc, *FR_SS_tauE_EB_unc, *FR_SS_tauE_EE_unc, *FR_SS_tauMu_EB_unc, *FR_SS_tauMu_EE_unc, *FR_SS_tauTau_EB_unc, *FR_SS_tauTau_EE_unc;
+   TGraphErrors *FR_SS_electron_EB, *FR_SS_electron_EE, *FR_SS_muon_EB, *FR_SS_muon_EE, *FR_SS_tauE_Decay0, *FR_SS_tauE_Decay1, *FR_SS_tauE_Decay10, *FR_SS_tauE_Decay11, *FR_SS_tauMu_Decay0, *FR_SS_tauMu_Decay1, *FR_SS_tauMu_Decay10, *FR_SS_tauMu_Decay11, *FR_SS_tauTau_Decay0, *FR_SS_tauTau_Decay1, *FR_SS_tauTau_Decay10, *FR_SS_tauTau_Decay11;
+   TGraphErrors *FR_SS_electron_EB_unc, *FR_SS_electron_EE_unc, *FR_SS_muon_EB_unc, *FR_SS_muon_EE_unc, *FR_SS_tauE_Decay0_unc, *FR_SS_tauE_Decay1_unc, *FR_SS_tauE_Decay10_unc, *FR_SS_tauE_Decay11_unc, *FR_SS_tauMu_Decay0_unc, *FR_SS_tauMu_Decay1_unc, *FR_SS_tauMu_Decay10_unc, *FR_SS_tauMu_Decay11_unc, *FR_SS_tauTau_Decay0_unc, *FR_SS_tauTau_Decay1_unc, *FR_SS_tauTau_Decay10_unc, *FR_SS_tauTau_Decay11_unc;
    TMultiGraph *mg_electrons, *mg_muons, *mg_tauE, *mg_tauMu, *mg_tauTau;
    
    vector<Float_t> vector_X[num_of_fake_rates][num_of_eta_bins][num_of_flavours];
@@ -158,7 +159,7 @@ private:
 	
 	TF1 *Ele_FR_correction_function[num_of_eta_bins][99];
 
-   TauIDSFTool *DeepTauSF_VSe_ETau, *DeepTauSF_VSmu_ETau, *DeepTauSF_VSjet_ETau, *DeepTauSF_VSe_MuTau, *DeepTauSF_VSmu_MuTau, *DeepTauSF_VSjet_MuTau, *DeepTauSF_VSe_TauTau, *DeepTauSF_VSmu_TauTau, *DeepTauSF_VSjet_TauTau;	
+   TauIDSFTool *DeepTauSF_VSe_ETau, *DeepTauSF_VSmu_ETau, *DeepTauSF_VSjet_ETau, *DeepTauSF_VSe_MuTau, *DeepTauSF_VSmu_MuTau, *DeepTauSF_VSjet_MuTau, *DeepTauSF_VSe_TauTau, *DeepTauSF_VSmu_TauTau, *DeepTauSF_VSjet_TauTau, *DeepTauSF_VSe_bare, *DeepTauSF_VSmu_bare, *DeepTauSF_VSjet_bare;
    
 };
 #endif

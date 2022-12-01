@@ -11,12 +11,12 @@ PROCESS_CR = True   # Uncomment to run CR paths and trees
 #APPLYTRIG = False    # hack for samples missing correct triggers - use with caution
 #KEEPLOOSECOMB = True # Do not skip loose lepton ZZ combinations (for debugging)
 ADDZTREE = True      # Add tree for Z analysis
-
+APPLY_QCD_GGF_UNCERT = True
 #For MC:
 PD = ""
 MCFILTER = ""
 IsMC = True
-
+OLDPATTRIGGER = True
 #For DATA: 
 #IsMC = False
 #PD = "DoubleMu"
@@ -42,9 +42,10 @@ if not IsMC:
 process.source.fileNames = cms.untracked.vstring(
 ### LEGACY PAPER - 2016 sync files
 #'/store/mc/RunIISummer16MiniAODv3/GluGluToHHTo2B2Tau_node_10_13TeV-madgraph/MINIAODSIM/PUMoriond17_94X_mcRun2_asymptotic_v3-v2/00000/3A546715-316A-E911-8FC5-002590FD5A48.root'
-#'/store/mc/RunIISummer16MiniAODv2/ZZTo4L_13TeV_powheg_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/221CC46F-2FC6-E611-8FFC-0CC47A1E0488.root',
+#'/store/mc/RunIISummer16MiniAODv2/ZZTo4L_13TeV_powheg_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/221CC46F-2FC6-E611-8FFC-0CC47A1E0488.root'#,
 #'/store/data/Run2016B/DoubleMuon/MINIAOD/17Jul2018_ver2-v1/00000/04F38EB5-D18A-E811-815D-0CC47A4C8F2C.root'
-'/store/mc/RunIISummer16MiniAODv2/GluGluHToZZTo4L_M125_13TeV_powheg2_JHUGenV709_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/20000/8A6DC1B7-D1D3-E711-8D88-002590DE6E32.root'#,
+'/store/mc/RunIISummer16MiniAODv2/GluGluToContinToZZTo2e2mu_13TeV_MCFM701_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/7C9CA3F7-95BE-E611-B653-0025905B858A.root'
+#'/store/mc/RunIISummer16MiniAODv2/GluGluHToZZTo4L_M125_13TeV_powheg2_JHUGenV709_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/20000/8A6DC1B7-D1D3-E711-8D88-002590DE6E32.root'#,
 #'/store/mc/RunIISummer16MiniAODv2/ttH_HToZZ_4LFilter_M125_13TeV_powheg2_JHUGenV709_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/30000/CCDA7461-FDD7-E711-AFA4-008CFAF2224C.root',                                                                                                                                                                                                        
 #'/store/mc/RunIISummer16MiniAODv2/ZH_HToZZ_4LFilter_M125_13TeV_powheg2-minlo-HZJ_JHUGenV709_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/20000/622DA168-2DD2-E711-AE8A-E0071B7A5650.root'
 )
@@ -71,8 +72,9 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.dumpUserData =  cms.EDAnalyzer("dumpUserData",
      dumpTrigger = cms.untracked.bool(True),
      muonSrcs = cms.PSet(
+        muons = cms.InputTag("slimmedMuons"),
 #       slimmedMuons = cms.InputTag("slimmedMuons"),
-        muons = cms.InputTag("appendPhotons:muons"),
+#        muons = cms.InputTag("appendPhotons:muons"),
      ),
      electronSrcs = cms.PSet(
 #       slimmedElectron = cms.InputTag("slimmedElectrons"),

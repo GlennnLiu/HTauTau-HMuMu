@@ -171,7 +171,7 @@ void OSmethod::FillFRHistos( TString input_file_data_name )
 //       if ( PFMET > 25. ) {_failMETCut++; continue;}
       if ( (LepLepId->at(2) < 0 && LepLepId->at(0) > 0 && (p1+p3).M() < 4.) || (LepLepId->at(2) < 0 && LepLepId->at(1) > 0 && (p2+p3).M() < 4.) ) {_faillingJPsiMassCut++; continue;}
       if ( (LepLepId->at(2) > 0 && LepLepId->at(0) < 0 && (p1+p3).M() < 4.) || (LepLepId->at(2) > 0 && LepLepId->at(1) < 0 && (p2+p3).M() < 4.) ) {_faillingJPsiMassCut++; continue;}
-      if (nCleanedJets==0) {continue;}
+      
       else
       {
          // Final event weight
@@ -184,14 +184,14 @@ void OSmethod::FillFRHistos( TString input_file_data_name )
          if(LepisID->at(2) && ((abs(LepLepId->at(2)) == 13) ? LepCombRelIsoPF->at(2) < 0.35 : LepCombRelIsoPF->at(2) < 999999.))
          {
 	   _passingSelection++;
-	   if(abs(LepLepId->at(2)) == 11 ) passing[_current_process][Settings::ele]->Fill(LepPt->at(2), PFMET, (fabs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight);
-	   else if(abs(LepLepId->at(2)) == 13 ) passing[_current_process][Settings::mu]->Fill(LepPt->at(2), PFMET, (fabs(LepEta->at(2)) < 1.2) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight);
+	   if(abs(LepLepId->at(2)) == 11 ) passing[_current_process][Settings::ele]->Fill(LepPt->at(2), (fabs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight);
+	   else if(abs(LepLepId->at(2)) == 13 ) passing[_current_process][Settings::mu]->Fill(LepPt->at(2), (fabs(LepEta->at(2)) < 1.2) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight);
          }
          else
 	   {
 	     _faillingSelection++;
-	     if(abs(LepLepId->at(2)) == 11 ) failing[_current_process][Settings::ele]->Fill(LepPt->at(2), PFMET, (fabs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight);
-	     else if(abs(LepLepId->at(2)) == 13 ) failing[_current_process][Settings::mu]->Fill(LepPt->at(2), PFMET, (fabs(LepEta->at(2)) < 1.2) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight);
+	     if(abs(LepLepId->at(2)) == 11 ) failing[_current_process][Settings::ele]->Fill(LepPt->at(2), (fabs(LepEta->at(2)) < 1.479) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight);
+	     else if(abs(LepLepId->at(2)) == 13 ) failing[_current_process][Settings::mu]->Fill(LepPt->at(2), (fabs(LepEta->at(2)) < 1.2) ? 0.5 : 1.5 , (_current_process == Settings::Data) ? 1 :  _event_weight);
 	   }
 	 }
 	 else if (LepisID->at(2)) {
@@ -205,28 +205,28 @@ void OSmethod::FillFRHistos( TString input_file_data_name )
 	     _passingSelectionTau++;
 	     //TString WP[3]={"Tight","VLoose","Tight"};
 	     _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), 225, true);
-	     passing[_current_process][Settings::tauMu]->Fill(LepPt->at(2), PFMET, decayID , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
-	     passing[_current_process][Settings::tauTau]->Fill(LepPt->at(2), PFMET, decayID, (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
+	     passing[_current_process][Settings::tauMu]->Fill(LepPt->at(2), decayID , (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
+	     passing[_current_process][Settings::tauTau]->Fill(LepPt->at(2), decayID, (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
 	 }
 	 else {
 	     _faillingSelectionMu++;
 	     _faillingSelectionTau++;
 	     //TString WP[3]={"Tight","VLoose","Tight"};
              _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), abs(225), false);
-	     failing[_current_process][Settings::tauMu]->Fill(LepPt->at(2), PFMET, decayID, (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
-	     failing[_current_process][Settings::tauTau]->Fill(LepPt->at(2), PFMET, decayID, (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
+	     failing[_current_process][Settings::tauMu]->Fill(LepPt->at(2), decayID, (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
+	     failing[_current_process][Settings::tauTau]->Fill(LepPt->at(2), decayID, (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
 	 }
 	 if (TauVSmu->at(2)>=4 && TauVSe->at(2)>=5 && TauVSjet->at(2)>=5) {
 	    _passingSelectionE++;
 	    //TString WP[3]={"Medium","Medium","Tight"};
 	    _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), 165, true);
-	    passing[_current_process][Settings::tauE]->Fill(LepPt->at(2), PFMET, decayID, (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
+	    passing[_current_process][Settings::tauE]->Fill(LepPt->at(2), decayID, (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
 	 }
 	 else {
 	    _faillingSelectionE++;
 	    //TString WP[3]={"Medium","Medium","Tight"};
             _TauIDSF=calculate_TauIDSF_OneLeg(TauDecayMode->at(2), LepPt->at(2), LepEta->at(2), GENMatch(2,input_file_data_name), 165, false);
-	    failing[_current_process][Settings::tauE]->Fill(LepPt->at(2), PFMET, decayID, (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
+	    failing[_current_process][Settings::tauE]->Fill(LepPt->at(2), decayID, (_current_process == Settings::Data) ? 1 :  _event_weight*_TauIDSF);
 	 }
 	 }
       }
@@ -415,17 +415,45 @@ void OSmethod::MakeHistogramsZX( TString input_file_data_name, TString  input_fi
          jetQGL[j] = JetQGLikelihood->at(j);
          jetPgOverPq[j] = 1./JetQGLikelihood->at(j) - 1.;
       }
-
+/* 
+      _current_category = categoryMor18(  nExtraLep,
+					  nExtraZ,
+					  nCleanedJetsPt30,
+					  nCleanedJetsPt30BTagged_bTagSF,
+					  jetQGL,
+					  p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal,
+					  p_JQCD_SIG_ghg2_1_JHUGen_JECNominal,
+					  p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal,
+					  p_JVBF_SIG_ghv1_1_JHUGen_JECNominal,
+					  pAux_JVBF_SIG_ghv1_1_JHUGen_JECNominal,
+					  p_HadWH_SIG_ghw1_1_JHUGen_JECNominal,
+					  p_HadZH_SIG_ghz1_1_JHUGen_JECNominal,
+					  p_HadWH_mavjj_JECNominal,
+					  p_HadWH_mavjj_true_JECNominal,
+					  p_HadZH_mavjj_JECNominal,
+					  p_HadZH_mavjj_true_JECNominal,
+					  jetPhi,
+					  ZZMass,
+					  PFMET,
+					  false,// Use VHMET category
+					  false);// Use QG tagging
+      
+      _current_category_stxs = stage1_reco_1p1 ( nCleanedJetsPt30,
+                                                 DiJetMass,
+                                                 ZZPt,
+                                                 _current_category,
+                                                 ZZjjPt);
+*/
       int tauChannel=-1;
       if (Z2Flav==-165) tauChannel=0;
       else if (Z2Flav==-195) tauChannel=1;
       else if (Z2Flav==-225) tauChannel=2;
-      _f3    = FR->GetFakeRate(LepPt->at(2),PFMET,LepEta->at(2),TauDecayMode->at(2),LepLepId->at(2),tauChannel);
-      _f3_Up = FR->GetFakeRate_Up(LepPt->at(2),PFMET,LepEta->at(2),TauDecayMode->at(2),LepLepId->at(2),tauChannel);
-      _f3_Dn = FR->GetFakeRate_Dn(LepPt->at(2),PFMET,LepEta->at(2),TauDecayMode->at(2),LepLepId->at(2),tauChannel);
-      _f4    = FR->GetFakeRate(LepPt->at(3),PFMET,LepEta->at(3),TauDecayMode->at(3),LepLepId->at(3),tauChannel);
-      _f4_Up = FR->GetFakeRate_Up(LepPt->at(3),PFMET,LepEta->at(3),TauDecayMode->at(3),LepLepId->at(3),tauChannel);
-      _f4_Dn = FR->GetFakeRate_Dn(LepPt->at(3),PFMET,LepEta->at(3),TauDecayMode->at(3),LepLepId->at(3),tauChannel);
+      _f3    = FR->GetFakeRate(LepPt->at(2),LepEta->at(2),TauDecayMode->at(2),LepLepId->at(2),tauChannel);
+      _f3_Up = FR->GetFakeRate_Up(LepPt->at(2),LepEta->at(2),TauDecayMode->at(2),LepLepId->at(2),tauChannel);
+      _f3_Dn = FR->GetFakeRate_Dn(LepPt->at(2),LepEta->at(2),TauDecayMode->at(2),LepLepId->at(2),tauChannel);
+      _f4    = FR->GetFakeRate(LepPt->at(3),LepEta->at(3),TauDecayMode->at(3),LepLepId->at(3),tauChannel);
+      _f4_Up = FR->GetFakeRate_Up(LepPt->at(3),LepEta->at(3),TauDecayMode->at(3),LepLepId->at(3),tauChannel);
+      _f4_Dn = FR->GetFakeRate_Dn(LepPt->at(3),LepEta->at(3),TauDecayMode->at(3),LepLepId->at(3),tauChannel);
       if ( test_bit(CRflag, CRZLLos_2P2F) )
       {
 	//nevents_CRLLos_2P2F += 1;	
@@ -459,15 +487,15 @@ void OSmethod::MakeHistogramsZX( TString input_file_data_name, TString  input_fi
 	//cout<<"tightLep3"<<tightLep3<<endl;
 	if(tightLep3)//(LepisID->at(3))
 	  {
-	    _f4    = FR->GetFakeRate(LepPt->at(2),PFMET,LepEta->at(2),TauDecayMode->at(2),LepLepId->at(2),tauChannel);
-	    _f4_Up = FR->GetFakeRate_Up(LepPt->at(2),PFMET,LepEta->at(2),TauDecayMode->at(2),LepLepId->at(2),tauChannel);
-	    _f4_Dn = FR->GetFakeRate_Dn(LepPt->at(2),PFMET,LepEta->at(2),TauDecayMode->at(2),LepLepId->at(2),tauChannel);
+	    _f4    = FR->GetFakeRate(LepPt->at(2),LepEta->at(2),TauDecayMode->at(2),LepLepId->at(2),tauChannel);
+	    _f4_Up = FR->GetFakeRate_Up(LepPt->at(2),LepEta->at(2),TauDecayMode->at(2),LepLepId->at(2),tauChannel);
+	    _f4_Dn = FR->GetFakeRate_Dn(LepPt->at(2),LepEta->at(2),TauDecayMode->at(2),LepLepId->at(2),tauChannel);
 	  }
 	else
 	  {
-	    _f4    = FR->GetFakeRate(LepPt->at(3),PFMET,LepEta->at(3),TauDecayMode->at(3),LepLepId->at(3),tauChannel);
-	    _f4_Up = FR->GetFakeRate_Up(LepPt->at(3),PFMET,LepEta->at(3),TauDecayMode->at(3),LepLepId->at(3),tauChannel);
-	    _f4_Dn = FR->GetFakeRate_Dn(LepPt->at(3),PFMET,LepEta->at(3),TauDecayMode->at(3),LepLepId->at(3),tauChannel);
+	    _f4    = FR->GetFakeRate(LepPt->at(3),LepEta->at(3),TauDecayMode->at(3),LepLepId->at(3),tauChannel);
+	    _f4_Up = FR->GetFakeRate_Up(LepPt->at(3),LepEta->at(3),TauDecayMode->at(3),LepLepId->at(3),tauChannel);
+	    _f4_Dn = FR->GetFakeRate_Dn(LepPt->at(3),LepEta->at(3),TauDecayMode->at(3),LepLepId->at(3),tauChannel);
 	  }
 	
 	h_from3P1F_SR[Settings::nominal][_current_final_state]->Fill(ZZMass, (_f4/(1-_f4)) );
@@ -589,15 +617,15 @@ void OSmethod::MakeZXMCContribution( TString input_file_data_name, TString  inpu
       
       if(tightLep3)//( LepisID->at(3) )
       {
-	_f4    = FR->GetFakeRate(LepPt->at(2),PFMET,LepEta->at(2),TauDecayMode->at(2),LepLepId->at(2),tauChannel);
-	_f4_Up = FR->GetFakeRate_Up(LepPt->at(2),PFMET,LepEta->at(2),TauDecayMode->at(2),LepLepId->at(2),tauChannel);
-	_f4_Dn = FR->GetFakeRate_Dn(LepPt->at(2),PFMET,LepEta->at(2),TauDecayMode->at(2),LepLepId->at(2),tauChannel);
+	_f4    = FR->GetFakeRate(LepPt->at(2),LepEta->at(2),TauDecayMode->at(2),LepLepId->at(2),tauChannel);
+	_f4_Up = FR->GetFakeRate_Up(LepPt->at(2),LepEta->at(2),TauDecayMode->at(2),LepLepId->at(2),tauChannel);
+	_f4_Dn = FR->GetFakeRate_Dn(LepPt->at(2),LepEta->at(2),TauDecayMode->at(2),LepLepId->at(2),tauChannel);
       }
       else
       {
-	_f4    = FR->GetFakeRate(LepPt->at(3),PFMET,LepEta->at(3),TauDecayMode->at(3),LepLepId->at(3),tauChannel);
-	_f4_Up = FR->GetFakeRate_Up(LepPt->at(3),PFMET,LepEta->at(3),TauDecayMode->at(3),LepLepId->at(3),tauChannel);
-	_f4_Dn = FR->GetFakeRate_Dn(LepPt->at(3),PFMET,LepEta->at(3),TauDecayMode->at(3),LepLepId->at(3),tauChannel);
+	_f4    = FR->GetFakeRate(LepPt->at(3),LepEta->at(3),TauDecayMode->at(3),LepLepId->at(3),tauChannel);
+	_f4_Up = FR->GetFakeRate_Up(LepPt->at(3),LepEta->at(3),TauDecayMode->at(3),LepLepId->at(3),tauChannel);
+	_f4_Dn = FR->GetFakeRate_Dn(LepPt->at(3),LepEta->at(3),TauDecayMode->at(3),LepLepId->at(3),tauChannel);
       }
       
       h_from3P1F_SR_ZZonly[Settings::nominal][_current_final_state]->Fill(ZZMass, _event_weight * (_f4/(1-_f4)) );
@@ -621,17 +649,17 @@ void OSmethod::DeclareFRHistos()
       for (int i_proc = 0; i_proc < Settings::Total; i_proc++)
       {
 	_histo_name = "Passing_" + _s_process.at(i_proc) + "_" + _s_flavour.at(i_flav);
-	passing[i_proc][i_flav] = new TH3F(_histo_name,"", 80, 0, 80, 100, 0, 100, 4, 0, 4);
+	passing[i_proc][i_flav] = new TH2F(_histo_name,"", 80, 0, 80, 4, 0, 4);
         
 	_histo_name = "Failing_" + _s_process.at(i_proc) + "_" + _s_flavour.at(i_flav);
-	failing[i_proc][i_flav] = new TH3F(_histo_name,"", 80, 0, 80, 100, 0, 100, 4, 0, 4);
+	failing[i_proc][i_flav] = new TH2F(_histo_name,"", 80, 0, 80, 4, 0, 4);
 	
       }
       
       _histo_name = "Passing_Total_" + _s_flavour.at(i_flav);
-      passing[Settings::Total][i_flav] = new TH3F(_histo_name,"", 80, 0, 80, 100, 0, 100, 4, 0, 4);
+      passing[Settings::Total][i_flav] = new TH2F(_histo_name,"", 80, 0, 80, 4, 0, 4);
       _histo_name = "Failing_Total_" + _s_flavour.at(i_flav);
-      failing[Settings::Total][i_flav] = new TH3F(_histo_name,"", 80, 0, 80, 100, 0, 100, 4, 0, 4);
+      failing[Settings::Total][i_flav] = new TH2F(_histo_name,"", 80, 0, 80, 4, 0, 4);
 
    }
 
@@ -719,8 +747,8 @@ void OSmethod::SaveFRHistos( TString file_name,  bool subtractWZ, bool remove_ne
    {
       for (int i_flav = 0; i_flav < num_of_flavours; i_flav++)
       {
-         RemoveNegativeBins3D( passing[Settings::Total][i_flav] );
-         RemoveNegativeBins3D( failing[Settings::Total][i_flav] );
+         RemoveNegativeBins2D( passing[Settings::Total][i_flav] );
+         RemoveNegativeBins2D( failing[Settings::Total][i_flav] );
       }
       cout << "[INFO] Negative bins removed." << endl;
    }
@@ -952,17 +980,17 @@ void OSmethod::GetFRHistos( TString file_name)
       for (int i_proc = 0; i_proc < Settings::Total; i_proc++)
       {
          _histo_name = "Passing_" + _s_process.at(i_proc) + "_" + _s_flavour.at(i_flav);
-         passing[i_proc][i_flav] = (TH3F*)histo_file->Get(_histo_name);
+         passing[i_proc][i_flav] = (TH2F*)histo_file->Get(_histo_name);
          
          _histo_name = "Failing_" + _s_process.at(i_proc) + "_" + _s_flavour.at(i_flav);
-         failing[i_proc][i_flav] = (TH3F*)histo_file->Get(_histo_name);
+         failing[i_proc][i_flav] = (TH2F*)histo_file->Get(_histo_name);
          
       }
       
       _histo_name = "Passing_Total_" + _s_flavour.at(i_flav);
-      passing[Settings::Total][i_flav] = (TH3F*)histo_file->Get(_histo_name);
+      passing[Settings::Total][i_flav] = (TH2F*)histo_file->Get(_histo_name);
       _histo_name = "Failing_Total_" + _s_flavour.at(i_flav);
-      failing[Settings::Total][i_flav] = (TH3F*)histo_file->Get(_histo_name);
+      failing[Settings::Total][i_flav] = (TH2F*)histo_file->Get(_histo_name);
       
    }
    
@@ -1444,549 +1472,623 @@ void OSmethod::SubtractWZ()
 //===============================================================
 void OSmethod::ProduceFakeRates( TString file_name )
 {
-    FR_OS_electron_EB=new TH1F("FR_OS_electron_EB",";p_{T} [GeV];Fake Rate",_n_pT_bins-1,_pT_bins);
-    FR_OS_electron_EE=new TH1F("FR_OS_electron_EE",";p_{T} [GeV];Fake Rate",_n_pT_bins-1,_pT_bins);
-    FR_OS_muon_EB=new TH1F("FR_OS_muon_EB",";p_{T} [GeV];Fake Rate",_n_pT_bins-1,_pT_bins);
-    FR_OS_muon_EE=new TH1F("FR_OS_muon_EE",";p_{T} [GeV];Fake Rate",_n_pT_bins-1,_pT_bins);
-    FR_OS_tauE_Decay0= new TH2F("FR_OS_tauE_Decay0",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
-    FR_OS_tauE_Decay1= new TH2F("FR_OS_tauE_Decay1",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
-    FR_OS_tauE_Decay10= new TH2F("FR_OS_tauE_Decay10",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
-    FR_OS_tauE_Decay11= new TH2F("FR_OS_tauE_Decay11",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
-    FR_OS_tauMu_Decay0= new TH2F("FR_OS_tauMu_Decay0",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
-    FR_OS_tauMu_Decay1= new TH2F("FR_OS_tauMu_Decay1",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
-    FR_OS_tauMu_Decay10= new TH2F("FR_OS_tauMu_Decay10",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
-    FR_OS_tauMu_Decay11= new TH2F("FR_OS_tauMu_Decay11",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
-    FR_OS_tauTau_Decay0= new TH2F("FR_OS_tauTau_Decay0",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
-    FR_OS_tauTau_Decay1= new TH2F("FR_OS_tauTau_Decay1",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
-    FR_OS_tauTau_Decay10= new TH2F("FR_OS_tauTau_Decay10",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
-    FR_OS_tauTau_Decay11= new TH2F("FR_OS_tauTau_Decay11",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
-    
-    FR_OS_electron_EB_unc=new TH1F("FR_OS_electron_EB_unc",";p_{T} [GeV];Fake Rate",_n_pT_bins-1,_pT_bins);
-    FR_OS_electron_EE_unc=new TH1F("FR_OS_electron_EE_unc",";p_{T} [GeV];Fake Rate",_n_pT_bins-1,_pT_bins);
-    FR_OS_muon_EB_unc=new TH1F("FR_OS_muon_EB_unc",";p_{T} [GeV];Fake Rate",_n_pT_bins-1,_pT_bins);
-    FR_OS_muon_EE_unc=new TH1F("FR_OS_muon_EE_unc",";p_{T} [GeV];Fake Rate",_n_pT_bins-1,_pT_bins);
-    FR_OS_tauE_Decay0_unc= new TH2F("FR_OS_tauE_Decay0_unc",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
-    FR_OS_tauE_Decay1_unc= new TH2F("FR_OS_tauE_Decay1_unc",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
-    FR_OS_tauE_Decay10_unc= new TH2F("FR_OS_tauE_Decay10_unc",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
-    FR_OS_tauE_Decay11_unc= new TH2F("FR_OS_tauE_Decay11_unc",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
-    FR_OS_tauMu_Decay0_unc= new TH2F("FR_OS_tauMu_Decay0_unc",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
-    FR_OS_tauMu_Decay1_unc= new TH2F("FR_OS_tauMu_Decay1_unc",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
-    FR_OS_tauMu_Decay10_unc= new TH2F("FR_OS_tauMu_Decay10_unc",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
-    FR_OS_tauMu_Decay11_unc= new TH2F("FR_OS_tauMu_Decay11_unc",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
-    FR_OS_tauTau_Decay0_unc= new TH2F("FR_OS_tauTau_Decay0_unc",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
-    FR_OS_tauTau_Decay1_unc= new TH2F("FR_OS_tauTau_Decay1_unc",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
-    FR_OS_tauTau_Decay10_unc= new TH2F("FR_OS_tauTau_Decay10_unc",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
-    FR_OS_tauTau_Decay11_unc= new TH2F("FR_OS_tauTau_Decay11_unc",";p_{T} [GeV];MET [GeV];Fake Rate",_n_pT_bins-1,_pT_bins,_n_MET_bins-1,_MET_bins);
+   for(int i_pT_bin = 0; i_pT_bin < _n_pT_bins - 1; i_pT_bin++ )
+   {
+      double temp_NP = 0;
+      double temp_NF = 0;
 
-    double temp_NP = 0;
-    double temp_NF = 0;
+      double temp_error_NP = 0;
+      double temp_error_NF = 0;
+      
+      for (int i_flav = 0; i_flav < num_of_flavours; i_flav++)
+      {
+         if ( i_flav == Settings::ele && i_pT_bin == 0) continue; // electrons do not have 5 - 7 GeV bin
+	 if ( (i_flav == Settings::tauE || i_flav == Settings::tauMu || i_flav == Settings::tauTau) && i_pT_bin <= 2) continue; //hadronic taus do not have 5 - 20 GeV bin
+         
+         if (i_flav == Settings::ele || i_flav == Settings::mu) {
 
-    double temp_error_NP = 0;
-    double temp_error_NF = 0;
+         temp_NP = passing[Settings::Total][i_flav]->IntegralAndError(passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 1, temp_error_NP);
+         temp_NF = failing[Settings::Total][i_flav]->IntegralAndError(failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 1, temp_error_NF);
+         vector_X[Settings::corrected][Settings::EB][i_flav].push_back((_pT_bins[i_pT_bin] + _pT_bins[i_pT_bin + 1])/2);
+         vector_Y[Settings::corrected][Settings::EB][i_flav].push_back(temp_NP/(temp_NP+temp_NF));
+         vector_EX[Settings::corrected][Settings::EB][i_flav].push_back((_pT_bins[i_pT_bin + 1] - _pT_bins[i_pT_bin])/2);
+         vector_EY[Settings::corrected][Settings::EB][i_flav].push_back(sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
+         
+         temp_NP = passing[Settings::Total][i_flav]->IntegralAndError(passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 2, 2, temp_error_NP);
+         temp_NF = failing[Settings::Total][i_flav]->IntegralAndError(failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 2, 2, temp_error_NF);
+         vector_X[Settings::corrected][Settings::EE][i_flav].push_back((_pT_bins[i_pT_bin] + _pT_bins[i_pT_bin + 1])/2);
+         vector_Y[Settings::corrected][Settings::EE][i_flav].push_back(temp_NP/(temp_NP+temp_NF));
+         vector_EX[Settings::corrected][Settings::EE][i_flav].push_back((_pT_bins[i_pT_bin + 1] - _pT_bins[i_pT_bin])/2);
+         vector_EY[Settings::corrected][Settings::EE][i_flav].push_back(sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
+         
+         // Just for fake rate plots calculate the same for histograms without WZ subtraction
+         temp_NP = passing[Settings::Data][i_flav]->IntegralAndError(passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 1, temp_error_NP);
+         temp_NF = failing[Settings::Data][i_flav]->IntegralAndError(failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 1, temp_error_NF);
+         vector_X[Settings::uncorrected][Settings::EB][i_flav].push_back((_pT_bins[i_pT_bin] + _pT_bins[i_pT_bin + 1])/2);
+         vector_Y[Settings::uncorrected][Settings::EB][i_flav].push_back(temp_NP/(temp_NP+temp_NF));
+         vector_EX[Settings::uncorrected][Settings::EB][i_flav].push_back((_pT_bins[i_pT_bin + 1] - _pT_bins[i_pT_bin])/2);
+         vector_EY[Settings::uncorrected][Settings::EB][i_flav].push_back(sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
+         
+         temp_NP = passing[Settings::Data][i_flav]->IntegralAndError(passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 2, 2, temp_error_NP);
+         temp_NF = failing[Settings::Data][i_flav]->IntegralAndError(failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 2, 2, temp_error_NF);
+         vector_X[Settings::uncorrected][Settings::EE][i_flav].push_back((_pT_bins[i_pT_bin] + _pT_bins[i_pT_bin + 1])/2);
+         vector_Y[Settings::uncorrected][Settings::EE][i_flav].push_back(temp_NP/(temp_NP+temp_NF));
+         vector_EX[Settings::uncorrected][Settings::EE][i_flav].push_back((_pT_bins[i_pT_bin + 1] - _pT_bins[i_pT_bin])/2);
+         vector_EY[Settings::uncorrected][Settings::EE][i_flav].push_back(sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
+             
+         }
+         else {
+         temp_NP = passing[Settings::Total][i_flav]->IntegralAndError(passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 1, temp_error_NP);
+         temp_NF = failing[Settings::Total][i_flav]->IntegralAndError(failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 1, temp_error_NF);
+         vector_X[Settings::corrected][Settings::Decay0][i_flav].push_back((_pT_bins[i_pT_bin] + _pT_bins[i_pT_bin + 1])/2);
+         vector_Y[Settings::corrected][Settings::Decay0][i_flav].push_back(temp_NP/(temp_NP+temp_NF));
+         vector_EX[Settings::corrected][Settings::Decay0][i_flav].push_back((_pT_bins[i_pT_bin + 1] - _pT_bins[i_pT_bin])/2);
+         vector_EY[Settings::corrected][Settings::Decay0][i_flav].push_back(sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
+         
+         temp_NP = passing[Settings::Total][i_flav]->IntegralAndError(passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 2, 2, temp_error_NP);
+         temp_NF = failing[Settings::Total][i_flav]->IntegralAndError(failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 2, 2, temp_error_NF);
+         vector_X[Settings::corrected][Settings::Decay1][i_flav].push_back((_pT_bins[i_pT_bin] + _pT_bins[i_pT_bin + 1])/2);
+         vector_Y[Settings::corrected][Settings::Decay1][i_flav].push_back(temp_NP/(temp_NP+temp_NF));
+         vector_EX[Settings::corrected][Settings::Decay1][i_flav].push_back((_pT_bins[i_pT_bin + 1] - _pT_bins[i_pT_bin])/2);
+         vector_EY[Settings::corrected][Settings::Decay1][i_flav].push_back(sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
+         
+         temp_NP = passing[Settings::Total][i_flav]->IntegralAndError(passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 3, 3, temp_error_NP);
+         temp_NF = failing[Settings::Total][i_flav]->IntegralAndError(failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 3, 3, temp_error_NF);
+         vector_X[Settings::corrected][Settings::Decay10][i_flav].push_back((_pT_bins[i_pT_bin] + _pT_bins[i_pT_bin + 1])/2);
+         vector_Y[Settings::corrected][Settings::Decay10][i_flav].push_back(temp_NP/(temp_NP+temp_NF));
+         vector_EX[Settings::corrected][Settings::Decay10][i_flav].push_back((_pT_bins[i_pT_bin + 1] - _pT_bins[i_pT_bin])/2);
+         vector_EY[Settings::corrected][Settings::Decay10][i_flav].push_back(sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
+             
+         temp_NP = passing[Settings::Total][i_flav]->IntegralAndError(passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 4, 4, temp_error_NP);
+         temp_NF = failing[Settings::Total][i_flav]->IntegralAndError(failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 4, 4, temp_error_NF);
+         vector_X[Settings::corrected][Settings::Decay11][i_flav].push_back((_pT_bins[i_pT_bin] + _pT_bins[i_pT_bin + 1])/2);
+         vector_Y[Settings::corrected][Settings::Decay11][i_flav].push_back(temp_NP/(temp_NP+temp_NF));
+         vector_EX[Settings::corrected][Settings::Decay11][i_flav].push_back((_pT_bins[i_pT_bin + 1] - _pT_bins[i_pT_bin])/2);
+         vector_EY[Settings::corrected][Settings::Decay11][i_flav].push_back(sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
+             
+         // Just for fake rate plots calculate the same for histograms without WZ subtraction
+         temp_NP = passing[Settings::Data][i_flav]->IntegralAndError(passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 1, temp_error_NP);
+         temp_NF = failing[Settings::Data][i_flav]->IntegralAndError(failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 1, temp_error_NF);
+         vector_X[Settings::uncorrected][Settings::Decay0][i_flav].push_back((_pT_bins[i_pT_bin] + _pT_bins[i_pT_bin + 1])/2);
+         vector_Y[Settings::uncorrected][Settings::Decay0][i_flav].push_back(temp_NP/(temp_NP+temp_NF));
+         vector_EX[Settings::uncorrected][Settings::Decay0][i_flav].push_back((_pT_bins[i_pT_bin + 1] - _pT_bins[i_pT_bin])/2);
+         vector_EY[Settings::uncorrected][Settings::Decay0][i_flav].push_back(sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
+         
+         temp_NP = passing[Settings::Data][i_flav]->IntegralAndError(passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 2, 2, temp_error_NP);
+         temp_NF = failing[Settings::Data][i_flav]->IntegralAndError(failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 2, 2, temp_error_NF);
+         vector_X[Settings::uncorrected][Settings::Decay1][i_flav].push_back((_pT_bins[i_pT_bin] + _pT_bins[i_pT_bin + 1])/2);
+         vector_Y[Settings::uncorrected][Settings::Decay1][i_flav].push_back(temp_NP/(temp_NP+temp_NF));
+         vector_EX[Settings::uncorrected][Settings::Decay1][i_flav].push_back((_pT_bins[i_pT_bin + 1] - _pT_bins[i_pT_bin])/2);
+         vector_EY[Settings::uncorrected][Settings::Decay1][i_flav].push_back(sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
 
-    int i_flav;
-    
-    for(int i_pT_bin = 0; i_pT_bin < _n_pT_bins - 1; i_pT_bin++ ) {
-//         for (int i_MET_bin = 0; i_MET_bin < _n_MET_bins - 1; i_MET_bin++ ) {
+         temp_NP = passing[Settings::Data][i_flav]->IntegralAndError(passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 3, 3, temp_error_NP);
+         temp_NF = failing[Settings::Data][i_flav]->IntegralAndError(failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 3, 3, temp_error_NF);
+         vector_X[Settings::uncorrected][Settings::Decay10][i_flav].push_back((_pT_bins[i_pT_bin] + _pT_bins[i_pT_bin + 1])/2);
+         vector_Y[Settings::uncorrected][Settings::Decay10][i_flav].push_back(temp_NP/(temp_NP+temp_NF));
+         vector_EX[Settings::uncorrected][Settings::Decay10][i_flav].push_back((_pT_bins[i_pT_bin + 1] - _pT_bins[i_pT_bin])/2);
+         vector_EY[Settings::uncorrected][Settings::Decay10][i_flav].push_back(sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
+         
+         temp_NP = passing[Settings::Data][i_flav]->IntegralAndError(passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 4, 4, temp_error_NP);
+         temp_NF = failing[Settings::Data][i_flav]->IntegralAndError(failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 4, 4, temp_error_NF);
+         vector_X[Settings::uncorrected][Settings::Decay11][i_flav].push_back((_pT_bins[i_pT_bin] + _pT_bins[i_pT_bin + 1])/2);
+         vector_Y[Settings::uncorrected][Settings::Decay11][i_flav].push_back(temp_NP/(temp_NP+temp_NF));
+         vector_EX[Settings::uncorrected][Settings::Decay11][i_flav].push_back((_pT_bins[i_pT_bin + 1] - _pT_bins[i_pT_bin])/2);
+         vector_EY[Settings::uncorrected][Settings::Decay11][i_flav].push_back(sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
+         }
+     }
+   }
+//corrected
+   FR_OS_electron_EB = new TGraphErrors (vector_X[Settings::corrected][Settings::EB][Settings::ele].size(),
+                                         &(vector_X[Settings::corrected][Settings::EB][Settings::ele][0]),
+                                         &(vector_Y[Settings::corrected][Settings::EB][Settings::ele][0]),
+                                         &(vector_EX[Settings::corrected][Settings::EB][Settings::ele][0]),
+                                         &(vector_EY[Settings::corrected][Settings::EB][Settings::ele][0]));
+   FR_OS_electron_EB->SetName("FR_OS_electron_EB");
+   
+   FR_OS_electron_EE = new TGraphErrors (vector_X[Settings::corrected][Settings::EE][Settings::ele].size(),
+                                         &(vector_X[Settings::corrected][Settings::EE][Settings::ele][0]),
+                                         &(vector_Y[Settings::corrected][Settings::EE][Settings::ele][0]),
+                                         &(vector_EX[Settings::corrected][Settings::EE][Settings::ele][0]),
+                                         &(vector_EY[Settings::corrected][Settings::EE][Settings::ele][0]));
+   FR_OS_electron_EE->SetName("FR_OS_electron_EE");
+   
+   FR_OS_muon_EB = new TGraphErrors (vector_X[Settings::corrected][Settings::EB][Settings::mu].size(),
+                                     &(vector_X[Settings::corrected][Settings::EB][Settings::mu][0]),
+                                     &(vector_Y[Settings::corrected][Settings::EB][Settings::mu][0]),
+                                     &(vector_EX[Settings::corrected][Settings::EB][Settings::mu][0]),
+                                     &(vector_EY[Settings::corrected][Settings::EB][Settings::mu][0]));
+   FR_OS_muon_EB->SetName("FR_OS_muon_EB");
+   
+   FR_OS_muon_EE = new TGraphErrors (vector_X[Settings::corrected][Settings::EE][Settings::mu].size(),
+                                     &(vector_X[Settings::corrected][Settings::EE][Settings::mu][0]),
+                                     &(vector_Y[Settings::corrected][Settings::EE][Settings::mu][0]),
+                                     &(vector_EX[Settings::corrected][Settings::EE][Settings::mu][0]),
+                                     &(vector_EY[Settings::corrected][Settings::EE][Settings::mu][0]));
+   FR_OS_muon_EE->SetName("FR_OS_muon_EE");
 
-//-----------------------------------ELECTRON------------------------------------------
-        i_flav=Settings::ele;
-        
-        if (i_pT_bin == 0) continue; // electrons do not have 5 - 7 GeV bin
-        
-        temp_NP = passing[Settings::Total][i_flav]->IntegralAndError(passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 100, 1, 1, temp_error_NP);
-        temp_NF = failing[Settings::Total][i_flav]->IntegralAndError(failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 100, 1, 1, temp_error_NF);
-        FR_OS_electron_EB->SetBinContent(i_pT_bin+1,temp_NP/(temp_NP+temp_NF));
-        FR_OS_electron_EB->SetBinError(i_pT_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-        
-        temp_NP = passing[Settings::Total][i_flav]->IntegralAndError(passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 100, 2, 2, temp_error_NP);
-        temp_NF = failing[Settings::Total][i_flav]->IntegralAndError(failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 100, 2, 2, temp_error_NF);
-        FR_OS_electron_EE->SetBinContent(i_pT_bin+1,temp_NP/(temp_NP+temp_NF));
-        FR_OS_electron_EE->SetBinError(i_pT_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-        
-        temp_NP = passing[Settings::Data][i_flav]->IntegralAndError(passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 100, 1, 1, temp_error_NP);
-        temp_NF = failing[Settings::Data][i_flav]->IntegralAndError(failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 100, 1, 1, temp_error_NF);
-        FR_OS_electron_EB_unc->SetBinContent(i_pT_bin+1,temp_NP/(temp_NP+temp_NF));
-        FR_OS_electron_EB_unc->SetBinError(i_pT_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-        
-        temp_NP = passing[Settings::Data][i_flav]->IntegralAndError(passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 100, 2, 2, temp_error_NP);
-        temp_NF = failing[Settings::Data][i_flav]->IntegralAndError(failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 100, 2, 2, temp_error_NF);
-        FR_OS_electron_EE_unc->SetBinContent(i_pT_bin+1,temp_NP/(temp_NP+temp_NF));
-        FR_OS_electron_EE_unc->SetBinError(i_pT_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-        
-        
-//-----------------------------------MUON------------------------------------------
-        i_flav=Settings::mu;
-        
-        if (i_pT_bin == 0) continue; // muons do not have 5 - 7 GeV bin
-        
-        temp_NP = passing[Settings::Total][i_flav]->IntegralAndError(passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 100, 1, 1, temp_error_NP);
-        temp_NF = failing[Settings::Total][i_flav]->IntegralAndError(failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 100, 1, 1, temp_error_NF);
-        FR_OS_muon_EB->SetBinContent(i_pT_bin+1,temp_NP/(temp_NP+temp_NF));
-        FR_OS_muon_EB->SetBinError(i_pT_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-        
-        temp_NP = passing[Settings::Total][i_flav]->IntegralAndError(passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 100, 2, 2, temp_error_NP);
-        temp_NF = failing[Settings::Total][i_flav]->IntegralAndError(failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 100, 2, 2, temp_error_NF);
-        FR_OS_muon_EE->SetBinContent(i_pT_bin+1,temp_NP/(temp_NP+temp_NF));
-        FR_OS_muon_EE->SetBinError(i_pT_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-        
-        temp_NP = passing[Settings::Data][i_flav]->IntegralAndError(passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 100, 1, 1, temp_error_NP);
-        temp_NF = failing[Settings::Data][i_flav]->IntegralAndError(failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 100, 1, 1, temp_error_NF);
-        FR_OS_muon_EB_unc->SetBinContent(i_pT_bin+1,temp_NP/(temp_NP+temp_NF));
-        FR_OS_muon_EB_unc->SetBinError(i_pT_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-        
-        temp_NP = passing[Settings::Data][i_flav]->IntegralAndError(passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 100, 2, 2, temp_error_NP);
-        temp_NF = failing[Settings::Data][i_flav]->IntegralAndError(failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, 1, 100, 2, 2, temp_error_NF);
-        FR_OS_muon_EE_unc->SetBinContent(i_pT_bin+1,temp_NP/(temp_NP+temp_NF));
-        FR_OS_muon_EE_unc->SetBinError(i_pT_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
+   FR_OS_tauE_Decay0 = new TGraphErrors (vector_X[Settings::corrected][Settings::Decay0][Settings::tauE].size(),
+                                     &(vector_X[Settings::corrected][Settings::Decay0][Settings::tauE][0]),
+                                     &(vector_Y[Settings::corrected][Settings::Decay0][Settings::tauE][0]),
+                                     &(vector_EX[Settings::corrected][Settings::Decay0][Settings::tauE][0]),
+                                     &(vector_EY[Settings::corrected][Settings::Decay0][Settings::tauE][0]));
+   FR_OS_tauE_Decay0->SetName("FR_OS_tauE_Decay0");
 
-    }
-    
-    for(int i_pT_bin = 0; i_pT_bin < _n_pT_bins - 1; i_pT_bin++ ) {
-        for (int i_MET_bin = 0; i_MET_bin < _n_MET_bins - 1; i_MET_bin++ ) {
-            
-            if (i_pT_bin <= 2) continue; //hadronic taus do not have 5 - 20 GeV bin
+   FR_OS_tauE_Decay1 = new TGraphErrors (vector_X[Settings::corrected][Settings::Decay1][Settings::tauE].size(),
+                                     &(vector_X[Settings::corrected][Settings::Decay1][Settings::tauE][0]),
+                                     &(vector_Y[Settings::corrected][Settings::Decay1][Settings::tauE][0]),
+                                     &(vector_EX[Settings::corrected][Settings::Decay1][Settings::tauE][0]),
+                                     &(vector_EY[Settings::corrected][Settings::Decay1][Settings::tauE][0]));
+   FR_OS_tauE_Decay1->SetName("FR_OS_tauE_Decay1");
 
-//-----------------------------------tauE------------------------------------------          
-            i_flav=Settings::tauE;
-            
-            temp_NP = passing[Settings::Total][i_flav]->IntegralAndError(passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 1, 1, temp_error_NP);
-            temp_NF = failing[Settings::Total][i_flav]->IntegralAndError(failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 1, 1, temp_error_NF);
-            FR_OS_tauE_Decay0->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauE_Decay0->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-            
-            temp_NP = passing[Settings::Total][i_flav]->IntegralAndError(passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 2, 2, temp_error_NP);
-            temp_NF = failing[Settings::Total][i_flav]->IntegralAndError(failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 2, 2, temp_error_NF);
-            FR_OS_tauE_Decay1->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauE_Decay1->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-            
-            temp_NP = passing[Settings::Total][i_flav]->IntegralAndError(passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 3, 3, temp_error_NP);
-            temp_NF = failing[Settings::Total][i_flav]->IntegralAndError(failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 3, 3, temp_error_NF);
-            FR_OS_tauE_Decay10->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauE_Decay10->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-            
-            temp_NP = passing[Settings::Total][i_flav]->IntegralAndError(passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 4, 4, temp_error_NP);
-            temp_NF = failing[Settings::Total][i_flav]->IntegralAndError(failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 4, 4, temp_error_NF);
-            FR_OS_tauE_Decay11->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauE_Decay11->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-            
-            temp_NP = passing[Settings::Data][i_flav]->IntegralAndError(passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 1, 1, temp_error_NP);
-            temp_NF = failing[Settings::Data][i_flav]->IntegralAndError(failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 1, 1, temp_error_NF);
-            FR_OS_tauE_Decay0_unc->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauE_Decay0_unc->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-            
-            temp_NP = passing[Settings::Data][i_flav]->IntegralAndError(passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 2, 2, temp_error_NP);
-            temp_NF = failing[Settings::Data][i_flav]->IntegralAndError(failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 2, 2, temp_error_NF);
-            FR_OS_tauE_Decay1_unc->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauE_Decay1_unc->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-            
-            temp_NP = passing[Settings::Data][i_flav]->IntegralAndError(passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 3, 3, temp_error_NP);
-            temp_NF = failing[Settings::Data][i_flav]->IntegralAndError(failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 3, 3, temp_error_NF);
-            FR_OS_tauE_Decay10_unc->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauE_Decay10_unc->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-            
-            temp_NP = passing[Settings::Data][i_flav]->IntegralAndError(passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 4, 4, temp_error_NP);
-            temp_NF = failing[Settings::Data][i_flav]->IntegralAndError(failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 4, 4, temp_error_NF);
-            FR_OS_tauE_Decay11_unc->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauE_Decay11_unc->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-
-//-----------------------------------tauMu------------------------------------------          
-            i_flav=Settings::tauMu;
-            
-            temp_NP = passing[Settings::Total][i_flav]->IntegralAndError(passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 1, 1, temp_error_NP);
-            temp_NF = failing[Settings::Total][i_flav]->IntegralAndError(failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 1, 1, temp_error_NF);
-            FR_OS_tauMu_Decay0->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauMu_Decay0->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-            
-            temp_NP = passing[Settings::Total][i_flav]->IntegralAndError(passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 2, 2, temp_error_NP);
-            temp_NF = failing[Settings::Total][i_flav]->IntegralAndError(failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 2, 2, temp_error_NF);
-            FR_OS_tauMu_Decay1->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauMu_Decay1->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-            
-            temp_NP = passing[Settings::Total][i_flav]->IntegralAndError(passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 3, 3, temp_error_NP);
-            temp_NF = failing[Settings::Total][i_flav]->IntegralAndError(failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 3, 3, temp_error_NF);
-            FR_OS_tauMu_Decay10->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauMu_Decay10->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-            
-            temp_NP = passing[Settings::Total][i_flav]->IntegralAndError(passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 4, 4, temp_error_NP);
-            temp_NF = failing[Settings::Total][i_flav]->IntegralAndError(failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 4, 4, temp_error_NF);
-            FR_OS_tauMu_Decay11->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauMu_Decay11->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-            
-            temp_NP = passing[Settings::Data][i_flav]->IntegralAndError(passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 1, 1, temp_error_NP);
-            temp_NF = failing[Settings::Data][i_flav]->IntegralAndError(failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 1, 1, temp_error_NF);
-            FR_OS_tauMu_Decay0_unc->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauMu_Decay0_unc->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-            
-            temp_NP = passing[Settings::Data][i_flav]->IntegralAndError(passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 2, 2, temp_error_NP);
-            temp_NF = failing[Settings::Data][i_flav]->IntegralAndError(failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 2, 2, temp_error_NF);
-            FR_OS_tauMu_Decay1_unc->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauMu_Decay1_unc->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-            
-            temp_NP = passing[Settings::Data][i_flav]->IntegralAndError(passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 3, 3, temp_error_NP);
-            temp_NF = failing[Settings::Data][i_flav]->IntegralAndError(failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 3, 3, temp_error_NF);
-            FR_OS_tauMu_Decay10_unc->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauMu_Decay10_unc->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-            
-            temp_NP = passing[Settings::Data][i_flav]->IntegralAndError(passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 4, 4, temp_error_NP);
-            temp_NF = failing[Settings::Data][i_flav]->IntegralAndError(failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 4, 4, temp_error_NF);
-            FR_OS_tauMu_Decay11_unc->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauMu_Decay11_unc->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-
-//-----------------------------------tauTau------------------------------------------          
-            i_flav=Settings::tauTau;
-            
-            temp_NP = passing[Settings::Total][i_flav]->IntegralAndError(passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 1, 1, temp_error_NP);
-            temp_NF = failing[Settings::Total][i_flav]->IntegralAndError(failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 1, 1, temp_error_NF);
-            FR_OS_tauTau_Decay0->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauTau_Decay0->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-            
-            temp_NP = passing[Settings::Total][i_flav]->IntegralAndError(passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 2, 2, temp_error_NP);
-            temp_NF = failing[Settings::Total][i_flav]->IntegralAndError(failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 2, 2, temp_error_NF);
-            FR_OS_tauTau_Decay1->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauTau_Decay1->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-            
-            temp_NP = passing[Settings::Total][i_flav]->IntegralAndError(passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 3, 3, temp_error_NP);
-            temp_NF = failing[Settings::Total][i_flav]->IntegralAndError(failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 3, 3, temp_error_NF);
-            FR_OS_tauTau_Decay10->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauTau_Decay10->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-            
-            temp_NP = passing[Settings::Total][i_flav]->IntegralAndError(passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 4, 4, temp_error_NP);
-            temp_NF = failing[Settings::Total][i_flav]->IntegralAndError(failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Total][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Total][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 4, 4, temp_error_NF);
-            FR_OS_tauTau_Decay11->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauTau_Decay11->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-            
-            temp_NP = passing[Settings::Data][i_flav]->IntegralAndError(passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 1, 1, temp_error_NP);
-            temp_NF = failing[Settings::Data][i_flav]->IntegralAndError(failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 1, 1, temp_error_NF);
-            FR_OS_tauTau_Decay0_unc->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauTau_Decay0_unc->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-            
-            temp_NP = passing[Settings::Data][i_flav]->IntegralAndError(passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 2, 2, temp_error_NP);
-            temp_NF = failing[Settings::Data][i_flav]->IntegralAndError(failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 2, 2, temp_error_NF);
-            FR_OS_tauTau_Decay1_unc->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauTau_Decay1_unc->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-            
-            temp_NP = passing[Settings::Data][i_flav]->IntegralAndError(passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 3, 3, temp_error_NP);
-            temp_NF = failing[Settings::Data][i_flav]->IntegralAndError(failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 3, 3, temp_error_NF);
-            FR_OS_tauTau_Decay10_unc->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauTau_Decay10_unc->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-            
-            temp_NP = passing[Settings::Data][i_flav]->IntegralAndError(passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),passing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 4, 4, temp_error_NP);
-            temp_NF = failing[Settings::Data][i_flav]->IntegralAndError(failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin]),failing[Settings::Data][i_flav]->GetXaxis()->FindBin(_pT_bins[i_pT_bin+1]) - 1, passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin]),passing[Settings::Data][i_flav]->GetYaxis()->FindBin(_MET_bins[i_MET_bin+1]) - 1, 4, 4, temp_error_NF);
-            FR_OS_tauTau_Decay11_unc->SetBinContent(i_pT_bin+1,i_MET_bin+1,temp_NP/(temp_NP+temp_NF));
-            FR_OS_tauTau_Decay11_unc->SetBinError(i_pT_bin+1,i_MET_bin+1,sqrt(pow((temp_NF/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NP,2) + pow((temp_NP/pow(temp_NF+temp_NP,2)),2)*pow(temp_error_NF,2)));
-            
-        }
-    }
+   FR_OS_tauE_Decay10 = new TGraphErrors (vector_X[Settings::corrected][Settings::Decay10][Settings::tauE].size(),
+                                     &(vector_X[Settings::corrected][Settings::Decay10][Settings::tauE][0]),
+                                     &(vector_Y[Settings::corrected][Settings::Decay10][Settings::tauE][0]),
+                                     &(vector_EX[Settings::corrected][Settings::Decay10][Settings::tauE][0]),
+                                     &(vector_EY[Settings::corrected][Settings::Decay10][Settings::tauE][0]));
+   FR_OS_tauE_Decay10->SetName("FR_OS_tauE_Decay10");
        
-    PlotFR();
+   FR_OS_tauE_Decay11 = new TGraphErrors (vector_X[Settings::corrected][Settings::Decay11][Settings::tauE].size(),
+                                     &(vector_X[Settings::corrected][Settings::Decay11][Settings::tauE][0]),
+                                     &(vector_Y[Settings::corrected][Settings::Decay11][Settings::tauE][0]),
+                                     &(vector_EX[Settings::corrected][Settings::Decay11][Settings::tauE][0]),
+                                     &(vector_EY[Settings::corrected][Settings::Decay11][Settings::tauE][0]));
+   FR_OS_tauE_Decay11->SetName("FR_OS_tauE_Decay11");
+       
+   FR_OS_tauMu_Decay0 = new TGraphErrors (vector_X[Settings::corrected][Settings::Decay0][Settings::tauMu].size(),
+                                     &(vector_X[Settings::corrected][Settings::Decay0][Settings::tauMu][0]),
+                                     &(vector_Y[Settings::corrected][Settings::Decay0][Settings::tauMu][0]),
+                                     &(vector_EX[Settings::corrected][Settings::Decay0][Settings::tauMu][0]),
+                                     &(vector_EY[Settings::corrected][Settings::Decay0][Settings::tauMu][0]));
+   FR_OS_tauMu_Decay0->SetName("FR_OS_tauMu_Decay0");
 
-    TFile* fOutHistos = TFile::Open(file_name, "recreate");
-    fOutHistos->cd();
+   FR_OS_tauMu_Decay1 = new TGraphErrors (vector_X[Settings::corrected][Settings::Decay1][Settings::tauMu].size(),
+                                     &(vector_X[Settings::corrected][Settings::Decay1][Settings::tauMu][0]),
+                                     &(vector_Y[Settings::corrected][Settings::Decay1][Settings::tauMu][0]),
+                                     &(vector_EX[Settings::corrected][Settings::Decay1][Settings::tauMu][0]),
+                                     &(vector_EY[Settings::corrected][Settings::Decay1][Settings::tauMu][0]));
+   FR_OS_tauMu_Decay1->SetName("FR_OS_tauMu_Decay1");
 
-    FR_OS_electron_EB->Write();
-    FR_OS_electron_EE->Write();
-    FR_OS_muon_EB->Write();
-    FR_OS_muon_EE->Write();
-    FR_OS_tauE_Decay0->Write();
-    FR_OS_tauE_Decay1->Write();
-    FR_OS_tauE_Decay10->Write();
-    FR_OS_tauE_Decay11->Write();
-    FR_OS_tauMu_Decay0->Write();
-    FR_OS_tauMu_Decay1->Write();
-    FR_OS_tauMu_Decay10->Write();
-    FR_OS_tauMu_Decay11->Write();
-    FR_OS_tauTau_Decay0->Write();
-    FR_OS_tauTau_Decay1->Write();
-    FR_OS_tauTau_Decay10->Write();
-    FR_OS_tauTau_Decay11->Write();
+   FR_OS_tauMu_Decay10 = new TGraphErrors (vector_X[Settings::corrected][Settings::Decay10][Settings::tauMu].size(),
+                                     &(vector_X[Settings::corrected][Settings::Decay10][Settings::tauMu][0]),
+                                     &(vector_Y[Settings::corrected][Settings::Decay10][Settings::tauMu][0]),
+                                     &(vector_EX[Settings::corrected][Settings::Decay10][Settings::tauMu][0]),
+                                     &(vector_EY[Settings::corrected][Settings::Decay10][Settings::tauMu][0]));
+   FR_OS_tauMu_Decay10->SetName("FR_OS_tauMu_Decay10");
+       
+   FR_OS_tauMu_Decay11 = new TGraphErrors (vector_X[Settings::corrected][Settings::Decay11][Settings::tauMu].size(),
+                                     &(vector_X[Settings::corrected][Settings::Decay11][Settings::tauMu][0]),
+                                     &(vector_Y[Settings::corrected][Settings::Decay11][Settings::tauMu][0]),
+                                     &(vector_EX[Settings::corrected][Settings::Decay11][Settings::tauMu][0]),
+                                     &(vector_EY[Settings::corrected][Settings::Decay11][Settings::tauMu][0]));
+   FR_OS_tauMu_Decay11->SetName("FR_OS_tauMu_Decay11");
+       
+   FR_OS_tauTau_Decay0 = new TGraphErrors (vector_X[Settings::corrected][Settings::Decay0][Settings::tauTau].size(),
+                                     &(vector_X[Settings::corrected][Settings::Decay0][Settings::tauTau][0]),
+                                     &(vector_Y[Settings::corrected][Settings::Decay0][Settings::tauTau][0]),
+                                     &(vector_EX[Settings::corrected][Settings::Decay0][Settings::tauTau][0]),
+                                     &(vector_EY[Settings::corrected][Settings::Decay0][Settings::tauTau][0]));
+   FR_OS_tauTau_Decay0->SetName("FR_OS_tauTau_Decay0");
 
-    FR_OS_electron_EB_unc->Write();
-    FR_OS_electron_EE_unc->Write();
-    FR_OS_muon_EB_unc->Write();
-    FR_OS_muon_EE_unc->Write();
-    FR_OS_tauE_Decay0_unc->Write();
-    FR_OS_tauE_Decay1_unc->Write();
-    FR_OS_tauE_Decay10_unc->Write();
-    FR_OS_tauE_Decay11_unc->Write();
-    FR_OS_tauMu_Decay0_unc->Write();
-    FR_OS_tauMu_Decay1_unc->Write();
-    FR_OS_tauMu_Decay10_unc->Write();
-    FR_OS_tauMu_Decay11_unc->Write();
-    FR_OS_tauTau_Decay0_unc->Write();
-    FR_OS_tauTau_Decay1_unc->Write();
-    FR_OS_tauTau_Decay10_unc->Write();
-    FR_OS_tauTau_Decay11_unc->Write();
+   FR_OS_tauTau_Decay1 = new TGraphErrors (vector_X[Settings::corrected][Settings::Decay1][Settings::tauTau].size(),
+                                     &(vector_X[Settings::corrected][Settings::Decay1][Settings::tauTau][0]),
+                                     &(vector_Y[Settings::corrected][Settings::Decay1][Settings::tauTau][0]),
+                                     &(vector_EX[Settings::corrected][Settings::Decay1][Settings::tauTau][0]),
+                                     &(vector_EY[Settings::corrected][Settings::Decay1][Settings::tauTau][0]));
+   FR_OS_tauTau_Decay1->SetName("FR_OS_tauTau_Decay1");
 
-    fOutHistos->Close();
-    delete fOutHistos;
+   FR_OS_tauTau_Decay10 = new TGraphErrors (vector_X[Settings::corrected][Settings::Decay10][Settings::tauTau].size(),
+                                     &(vector_X[Settings::corrected][Settings::Decay10][Settings::tauTau][0]),
+                                     &(vector_Y[Settings::corrected][Settings::Decay10][Settings::tauTau][0]),
+                                     &(vector_EX[Settings::corrected][Settings::Decay10][Settings::tauTau][0]),
+                                     &(vector_EY[Settings::corrected][Settings::Decay10][Settings::tauTau][0]));
+   FR_OS_tauTau_Decay10->SetName("FR_OS_tauTau_Decay10");
+       
+   FR_OS_tauTau_Decay11 = new TGraphErrors (vector_X[Settings::corrected][Settings::Decay11][Settings::tauTau].size(),
+                                     &(vector_X[Settings::corrected][Settings::Decay11][Settings::tauTau][0]),
+                                     &(vector_Y[Settings::corrected][Settings::Decay11][Settings::tauTau][0]),
+                                     &(vector_EX[Settings::corrected][Settings::Decay11][Settings::tauTau][0]),
+                                     &(vector_EY[Settings::corrected][Settings::Decay11][Settings::tauTau][0]));
+   FR_OS_tauTau_Decay11->SetName("FR_OS_tauTau_Decay11");
 
-    cout << "[INFO] Fake rates produced and stored in a file." << endl;
+//uncorrected
+   FR_OS_electron_EB_unc = new TGraphErrors (vector_X[Settings::uncorrected][Settings::EB][Settings::ele].size(),
+                                         &(vector_X[Settings::uncorrected][Settings::EB][Settings::ele][0]),
+                                         &(vector_Y[Settings::uncorrected][Settings::EB][Settings::ele][0]),
+                                         &(vector_EX[Settings::uncorrected][Settings::EB][Settings::ele][0]),
+                                         &(vector_EY[Settings::uncorrected][Settings::EB][Settings::ele][0]));
+   FR_OS_electron_EB_unc->SetName("FR_OS_electron_EB_unc");
+   
+   FR_OS_electron_EE_unc = new TGraphErrors (vector_X[Settings::uncorrected][Settings::EE][Settings::ele].size(),
+                                         &(vector_X[Settings::uncorrected][Settings::EE][Settings::ele][0]),
+                                         &(vector_Y[Settings::uncorrected][Settings::EE][Settings::ele][0]),
+                                         &(vector_EX[Settings::uncorrected][Settings::EE][Settings::ele][0]),
+                                         &(vector_EY[Settings::uncorrected][Settings::EE][Settings::ele][0]));
+   FR_OS_electron_EE_unc->SetName("FR_OS_electron_EE_unc");
+   
+   FR_OS_muon_EB_unc = new TGraphErrors (vector_X[Settings::uncorrected][Settings::EB][Settings::mu].size(),
+                                     &(vector_X[Settings::uncorrected][Settings::EB][Settings::mu][0]),
+                                     &(vector_Y[Settings::uncorrected][Settings::EB][Settings::mu][0]),
+                                     &(vector_EX[Settings::uncorrected][Settings::EB][Settings::mu][0]),
+                                     &(vector_EY[Settings::uncorrected][Settings::EB][Settings::mu][0]));
+   FR_OS_muon_EB_unc->SetName("FR_OS_muon_EB_unc");
+   
+   FR_OS_muon_EE_unc = new TGraphErrors (vector_X[Settings::uncorrected][Settings::EE][Settings::mu].size(),
+                                     &(vector_X[Settings::uncorrected][Settings::EE][Settings::mu][0]),
+                                     &(vector_Y[Settings::uncorrected][Settings::EE][Settings::mu][0]),
+                                     &(vector_EX[Settings::uncorrected][Settings::EE][Settings::mu][0]),
+                                     &(vector_EY[Settings::uncorrected][Settings::EE][Settings::mu][0]));
+   FR_OS_muon_EE_unc->SetName("FR_OS_muon_EE_unc");
+
+   FR_OS_tauE_Decay0_unc = new TGraphErrors (vector_X[Settings::uncorrected][Settings::Decay0][Settings::tauE].size(),
+                                     &(vector_X[Settings::uncorrected][Settings::Decay0][Settings::tauE][0]),
+                                     &(vector_Y[Settings::uncorrected][Settings::Decay0][Settings::tauE][0]),
+                                     &(vector_EX[Settings::uncorrected][Settings::Decay0][Settings::tauE][0]),
+                                     &(vector_EY[Settings::uncorrected][Settings::Decay0][Settings::tauE][0]));
+   FR_OS_tauE_Decay0_unc->SetName("FR_OS_tauE_Decay0_unc");
+   
+   FR_OS_tauE_Decay1_unc = new TGraphErrors (vector_X[Settings::uncorrected][Settings::Decay1][Settings::tauE].size(),
+                                     &(vector_X[Settings::uncorrected][Settings::Decay1][Settings::tauE][0]),
+                                     &(vector_Y[Settings::uncorrected][Settings::Decay1][Settings::tauE][0]),
+                                     &(vector_EX[Settings::uncorrected][Settings::Decay1][Settings::tauE][0]),
+                                     &(vector_EY[Settings::uncorrected][Settings::Decay1][Settings::tauE][0]));
+   FR_OS_tauE_Decay1_unc->SetName("FR_OS_tauE_Decay1_unc");
+
+   FR_OS_tauE_Decay10_unc = new TGraphErrors (vector_X[Settings::uncorrected][Settings::Decay10][Settings::tauE].size(),
+                                     &(vector_X[Settings::uncorrected][Settings::Decay10][Settings::tauE][0]),
+                                     &(vector_Y[Settings::uncorrected][Settings::Decay10][Settings::tauE][0]),
+                                     &(vector_EX[Settings::uncorrected][Settings::Decay10][Settings::tauE][0]),
+                                     &(vector_EY[Settings::uncorrected][Settings::Decay10][Settings::tauE][0]));
+   FR_OS_tauE_Decay10_unc->SetName("FR_OS_tauE_Decay10_unc");
+       
+   FR_OS_tauE_Decay11_unc = new TGraphErrors (vector_X[Settings::uncorrected][Settings::Decay11][Settings::tauE].size(),
+                                     &(vector_X[Settings::uncorrected][Settings::Decay11][Settings::tauE][0]),
+                                     &(vector_Y[Settings::uncorrected][Settings::Decay11][Settings::tauE][0]),
+                                     &(vector_EX[Settings::uncorrected][Settings::Decay11][Settings::tauE][0]),
+                                     &(vector_EY[Settings::uncorrected][Settings::Decay11][Settings::tauE][0]));
+   FR_OS_tauE_Decay11_unc->SetName("FR_OS_tauE_Decay11_unc");
+       
+   FR_OS_tauMu_Decay0_unc = new TGraphErrors (vector_X[Settings::uncorrected][Settings::Decay0][Settings::tauMu].size(),
+                                     &(vector_X[Settings::uncorrected][Settings::Decay0][Settings::tauMu][0]),
+                                     &(vector_Y[Settings::uncorrected][Settings::Decay0][Settings::tauMu][0]),
+                                     &(vector_EX[Settings::uncorrected][Settings::Decay0][Settings::tauMu][0]),
+                                     &(vector_EY[Settings::uncorrected][Settings::Decay0][Settings::tauMu][0]));
+   FR_OS_tauMu_Decay0_unc->SetName("FR_OS_tauMu_Decay0_unc");
+   
+   FR_OS_tauMu_Decay1_unc = new TGraphErrors (vector_X[Settings::uncorrected][Settings::Decay1][Settings::tauMu].size(),
+                                     &(vector_X[Settings::uncorrected][Settings::Decay1][Settings::tauMu][0]),
+                                     &(vector_Y[Settings::uncorrected][Settings::Decay1][Settings::tauMu][0]),
+                                     &(vector_EX[Settings::uncorrected][Settings::Decay1][Settings::tauMu][0]),
+                                     &(vector_EY[Settings::uncorrected][Settings::Decay1][Settings::tauMu][0]));
+   FR_OS_tauMu_Decay1_unc->SetName("FR_OS_tauMu_Decay1_unc");
+
+   FR_OS_tauMu_Decay10_unc = new TGraphErrors (vector_X[Settings::uncorrected][Settings::Decay10][Settings::tauMu].size(),
+                                     &(vector_X[Settings::uncorrected][Settings::Decay10][Settings::tauMu][0]),
+                                     &(vector_Y[Settings::uncorrected][Settings::Decay10][Settings::tauMu][0]),
+                                     &(vector_EX[Settings::uncorrected][Settings::Decay10][Settings::tauMu][0]),
+                                     &(vector_EY[Settings::uncorrected][Settings::Decay10][Settings::tauMu][0]));
+   FR_OS_tauMu_Decay10_unc->SetName("FR_OS_tauMu_Decay10_unc");
+       
+   FR_OS_tauMu_Decay11_unc = new TGraphErrors (vector_X[Settings::uncorrected][Settings::Decay11][Settings::tauMu].size(),
+                                     &(vector_X[Settings::uncorrected][Settings::Decay11][Settings::tauMu][0]),
+                                     &(vector_Y[Settings::uncorrected][Settings::Decay11][Settings::tauMu][0]),
+                                     &(vector_EX[Settings::uncorrected][Settings::Decay11][Settings::tauMu][0]),
+                                     &(vector_EY[Settings::uncorrected][Settings::Decay11][Settings::tauMu][0]));
+   FR_OS_tauMu_Decay11_unc->SetName("FR_OS_tauMu_Decay11_unc");
+   
+   FR_OS_tauTau_Decay0_unc = new TGraphErrors (vector_X[Settings::uncorrected][Settings::Decay0][Settings::tauTau].size(),
+                                     &(vector_X[Settings::uncorrected][Settings::Decay0][Settings::tauTau][0]),
+                                     &(vector_Y[Settings::uncorrected][Settings::Decay0][Settings::tauTau][0]),
+                                     &(vector_EX[Settings::uncorrected][Settings::Decay0][Settings::tauTau][0]),
+                                     &(vector_EY[Settings::uncorrected][Settings::Decay0][Settings::tauTau][0]));
+   FR_OS_tauTau_Decay0_unc->SetName("FR_OS_tauTau_Decay0_unc");
+   
+   FR_OS_tauTau_Decay1_unc = new TGraphErrors (vector_X[Settings::uncorrected][Settings::Decay1][Settings::tauTau].size(),
+                                     &(vector_X[Settings::uncorrected][Settings::Decay1][Settings::tauTau][0]),
+                                     &(vector_Y[Settings::uncorrected][Settings::Decay1][Settings::tauTau][0]),
+                                     &(vector_EX[Settings::uncorrected][Settings::Decay1][Settings::tauTau][0]),
+                                     &(vector_EY[Settings::uncorrected][Settings::Decay1][Settings::tauTau][0]));
+   FR_OS_tauTau_Decay1_unc->SetName("FR_OS_tauTau_Decay1_unc");
+
+   FR_OS_tauTau_Decay10_unc = new TGraphErrors (vector_X[Settings::uncorrected][Settings::Decay10][Settings::tauTau].size(),
+                                     &(vector_X[Settings::uncorrected][Settings::Decay10][Settings::tauTau][0]),
+                                     &(vector_Y[Settings::uncorrected][Settings::Decay10][Settings::tauTau][0]),
+                                     &(vector_EX[Settings::uncorrected][Settings::Decay10][Settings::tauTau][0]),
+                                     &(vector_EY[Settings::uncorrected][Settings::Decay10][Settings::tauTau][0]));
+   FR_OS_tauTau_Decay10_unc->SetName("FR_OS_tauTau_Decay10_unc");
+       
+   FR_OS_tauTau_Decay11_unc = new TGraphErrors (vector_X[Settings::uncorrected][Settings::Decay11][Settings::tauTau].size(),
+                                     &(vector_X[Settings::uncorrected][Settings::Decay11][Settings::tauTau][0]),
+                                     &(vector_Y[Settings::uncorrected][Settings::Decay11][Settings::tauTau][0]),
+                                     &(vector_EX[Settings::uncorrected][Settings::Decay11][Settings::tauTau][0]),
+                                     &(vector_EY[Settings::uncorrected][Settings::Decay11][Settings::tauTau][0]));
+   FR_OS_tauTau_Decay11_unc->SetName("FR_OS_tauTau_Decay11_unc");
+       
+   PlotFR();
+   
+   TFile* fOutHistos = TFile::Open(file_name, "recreate");
+   fOutHistos->cd();
+   
+   FR_OS_electron_EB->Write();
+   FR_OS_electron_EE->Write();
+   FR_OS_muon_EB->Write();
+   FR_OS_muon_EE->Write();
+   FR_OS_tauE_Decay0->Write();
+   FR_OS_tauE_Decay1->Write();
+   FR_OS_tauE_Decay10->Write();
+   FR_OS_tauE_Decay11->Write();
+   FR_OS_tauMu_Decay0->Write();
+   FR_OS_tauMu_Decay1->Write();
+   FR_OS_tauMu_Decay10->Write();
+   FR_OS_tauMu_Decay11->Write();
+   FR_OS_tauTau_Decay0->Write();
+   FR_OS_tauTau_Decay1->Write();
+   FR_OS_tauTau_Decay10->Write();
+   FR_OS_tauTau_Decay11->Write();
+
+   FR_OS_electron_EB_unc->Write();
+   FR_OS_electron_EE_unc->Write();
+   FR_OS_muon_EB_unc->Write();
+   FR_OS_muon_EE_unc->Write();
+   FR_OS_tauE_Decay0_unc->Write();
+   FR_OS_tauE_Decay1_unc->Write();
+   FR_OS_tauE_Decay10_unc->Write();
+   FR_OS_tauE_Decay11_unc->Write();
+   FR_OS_tauMu_Decay0_unc->Write();
+   FR_OS_tauMu_Decay1_unc->Write();
+   FR_OS_tauMu_Decay10_unc->Write();
+   FR_OS_tauMu_Decay11_unc->Write();
+   FR_OS_tauTau_Decay0_unc->Write();
+   FR_OS_tauTau_Decay1_unc->Write();
+   FR_OS_tauTau_Decay10_unc->Write();
+   FR_OS_tauTau_Decay11_unc->Write();
+
+   fOutHistos->Close();
+   delete fOutHistos;
+   
+   cout << "[INFO] Fake rates produced and stored in a file." << endl;
 }
 //===============================================================
 
 //===============================================================
 void OSmethod::PlotFR()
 {
-//     TCanvas *c_ele, *c_mu, *c_tauE_Decay0, *c_tauE_Decay1, *c_tauE_Decay10, *c_tauE_Decay11, *c_tauMu_Decay0, *c_tauMu_Decay1, *c_tauMu_Decay10, *c_tauMu_Decay11, *c_tauTau_Decay0, *c_tauTau_Decay1, *c_tauTau_Decay10, *c_tauTau_Decay11;
-//     c_ele = new TCanvas("FR_ele", "FR_ele", 600, 600);
-//     c_mu  = new TCanvas("FR_mu", "FR_mu", 600, 600);
-//     c_tauE_Decay0 = new TCanvas("FR_tauE_Decay0", "FR_tauE_Decay0", 600, 600);
-//     c_tauE_Decay1 = new TCanvas("FR_tauE_Decay1", "FR_tauE_Decay1", 600, 600);
-//     c_tauE_Decay10 = new TCanvas("FR_tauE_Decay10", "FR_tauE_Decay10", 600, 600);
-//     c_tauE_Decay11 = new TCanvas("FR_tauE_Decay11", "FR_tauE_Decay11", 600, 600);
-//     c_tauMu_Decay0 = new TCanvas("FR_tauMu_Decay0", "FR_tauMu_Decay0", 600, 600);
-//     c_tauMu_Decay1 = new TCanvas("FR_tauMu_Decay1", "FR_tauMu_Decay1", 600, 600);
-//     c_tauMu_Decay10 = new TCanvas("FR_tauMu_Decay10", "FR_tauMu_Decay10", 600, 600);
-//     c_tauMu_Decay11 = new TCanvas("FR_tauMu_Decay11", "FR_tauMu_Decay11", 600, 600);
-//     c_tauTau_Decay0 = new TCanvas("FR_tauTau_Decay0", "FR_tauTau_Decay0", 600, 600);
-//     c_tauTau_Decay1 = new TCanvas("FR_tauTau_Decay1", "FR_tauTau_Decay1", 600, 600);
-//     c_tauTau_Decay10 = new TCanvas("FR_tauTau_Decay10", "FR_tauTau_Decay10", 600, 600);
-//     c_tauTau_Decay11 = new TCanvas("FR_tauTau_Decay11", "FR_tauTau_Decay11", 600, 600);
+   TCanvas *c_ele, *c_mu, *c_tauE, *c_tauMu, *c_tauTau;
+   c_ele = new TCanvas("FR_ele", "FR_ele", 600, 600);
+   c_mu  = new TCanvas("FR_mu", "FR_mu", 600, 600);
+   c_tauE = new TCanvas("FR_tauE", "FR_tauMu", 600, 600);
+   c_tauMu = new TCanvas("FR_tauMu", "FR_tauMu", 600, 600);
+   c_tauTau = new TCanvas("FR_tauTau", "FR_tauTau", 600, 600);
+   
+   mg_electrons = new TMultiGraph();
+   mg_muons = new TMultiGraph();
+   mg_tauE = new TMultiGraph();
+   mg_tauMu = new TMultiGraph();
+   mg_tauTau = new TMultiGraph();
 
-    TCanvas *c_ele, *c_mu, *c_tauE, *c_tauMu, *c_tauTau;
-    c_ele = new TCanvas("FR_ele", "FR_ele", 600, 600);
-    c_mu  = new TCanvas("FR_mu", "FR_mu", 600, 600);
-    c_tauE = new TCanvas("FR_tauE", "FR_tauE", 600, 600);
-    c_tauMu = new TCanvas("FR_tauMu", "FR_tauMu", 600, 600);
-    c_tauTau = new TCanvas("FR_tauTau", "FR_tauTau", 600, 600);
+   mg_electrons->Add(FR_OS_electron_EB);
+   FR_OS_electron_EB->SetLineColor(kBlue);
+   FR_OS_electron_EB->SetLineStyle(2);
+   FR_OS_electron_EB->SetMarkerSize(0);
+   FR_OS_electron_EB->SetTitle("barel corrected");
+   mg_electrons->Add(FR_OS_electron_EE);
+   FR_OS_electron_EE->SetLineColor(kRed);
+   FR_OS_electron_EE->SetLineStyle(2);
+   FR_OS_electron_EE->SetMarkerSize(0);
+   FR_OS_electron_EE->SetTitle("endcap corrected");
+   mg_electrons->Add(FR_OS_electron_EB_unc);
+   FR_OS_electron_EB_unc->SetLineColor(kBlue);
+   FR_OS_electron_EB_unc->SetLineStyle(1);
+   FR_OS_electron_EB_unc->SetMarkerSize(0);
+   FR_OS_electron_EB_unc->SetTitle("barel uncorrected");
+   mg_electrons->Add(FR_OS_electron_EE_unc);
+   FR_OS_electron_EE_unc->SetLineColor(kRed);
+   FR_OS_electron_EE_unc->SetLineStyle(1);
+   FR_OS_electron_EE_unc->SetMarkerSize(0);
+   FR_OS_electron_EE_unc->SetTitle("endcap uncorrected");
+   
+   mg_muons->Add(FR_OS_muon_EB);
+   FR_OS_muon_EB->SetLineColor(kBlue);
+   FR_OS_muon_EB->SetLineStyle(2);
+   FR_OS_muon_EB->SetMarkerSize(0);
+   FR_OS_muon_EB->SetTitle("barel corrected");
+   mg_muons->Add(FR_OS_muon_EE);
+   FR_OS_muon_EE->SetLineColor(kRed);
+   FR_OS_muon_EE->SetLineStyle(2);
+   FR_OS_muon_EE->SetMarkerSize(0);
+   FR_OS_muon_EE->SetTitle("endcap corrected");
+   mg_muons->Add(FR_OS_muon_EB_unc);
+   FR_OS_muon_EB_unc->SetLineColor(kBlue);
+   FR_OS_muon_EB_unc->SetLineStyle(1);
+   FR_OS_muon_EB_unc->SetMarkerSize(0);
+   FR_OS_muon_EB_unc->SetTitle("barel uncorrected");
+   mg_muons->Add(FR_OS_muon_EE_unc);
+   FR_OS_muon_EE_unc->SetLineColor(kRed);
+   FR_OS_muon_EE_unc->SetLineStyle(1);
+   FR_OS_muon_EE_unc->SetMarkerSize(0);
+   FR_OS_muon_EE_unc->SetTitle("endcap uncorrected");
+   
+   mg_tauE->Add(FR_OS_tauE_Decay0);
+   FR_OS_tauE_Decay0->SetLineColor(kBlue);
+   FR_OS_tauE_Decay0->SetLineStyle(2);
+   FR_OS_tauE_Decay0->SetMarkerSize(0);
+   FR_OS_tauE_Decay0->SetTitle("decay mode 0 corrected");
+   mg_tauE->Add(FR_OS_tauE_Decay1);
+   FR_OS_tauE_Decay1->SetLineColor(kRed);
+   FR_OS_tauE_Decay1->SetLineStyle(2);
+   FR_OS_tauE_Decay1->SetMarkerSize(0);
+   FR_OS_tauE_Decay1->SetTitle("decay mode 1 corrected");
+   mg_tauE->Add(FR_OS_tauE_Decay10);
+   FR_OS_tauE_Decay10->SetLineColor(kOrange);
+   FR_OS_tauE_Decay10->SetLineStyle(2);
+   FR_OS_tauE_Decay10->SetMarkerSize(0);
+   FR_OS_tauE_Decay10->SetTitle("decay mode 10 corrected");
+   mg_tauE->Add(FR_OS_tauE_Decay11);
+   FR_OS_tauE_Decay11->SetLineColor(kGreen);
+   FR_OS_tauE_Decay11->SetLineStyle(2);
+   FR_OS_tauE_Decay11->SetMarkerSize(0);
+   FR_OS_tauE_Decay11->SetTitle("decay mode 11 corrected");
+   mg_tauE->Add(FR_OS_tauE_Decay0_unc);
+   FR_OS_tauE_Decay0_unc->SetLineColor(kBlue);
+   FR_OS_tauE_Decay0_unc->SetLineStyle(1);
+   FR_OS_tauE_Decay0_unc->SetMarkerSize(0);
+   FR_OS_tauE_Decay0_unc->SetTitle("decay mode 0 uncorrected");
+   mg_tauE->Add(FR_OS_tauE_Decay1_unc);
+   FR_OS_tauE_Decay1_unc->SetLineColor(kRed);
+   FR_OS_tauE_Decay1_unc->SetLineStyle(1);
+   FR_OS_tauE_Decay1_unc->SetMarkerSize(0);
+   FR_OS_tauE_Decay1_unc->SetTitle("decay mode 1 uncorrected");
+   mg_tauE->Add(FR_OS_tauE_Decay10_unc);
+   FR_OS_tauE_Decay10_unc->SetLineColor(kOrange);
+   FR_OS_tauE_Decay10_unc->SetLineStyle(1);
+   FR_OS_tauE_Decay10_unc->SetMarkerSize(0);
+   FR_OS_tauE_Decay10_unc->SetTitle("decay mode 10 uncorrected");
+   mg_tauE->Add(FR_OS_tauE_Decay11_unc);
+   FR_OS_tauE_Decay11_unc->SetLineColor(kGreen);
+   FR_OS_tauE_Decay11_unc->SetLineStyle(1);
+   FR_OS_tauE_Decay11_unc->SetMarkerSize(0);
+   FR_OS_tauE_Decay11_unc->SetTitle("decay mode 11 uncorrected");
+
+   mg_tauMu->Add(FR_OS_tauMu_Decay0);
+   FR_OS_tauMu_Decay0->SetLineColor(kBlue);
+   FR_OS_tauMu_Decay0->SetLineStyle(2);
+   FR_OS_tauMu_Decay0->SetMarkerSize(0);
+   FR_OS_tauMu_Decay0->SetTitle("decay mode 0 corrected");
+   mg_tauMu->Add(FR_OS_tauMu_Decay1);
+   FR_OS_tauMu_Decay1->SetLineColor(kRed);
+   FR_OS_tauMu_Decay1->SetLineStyle(2);
+   FR_OS_tauMu_Decay1->SetMarkerSize(0);
+   FR_OS_tauMu_Decay1->SetTitle("decay mode 1 corrected");
+   mg_tauMu->Add(FR_OS_tauMu_Decay10);
+   FR_OS_tauMu_Decay10->SetLineColor(kOrange);
+   FR_OS_tauMu_Decay10->SetLineStyle(2);
+   FR_OS_tauMu_Decay10->SetMarkerSize(0);
+   FR_OS_tauMu_Decay10->SetTitle("decay mode 10 corrected");
+   mg_tauMu->Add(FR_OS_tauMu_Decay11);
+   FR_OS_tauMu_Decay11->SetLineColor(kGreen);
+   FR_OS_tauMu_Decay11->SetLineStyle(2);
+   FR_OS_tauMu_Decay11->SetMarkerSize(0);
+   FR_OS_tauMu_Decay11->SetTitle("decay mode 11 corrected");
+   mg_tauMu->Add(FR_OS_tauMu_Decay0_unc);
+   FR_OS_tauMu_Decay0_unc->SetLineColor(kBlue);
+   FR_OS_tauMu_Decay0_unc->SetLineStyle(1);
+   FR_OS_tauMu_Decay0_unc->SetMarkerSize(0);
+   FR_OS_tauMu_Decay0_unc->SetTitle("decay mode 0 uncorrected");
+   mg_tauMu->Add(FR_OS_tauMu_Decay1_unc);
+   FR_OS_tauMu_Decay1_unc->SetLineColor(kRed);
+   FR_OS_tauMu_Decay1_unc->SetLineStyle(1);
+   FR_OS_tauMu_Decay1_unc->SetMarkerSize(0);
+   FR_OS_tauMu_Decay1_unc->SetTitle("decay mode 1 uncorrected");
+   mg_tauMu->Add(FR_OS_tauMu_Decay10_unc);
+   FR_OS_tauMu_Decay10_unc->SetLineColor(kOrange);
+   FR_OS_tauMu_Decay10_unc->SetLineStyle(1);
+   FR_OS_tauMu_Decay10_unc->SetMarkerSize(0);
+   FR_OS_tauMu_Decay10_unc->SetTitle("decay mode 10 uncorrected");
+   mg_tauMu->Add(FR_OS_tauMu_Decay11_unc);
+   FR_OS_tauMu_Decay11_unc->SetLineColor(kGreen);
+   FR_OS_tauMu_Decay11_unc->SetLineStyle(1);
+   FR_OS_tauMu_Decay11_unc->SetMarkerSize(0);
+   FR_OS_tauMu_Decay11_unc->SetTitle("decay mode 11 uncorrected");
+
+   mg_tauTau->Add(FR_OS_tauTau_Decay0);
+   FR_OS_tauTau_Decay0->SetLineColor(kBlue);
+   FR_OS_tauTau_Decay0->SetLineStyle(2);
+   FR_OS_tauTau_Decay0->SetMarkerSize(0);
+   FR_OS_tauTau_Decay0->SetTitle("decay mode 0 corrected");
+   mg_tauTau->Add(FR_OS_tauTau_Decay1);
+   FR_OS_tauTau_Decay1->SetLineColor(kRed);
+   FR_OS_tauTau_Decay1->SetLineStyle(2);
+   FR_OS_tauTau_Decay1->SetMarkerSize(0);
+   FR_OS_tauTau_Decay1->SetTitle("decay mode 1 corrected");
+   mg_tauTau->Add(FR_OS_tauTau_Decay10);
+   FR_OS_tauTau_Decay10->SetLineColor(kOrange);
+   FR_OS_tauTau_Decay10->SetLineStyle(2);
+   FR_OS_tauTau_Decay10->SetMarkerSize(0);
+   FR_OS_tauTau_Decay10->SetTitle("decay mode 10 corrected");
+   mg_tauTau->Add(FR_OS_tauTau_Decay11);
+   FR_OS_tauTau_Decay11->SetLineColor(kGreen);
+   FR_OS_tauTau_Decay11->SetLineStyle(2);
+   FR_OS_tauTau_Decay11->SetMarkerSize(0);
+   FR_OS_tauTau_Decay11->SetTitle("decay mode 11 corrected");
+   mg_tauTau->Add(FR_OS_tauTau_Decay0_unc);
+   FR_OS_tauTau_Decay0_unc->SetLineColor(kBlue);
+   FR_OS_tauTau_Decay0_unc->SetLineStyle(1);
+   FR_OS_tauTau_Decay0_unc->SetMarkerSize(0);
+   FR_OS_tauTau_Decay0_unc->SetTitle("decay mode 0 uncorrected");
+   mg_tauTau->Add(FR_OS_tauTau_Decay1_unc);
+   FR_OS_tauTau_Decay1_unc->SetLineColor(kRed);
+   FR_OS_tauTau_Decay1_unc->SetLineStyle(1);
+   FR_OS_tauTau_Decay1_unc->SetMarkerSize(0);
+   FR_OS_tauTau_Decay1_unc->SetTitle("decay mode 1 uncorrected");
+   mg_tauTau->Add(FR_OS_tauTau_Decay10_unc);
+   FR_OS_tauTau_Decay10_unc->SetLineColor(kOrange);
+   FR_OS_tauTau_Decay10_unc->SetLineStyle(1);
+   FR_OS_tauTau_Decay10_unc->SetMarkerSize(0);
+   FR_OS_tauTau_Decay10_unc->SetTitle("decay mode 10 uncorrected");
+   mg_tauTau->Add(FR_OS_tauTau_Decay11_unc);
+   FR_OS_tauTau_Decay11_unc->SetLineColor(kGreen);
+   FR_OS_tauTau_Decay11_unc->SetLineStyle(1);
+   FR_OS_tauTau_Decay11_unc->SetMarkerSize(0);
+   FR_OS_tauTau_Decay11_unc->SetTitle("decay mode 11 uncorrected");
     
-//-----------------------------------ELECTRON------------------------------------------          
-    FR_OS_electron_EB->SetLineColor(kBlue);
-    FR_OS_electron_EB->SetLineStyle(2);
-    FR_OS_electron_EB->SetMarkerSize(0);
-    FR_OS_electron_EB->SetTitle("barel corrected");
+   gStyle->SetEndErrorSize(0);
+   
+   TLegend *leg_ele,*leg_mu,*leg_tauE,*leg_tauMu,*leg_tauTau;
+   CMS_lumi *lumi = new CMS_lumi;
 
-    FR_OS_electron_EE->SetLineColor(kRed);
-    FR_OS_electron_EE->SetLineStyle(2);
-    FR_OS_electron_EE->SetMarkerSize(0);
-    FR_OS_electron_EE->SetTitle("endcap corrected");
+   c_ele->cd();
+   lumi->set_lumi(c_ele, _lumi, 0);
+   mg_electrons->Draw("AP");
+   mg_electrons->GetXaxis()->SetTitle("p_{T} [GeV]");
+   mg_electrons->GetYaxis()->SetTitle("Fake Rate");
+   mg_electrons->SetTitle("Electron fake rate");
+   mg_electrons->SetMaximum(0.35);
+   leg_ele = CreateLegend_FR("left",FR_OS_electron_EB_unc,FR_OS_electron_EB,FR_OS_electron_EE_unc,FR_OS_electron_EE);
+   leg_ele->Draw();
+   SavePlots(c_ele, "Plots/FR_OS_electrons");
+   
+   c_mu->cd();
+   lumi->set_lumi(c_mu, _lumi, 0);
+   mg_muons->Draw("AP");
+   mg_muons->GetXaxis()->SetTitle("p_{T} [GeV]");
+   mg_muons->GetYaxis()->SetTitle("Fake Rate");
+   mg_muons->SetTitle("Muon fake rate");
+   mg_muons->SetMaximum(0.35);
+   leg_mu = CreateLegend_FR("left",FR_OS_muon_EB_unc,FR_OS_muon_EB,FR_OS_muon_EE_unc,FR_OS_muon_EE);
+   leg_mu->Draw();
+   SavePlots(c_mu, "Plots/FR_OS_muons");
 
-    FR_OS_electron_EB_unc->SetLineColor(kBlue);
-    FR_OS_electron_EB_unc->SetLineStyle(1);
-    FR_OS_electron_EB_unc->SetMarkerSize(0);
-    FR_OS_electron_EB_unc->SetTitle("barel uncorrected");
+   c_tauE->cd();
+   lumi->set_lumi(c_tauE, _lumi, 0);
+   mg_tauE->Draw("AP");
+   mg_tauE->GetXaxis()->SetTitle("p_{T} [GeV]");
+   mg_tauE->GetYaxis()->SetTitle("Fake Rate");
+   mg_tauE->SetTitle("#tau fake rate, #tau_{e}#tau_{h} channel");
+   mg_tauE->SetMaximum(0.35);
+   leg_tauE = CreateLegend_FR_tau("right",FR_OS_tauE_Decay0_unc,FR_OS_tauE_Decay0,FR_OS_tauE_Decay1_unc,FR_OS_tauE_Decay1,FR_OS_tauE_Decay10_unc,FR_OS_tauE_Decay10,FR_OS_tauE_Decay11_unc,FR_OS_tauE_Decay11);
+   leg_tauE->Draw();
+   SavePlots(c_tauE, "Plots/FR_OS_tauE");
 
-    FR_OS_electron_EE_unc->SetLineColor(kRed);
-    FR_OS_electron_EE_unc->SetLineStyle(1);
-    FR_OS_electron_EE_unc->SetMarkerSize(0);
-    FR_OS_electron_EE_unc->SetTitle("endcap uncorrected");
+   c_tauMu->cd();
+   lumi->set_lumi(c_tauMu, _lumi, 0);
+   mg_tauMu->Draw("AP");
+   mg_tauMu->GetXaxis()->SetTitle("p_{T} [GeV]");
+   mg_tauMu->GetYaxis()->SetTitle("Fake Rate");
+   mg_tauMu->SetTitle("#tau fake rate, #tau_{e}#tau_{h} channel");
+   mg_tauMu->SetMaximum(0.35);
+   leg_tauMu = CreateLegend_FR_tau("right",FR_OS_tauMu_Decay0_unc,FR_OS_tauMu_Decay0,FR_OS_tauMu_Decay1_unc,FR_OS_tauMu_Decay1,FR_OS_tauMu_Decay10_unc,FR_OS_tauMu_Decay10,FR_OS_tauMu_Decay11_unc,FR_OS_tauMu_Decay11);
+   leg_tauMu->Draw();
+   SavePlots(c_tauMu, "Plots/FR_OS_tauMu");
 
-//-----------------------------------MUON------------------------------------------          
-    FR_OS_muon_EB->SetLineColor(kBlue);
-    FR_OS_muon_EB->SetLineStyle(2);
-    FR_OS_muon_EB->SetMarkerSize(0);
-    FR_OS_muon_EB->SetTitle("barel corrected");
-
-    FR_OS_muon_EE->SetLineColor(kRed);
-    FR_OS_muon_EE->SetLineStyle(2);
-    FR_OS_muon_EE->SetMarkerSize(0);
-    FR_OS_muon_EE->SetTitle("endcap corrected");
-
-    FR_OS_muon_EB_unc->SetLineColor(kBlue);
-    FR_OS_muon_EB_unc->SetLineStyle(1);
-    FR_OS_muon_EB_unc->SetMarkerSize(0);
-    FR_OS_muon_EB_unc->SetTitle("barel uncorrected");
-
-    FR_OS_muon_EE_unc->SetLineColor(kRed);
-    FR_OS_muon_EE_unc->SetLineStyle(1);
-    FR_OS_muon_EE_unc->SetMarkerSize(0);
-    FR_OS_muon_EE_unc->SetTitle("endcap uncorrected");
-
-//-----------------------------------tauE------------------------------------------          
-    FR_OS_tauE_Decay0->SetLineColor(kBlue);
-    FR_OS_tauE_Decay0->SetLineStyle(2);
-    FR_OS_tauE_Decay0->SetMarkerSize(0);
-    FR_OS_tauE_Decay0->SetTitle("decay mode 0 corrected");
-
-    FR_OS_tauE_Decay1->SetLineColor(kRed);
-    FR_OS_tauE_Decay1->SetLineStyle(2);
-    FR_OS_tauE_Decay1->SetMarkerSize(0);
-    FR_OS_tauE_Decay1->SetTitle("decay mode 1 corrected");
-
-    FR_OS_tauE_Decay10->SetLineColor(kOrange);
-    FR_OS_tauE_Decay10->SetLineStyle(2);
-    FR_OS_tauE_Decay10->SetMarkerSize(0);
-    FR_OS_tauE_Decay10->SetTitle("decay mode 10 corrected");
-
-    FR_OS_tauE_Decay11->SetLineColor(kGreen);
-    FR_OS_tauE_Decay11->SetLineStyle(2);
-    FR_OS_tauE_Decay11->SetMarkerSize(0);
-    FR_OS_tauE_Decay11->SetTitle("decay mode 11 corrected");
-
-    FR_OS_tauE_Decay0_unc->SetLineColor(kBlue);
-    FR_OS_tauE_Decay0_unc->SetLineStyle(1);
-    FR_OS_tauE_Decay0_unc->SetMarkerSize(0);
-    FR_OS_tauE_Decay0_unc->SetTitle("decay mode 0 uncorrected");
-
-    FR_OS_tauE_Decay1_unc->SetLineColor(kRed);
-    FR_OS_tauE_Decay1_unc->SetLineStyle(1);
-    FR_OS_tauE_Decay1_unc->SetMarkerSize(0);
-    FR_OS_tauE_Decay1_unc->SetTitle("decay mode 1 uncorrected");
-
-    FR_OS_tauE_Decay10_unc->SetLineColor(kOrange);
-    FR_OS_tauE_Decay10_unc->SetLineStyle(1);
-    FR_OS_tauE_Decay10_unc->SetMarkerSize(0);
-    FR_OS_tauE_Decay10_unc->SetTitle("decay mode 10 uncorrected");
-
-    FR_OS_tauE_Decay11_unc->SetLineColor(kGreen);
-    FR_OS_tauE_Decay11_unc->SetLineStyle(1);
-    FR_OS_tauE_Decay11_unc->SetMarkerSize(0);
-    FR_OS_tauE_Decay11_unc->SetTitle("decay mode 11 uncorrected");
-
-//-----------------------------------tauMu------------------------------------------          
-    FR_OS_tauMu_Decay0->SetLineColor(kBlue);
-    FR_OS_tauMu_Decay0->SetLineStyle(2);
-    FR_OS_tauMu_Decay0->SetMarkerSize(0);
-    FR_OS_tauMu_Decay0->SetTitle("decay mode 0 corrected");
-
-    FR_OS_tauMu_Decay1->SetLineColor(kRed);
-    FR_OS_tauMu_Decay1->SetLineStyle(2);
-    FR_OS_tauMu_Decay1->SetMarkerSize(0);
-    FR_OS_tauMu_Decay1->SetTitle("decay mode 1 corrected");
-
-    FR_OS_tauMu_Decay10->SetLineColor(kOrange);
-    FR_OS_tauMu_Decay10->SetLineStyle(2);
-    FR_OS_tauMu_Decay10->SetMarkerSize(0);
-    FR_OS_tauMu_Decay10->SetTitle("decay mode 10 corrected");
-
-    FR_OS_tauMu_Decay11->SetLineColor(kGreen);
-    FR_OS_tauMu_Decay11->SetLineStyle(2);
-    FR_OS_tauMu_Decay11->SetMarkerSize(0);
-    FR_OS_tauMu_Decay11->SetTitle("decay mode 11 corrected");
-
-    FR_OS_tauMu_Decay0_unc->SetLineColor(kBlue);
-    FR_OS_tauMu_Decay0_unc->SetLineStyle(1);
-    FR_OS_tauMu_Decay0_unc->SetMarkerSize(0);
-    FR_OS_tauMu_Decay0_unc->SetTitle("decay mode 0 uncorrected");
-
-    FR_OS_tauMu_Decay1_unc->SetLineColor(kRed);
-    FR_OS_tauMu_Decay1_unc->SetLineStyle(1);
-    FR_OS_tauMu_Decay1_unc->SetMarkerSize(0);
-    FR_OS_tauMu_Decay1_unc->SetTitle("decay mode 1 uncorrected");
-
-    FR_OS_tauMu_Decay10_unc->SetLineColor(kOrange);
-    FR_OS_tauMu_Decay10_unc->SetLineStyle(1);
-    FR_OS_tauMu_Decay10_unc->SetMarkerSize(0);
-    FR_OS_tauMu_Decay10_unc->SetTitle("decay mode 10 uncorrected");
-
-    FR_OS_tauMu_Decay11_unc->SetLineColor(kGreen);
-    FR_OS_tauMu_Decay11_unc->SetLineStyle(1);
-    FR_OS_tauMu_Decay11_unc->SetMarkerSize(0);
-    FR_OS_tauMu_Decay11_unc->SetTitle("decay mode 11 uncorrected");
-
-//-----------------------------------tauTau------------------------------------------          
-    FR_OS_tauTau_Decay0->SetLineColor(kBlue);
-    FR_OS_tauTau_Decay0->SetLineStyle(2);
-    FR_OS_tauTau_Decay0->SetMarkerSize(0);
-    FR_OS_tauTau_Decay0->SetTitle("decay mode 0 corrected");
-
-    FR_OS_tauTau_Decay1->SetLineColor(kRed);
-    FR_OS_tauTau_Decay1->SetLineStyle(2);
-    FR_OS_tauTau_Decay1->SetMarkerSize(0);
-    FR_OS_tauTau_Decay1->SetTitle("decay mode 1 corrected");
-
-    FR_OS_tauTau_Decay10->SetLineColor(kOrange);
-    FR_OS_tauTau_Decay10->SetLineStyle(2);
-    FR_OS_tauTau_Decay10->SetMarkerSize(0);
-    FR_OS_tauTau_Decay10->SetTitle("decay mode 10 corrected");
-
-    FR_OS_tauTau_Decay11->SetLineColor(kGreen);
-    FR_OS_tauTau_Decay11->SetLineStyle(2);
-    FR_OS_tauTau_Decay11->SetMarkerSize(0);
-    FR_OS_tauTau_Decay11->SetTitle("decay mode 11 corrected");
-
-    FR_OS_tauTau_Decay0_unc->SetLineColor(kBlue);
-    FR_OS_tauTau_Decay0_unc->SetLineStyle(1);
-    FR_OS_tauTau_Decay0_unc->SetMarkerSize(0);
-    FR_OS_tauTau_Decay0_unc->SetTitle("decay mode 0 uncorrected");
-
-    FR_OS_tauTau_Decay1_unc->SetLineColor(kRed);
-    FR_OS_tauTau_Decay1_unc->SetLineStyle(1);
-    FR_OS_tauTau_Decay1_unc->SetMarkerSize(0);
-    FR_OS_tauTau_Decay1_unc->SetTitle("decay mode 1 uncorrected");
-
-    FR_OS_tauTau_Decay10_unc->SetLineColor(kOrange);
-    FR_OS_tauTau_Decay10_unc->SetLineStyle(1);
-    FR_OS_tauTau_Decay10_unc->SetMarkerSize(0);
-    FR_OS_tauTau_Decay10_unc->SetTitle("decay mode 10 uncorrected");
-
-    FR_OS_tauTau_Decay11_unc->SetLineColor(kGreen);
-    FR_OS_tauTau_Decay11_unc->SetLineStyle(1);
-    FR_OS_tauTau_Decay11_unc->SetMarkerSize(0);
-    FR_OS_tauTau_Decay11_unc->SetTitle("decay mode 11 uncorrected");
-
-    gStyle->SetEndErrorSize(0);
-
-    TLegend *leg_ele,*leg_mu,*leg_tauE,*leg_tauMu,*leg_tauTau;
-    CMS_lumi *lumi = new CMS_lumi;
-
-    c_ele->cd();
-    lumi->set_lumi(c_ele, _lumi, 0);
-    FR_OS_electron_EB->SetMaximum(0.35);
-    FR_OS_electron_EB->Draw("E");
-    FR_OS_electron_EE->Draw("Esame");
-    FR_OS_electron_EB_unc->Draw("Esame");
-    FR_OS_electron_EE_unc->Draw("Esame");
-    leg_ele = CreateLegend_FR("left",FR_OS_electron_EB_unc,FR_OS_electron_EB,FR_OS_electron_EE_unc,FR_OS_electron_EE);
-    leg_ele->Draw("same");
-    SavePlots(c_ele, "Plots/FR_OS_electrons");
-
-    c_mu->cd();
-    lumi->set_lumi(c_mu, _lumi, 0);
-    FR_OS_muon_EB->SetMaximum(0.35);
-    FR_OS_muon_EB->Draw("E");
-    FR_OS_muon_EE->Draw("Esame");
-    FR_OS_muon_EB_unc->Draw("Esame");
-    FR_OS_muon_EE_unc->Draw("Esame");
-    leg_mu = CreateLegend_FR("left",FR_OS_muon_EB_unc,FR_OS_muon_EB,FR_OS_muon_EE_unc,FR_OS_muon_EE);
-    leg_mu->Draw("same");
-    SavePlots(c_mu, "Plots/FR_OS_muons");
-
-    c_tauE->cd();
-    lumi->set_lumi(c_tauE, _lumi, 0);
-    FR_OS_tauE_Decay0->SetMaximum(0.35);
-    FR_OS_tauE_Decay0->Draw("E");
-    FR_OS_tauE_Decay1->Draw("Esame");
-    FR_OS_tauE_Decay10->Draw("Esame");
-    FR_OS_tauE_Decay11->Draw("Esame");
-    FR_OS_tauE_Decay0_unc->Draw("Esame");
-    FR_OS_tauE_Decay1_unc->Draw("Esame");
-    FR_OS_tauE_Decay10_unc->Draw("Esame");
-    FR_OS_tauE_Decay11_unc->Draw("Esame");
-    leg_tauE = CreateLegend_FR_tau("right",FR_OS_tauE_Decay0_unc,FR_OS_tauE_Decay0,FR_OS_tauE_Decay1_unc,FR_OS_tauE_Decay1,FR_OS_tauE_Decay10_unc,FR_OS_tauE_Decay10,FR_OS_tauE_Decay11_unc,FR_OS_tauE_Decay11);
-    leg_tauE->Draw("same");
-    SavePlots(c_tauE, "Plots/FR_OS_tauE");
-    
-    c_tauMu->cd();
-    lumi->set_lumi(c_tauMu, _lumi, 0);
-    FR_OS_tauMu_Decay0->SetMaximum(0.35);
-    FR_OS_tauMu_Decay0->Draw("E");
-    FR_OS_tauMu_Decay1->Draw("Esame");
-    FR_OS_tauMu_Decay10->Draw("Esame");
-    FR_OS_tauMu_Decay11->Draw("Esame");
-    FR_OS_tauMu_Decay0_unc->Draw("Esame");
-    FR_OS_tauMu_Decay1_unc->Draw("Esame");
-    FR_OS_tauMu_Decay10_unc->Draw("Esame");
-    FR_OS_tauMu_Decay11_unc->Draw("Esame");
-    leg_tauMu = CreateLegend_FR_tau("right",FR_OS_tauMu_Decay0_unc,FR_OS_tauMu_Decay0,FR_OS_tauMu_Decay1_unc,FR_OS_tauMu_Decay1,FR_OS_tauMu_Decay10_unc,FR_OS_tauMu_Decay10,FR_OS_tauMu_Decay11_unc,FR_OS_tauMu_Decay11);
-    leg_tauMu->Draw("same");
-    SavePlots(c_tauMu, "Plots/FR_OS_tauMu");
-
-    c_tauTau->cd();
-    lumi->set_lumi(c_tauTau, _lumi, 0);
-    FR_OS_tauTau_Decay0->SetMaximum(0.35);
-    FR_OS_tauTau_Decay0->Draw("E");
-    FR_OS_tauTau_Decay1->Draw("Esame");
-    FR_OS_tauTau_Decay10->Draw("Esame");
-    FR_OS_tauTau_Decay11->Draw("Esame");
-    FR_OS_tauTau_Decay0_unc->Draw("Esame");
-    FR_OS_tauTau_Decay1_unc->Draw("Esame");
-    FR_OS_tauTau_Decay10_unc->Draw("Esame");
-    FR_OS_tauTau_Decay11_unc->Draw("Esame");
-    leg_tauTau = CreateLegend_FR_tau("right",FR_OS_tauTau_Decay0_unc,FR_OS_tauTau_Decay0,FR_OS_tauTau_Decay1_unc,FR_OS_tauTau_Decay1,FR_OS_tauTau_Decay10_unc,FR_OS_tauTau_Decay10,FR_OS_tauTau_Decay11_unc,FR_OS_tauTau_Decay11);
-    leg_tauTau->Draw("same");
-    SavePlots(c_tauTau, "Plots/FR_OS_tauTau"); 
+   c_tauTau->cd();
+   lumi->set_lumi(c_tauTau, _lumi, 0);
+   mg_tauTau->Draw("AP");
+   mg_tauTau->GetXaxis()->SetTitle("p_{T} [GeV]");
+   mg_tauTau->GetYaxis()->SetTitle("Fake Rate");
+   mg_tauTau->SetTitle("#tau fake rate, #tau_{e}#tau_{h} channel");
+   mg_tauTau->SetMaximum(0.35);
+   leg_tauTau = CreateLegend_FR_tau("right",FR_OS_tauTau_Decay0_unc,FR_OS_tauTau_Decay0,FR_OS_tauTau_Decay1_unc,FR_OS_tauTau_Decay1,FR_OS_tauTau_Decay10_unc,FR_OS_tauTau_Decay10,FR_OS_tauTau_Decay11_unc,FR_OS_tauTau_Decay11);
+   leg_tauTau->Draw();
+   SavePlots(c_tauTau, "Plots/FR_OS_tauTau");  
 
 }
 //===============================================================
@@ -2018,23 +2120,6 @@ void OSmethod::RemoveNegativeBins2D(TH2F *h)
 //===============================================================
 
 //===============================================================
-void OSmethod::RemoveNegativeBins3D(TH3F *h)
-{
-    for (int i_bin_x = 1; i_bin_x <= h->GetXaxis()->GetNbins(); i_bin_x++)
-    {
-        for (int i_bin_y = 1; i_bin_y <= h->GetYaxis()->GetNbins(); i_bin_y++)
-        {
-            for (int i_bin_z = 1; i_bin_z <= h->GetZaxis()->GetNbins(); i_bin_z++)
-            {
-                if( h->GetBinContent(i_bin_x,i_bin_y,i_bin_z) < 0.) h->SetBinContent(i_bin_x,i_bin_y,i_bin_z,0);
-            }
-        }
-    }
-
-}
-//===============================================================
-
-//===============================================================
 void OSmethod::Set_pT_binning(int size, float *bins)
 {
    _n_pT_bins = size;
@@ -2042,18 +2127,6 @@ void OSmethod::Set_pT_binning(int size, float *bins)
    for (int i = 0; i < size; i++)
    {
       _pT_bins[i] = bins[i];
-   }
-}
-//===============================================================
-
-//===============================================================
-void OSmethod::Set_MET_binning(int size, float *bins)
-{
-   _n_MET_bins = size;
-
-   for (int i = 0; i < size; i++)
-   {
-      _MET_bins[i] = bins[i];
    }
 }
 //===============================================================
@@ -2262,7 +2335,7 @@ bool OSmethod::GetVarLogY ( TString variable_name )
 //===================================================
 
 //=========================================================================================================
-TLegend* OSmethod::CreateLegend_FR( string position, TH1F *EB_unc, TH1F *EB_cor,TH1F *EE_unc,TH1F *EE_cor )
+TLegend* OSmethod::CreateLegend_FR( string position, TGraphErrors *EB_unc, TGraphErrors *EB_cor,TGraphErrors *EE_unc,TGraphErrors *EE_cor )
 {
    TLegend *leg;
    leg = new TLegend( .64, .65, .97, .9 );
@@ -2279,7 +2352,7 @@ TLegend* OSmethod::CreateLegend_FR( string position, TH1F *EB_unc, TH1F *EB_cor,
 //=========================================================================================================
 
 //=========================================================================================================
-TLegend* OSmethod::CreateLegend_FR_tau( string position, TH2F *Decay0_unc, TH2F *Decay0_cor,TH2F *Decay1_unc,TH2F *Decay1_cor, TH2F *Decay10_unc, TH2F *Decay10_cor, TH2F *Decay11_unc, TH2F *Decay11_cor )
+TLegend* OSmethod::CreateLegend_FR_tau( string position, TGraphErrors *Decay0_unc, TGraphErrors *Decay0_cor,TGraphErrors *Decay1_unc,TGraphErrors *Decay1_cor, TGraphErrors *Decay10_unc, TGraphErrors *Decay10_cor,TGraphErrors *Decay11_unc,TGraphErrors *Decay11_cor )
 {
    TLegend *leg;
    leg = new TLegend( .64, .65, .97, .9 );
