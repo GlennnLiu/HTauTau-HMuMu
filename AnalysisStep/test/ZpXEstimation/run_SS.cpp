@@ -24,16 +24,17 @@ int main( int argc, char *argv[] )
    TString file_name = "/HTauTauHMuMu.root";
      	
    TString Data    = path + "AllData" + file_name;
-   TString WZ      = path + "WZTo3LNu"       + file_name;
-   TString ZZ      = path + "ZZTo4l"      + file_name;
+   TString WZ      = path + "WZTo3LNu/HTauTauHMuMu.root";//       + file_name;
+   TString ZZ      = path + "ZZTo4l/HTauTauHMuMu.root";//      + file_name;
    TString ttbar   = path + "TTTo2L2Nu"      + file_name;
-   TString DY      = path + "DYJetsToLL_M50" + file_name;
+   TString DY      = path + "DYJetsToLL_M50/HTauTauHMuMu.root";// + file_name;
    	
    bool SubtractWZ = true;
    bool Remove_NegBins_FR = true;
    bool SubtractMCContribution = true;
 	
-   float pT_bins[] = {5, 7, 10, 20, 30, 40, 50, 80};
+   float pT_bins[] = {5, 7, 10, 20, 25, 30, 40, 50, 80};
+   float MET_bins[] = {0, 10, 18, 25, 32, 40, 50, 60, 80, 100};
 
    SSmethod *ss = new SSmethod();
    ss->SetLumi(35.92); // 2016 lumi
@@ -43,7 +44,7 @@ int main( int argc, char *argv[] )
    ///////////////////////////////////
    // Fill control histos           //
    ///////////////////////////////////
-  /* ss->FillDataMCPlots(Data);
+   ss->FillDataMCPlots(Data);
    ss->FillDataMCPlots(WZ);
    ss->FillDataMCPlots(ZZ);
    ss->FillDataMCPlots(ttbar);
@@ -61,14 +62,15 @@ int main( int argc, char *argv[] )
    // Calculate fake rates          //
    ///////////////////////////////////
    ss->GetFRHistos("Histos_SS.root");
-   ss->Set_pT_binning(8, pT_bins);
+   ss->Set_pT_binning(9, pT_bins);
+   ss->Set_MET_binning(10, MET_bins);
    ss->ProduceFakeRates("FakeRates_SS.root", Data);
-*/
+
    ///////////////////////////////////
    // Calculate OS/SS ratios        //
    ///////////////////////////////////
    ss->Calculate_SSOS_Ratio( Data, ZZ, SubtractMCContribution);
-/*
+
    ///////////////////////////////////
    // Fill ZX contributions histos  //
    ///////////////////////////////////
@@ -87,6 +89,6 @@ int main( int argc, char *argv[] )
    ss->GetZXHistos("ZXHistos_SS.root");
    ss->PlotZX("M4l", "Plots");
    ss->FitZX("M4l", "Plots");
-*/	
+	
    delete ss;
 }

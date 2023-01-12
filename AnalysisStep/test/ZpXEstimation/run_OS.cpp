@@ -48,13 +48,13 @@ int main( int argc, char *argv[] )
    ///////////////////////////////////
    // Fill control histos           //
    ///////////////////////////////////
-/*   os->FillDataMCPlots(Data);
+   os->FillDataMCPlots(Data);
    os->FillDataMCPlots(WZ);
    os->FillDataMCPlots(ZZ);
    os->FillDataMCPlots(ttbar);
    os->FillDataMCPlots(DY);
    os->SaveDataMCHistos("DataMC_OS.root");
-*/
+
    ///////////////////////////////////
    // Fill passing/failling histos  //
    ///////////////////////////////////
@@ -68,12 +68,12 @@ int main( int argc, char *argv[] )
    os->GetFRHistos("Histos_OS.root");
    os->Set_pT_binning(9, pT_bins);
    os->Set_MET_binning(10, MET_bins);
-   os->ProduceFakeRates("FakeRates_OS_test1.root");
+   os->ProduceFakeRates("FakeRates_OS.root");
 
    ///////////////////////////////////
    // Fill ZX contributions histos  //
    ///////////////////////////////////
-/*   os->MakeHistogramsZX(Data, "FakeRates_OS.root");
+   os->MakeHistogramsZX(Data, "FakeRates_OS.root");
    os->MakeZXMCContribution(ZZ, "FakeRates_OS.root");
    os->SaveZXHistos("ZXHistos_OS.root", Remove_NegBins_ZX);
 
@@ -92,7 +92,7 @@ int main( int argc, char *argv[] )
    ///////////////////////////////////
    os->GetZXHistos("ZXHistos_OS.root");
    os->PlotZXContributions("Plots");
-   os->FitZX("Plots");*/
+   os->FitZX("Plots");
 	
    delete os;
 }
