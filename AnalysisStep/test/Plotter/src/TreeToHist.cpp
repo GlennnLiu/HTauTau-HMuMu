@@ -10,29 +10,40 @@ TreeToHist::TreeToHist():Tree()
     _current_gen_final_state = -999;
     
     _fs_ROS_SS.push_back(0.954003);
-    _fs_ROS_SS.push_back(1.05603);
-    _fs_ROS_SS.push_back(1.03091);
-    _fs_ROS_SS.push_back(0.98326);
+    _fs_ROS_SS.push_back(1.05664);
+    _fs_ROS_SS.push_back(1.03268);
+    _fs_ROS_SS.push_back(0.983579);
     _fs_ROS_SS.push_back(0.985223);
-    _fs_ROS_SS.push_back(1.04867);
-    _fs_ROS_SS.push_back(1.024);
-    _fs_ROS_SS.push_back(0.994852);
+    _fs_ROS_SS.push_back(1.04922);
+    _fs_ROS_SS.push_back(1.02563);
+    _fs_ROS_SS.push_back(0.995229);
 
-    _cb_ss.push_back(1);//(1.112709813);
-    _cb_ss.push_back(1);//(1.017112365);
-    _cb_ss.push_back(1);//(1.045235335);
-    _cb_ss.push_back(1);//(1.021858387);
-    _cb_ss.push_back(1);//(1.158447633);
-    _cb_ss.push_back(1);//(1.053897151);
-    _cb_ss.push_back(1);//(1.054209183);
-    _cb_ss.push_back(1);//(1.016327376);
+//withDM_MET_nJet
+//     _cb_ss.push_back(1.111329099);
+//     _cb_ss.push_back(1.121706248);
+//     _cb_ss.push_back(1.137340759);
+//     _cb_ss.push_back(1.074704501);
+//     _cb_ss.push_back(1.157340641);
+//     _cb_ss.push_back(1.148738302);
+//     _cb_ss.push_back(1.117909496);
+//     _cb_ss.push_back(1.041371601);
+
+//withDM_MET
+    _cb_ss.push_back(1.11134383);
+    _cb_ss.push_back(1.11641482);
+    _cb_ss.push_back(1.138206556);
+    _cb_ss.push_back(1.07851374);
+    _cb_ss.push_back(1.157347331);
+    _cb_ss.push_back(1.136168688);
+    _cb_ss.push_back(1.126838945);
+    _cb_ss.push_back(1.035982102);
     
     _s_process.push_back("H");
     _s_process.push_back("qqZZ");
     _s_process.push_back("ggZZ");
     _s_process.push_back("rare");
     _s_process.push_back("ZX");
-    _s_process.push_back("WZ");
+//     _s_process.push_back("WZ");
     _s_process.push_back("TotalMC");
     _s_process.push_back("Data");
     
@@ -88,7 +99,7 @@ void TreeToHist::ToHistos(string* process, int n_proc, int i_proc, bool Signal)
     DeclareHistos(process,n_proc,i_proc);
     
     for (int i=0;i<n_proc;i++) {
-        TString input_file_name=_path+process[i]+_file_name;
+        TString input_file_name=_path+process[i]+(i_proc==Settings::Data?_file_name:"/HTauTauHMuMu_unc.root");
         cout<<i<<","<<input_file_name<<endl;
         input_file = TFile::Open(input_file_name,"read");
         
@@ -210,6 +221,8 @@ void TreeToHist::ToHistosCR(string* process, int i_proc, bool Signal,TString inp
     input_file->Close();
     
     cout<<"[INFO] Processing "<<input_file_name<<" done"<<endl;
+    for (int i_fs=0;i_fs<Settings::fs4l;i_fs++)
+        cout<<_s_final_state.at(i_fs)<<": "<<histos_1D[i_proc][i_fs][_current_gen_final_state][0][1]->Integral()<<endl;
     SumGroups(1,i_proc);
     saveHistos(1,i_proc);
 }
@@ -589,7 +602,7 @@ void TreeToHist::ToPlotsMC(bool addData)
                         }
                     }
 
-            for (int i_proc=Settings::rare;i_proc<=Settings::WZ;i_proc++)
+            for (int i_proc=Settings::rare;i_proc<Settings::TotalMC;i_proc++)
                 if (histos_1D[i_proc][i_fs][Settings::gfsbkg][0][i_var]->Integral()>0) {
                     SetColor(histos_1D[i_proc][i_fs][Settings::gfsbkg][0][i_var],colors[i_proc]);
                     HList.push_back(histos_1D[i_proc][i_fs][Settings::gfsbkg][0][i_var]);
@@ -617,7 +630,7 @@ void TreeToHist::ToPlotsMC(bool addData)
             base->GetYaxis()->SetTitleSize(0.05);
             base->GetYaxis()->SetTitleOffset(0.9);
             base->GetYaxis()->SetLabelSize(0.045);
-            if (addData)
+            if (true)
                 base->SetMaximum(max(histos_1D[Settings::Data][i_fs][Settings::gfsall][0][i_var]->GetMaximum(),mc->GetMaximum())*1.3);
             else
                 base->SetMaximum(histos_1D[Settings::TotalMC][i_fs][Settings::gfsall][0][i_var]->GetMaximum()*1.3);
@@ -634,7 +647,7 @@ void TreeToHist::ToPlotsMC(bool addData)
             c->SetBottomMargin(0.12);
             c->SetGrid();
             c->SaveAs(_savepath+"Plots/"+name+(addData?"data.png":".png"));
-            c->SaveAs(_savepath+"Plots/"+name+(addData?"data.png":".pdf"));
+            c->SaveAs(_savepath+"Plots/"+name+(addData?"data.pdf":".pdf"));
         }
     }
 }

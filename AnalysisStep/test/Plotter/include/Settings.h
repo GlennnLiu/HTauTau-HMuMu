@@ -18,9 +18,9 @@ public:
       ggZZ = 2,
       rare = 3,
       ZX = 4,
-      WZ = 5,
-      TotalMC = 6,
-      Data = 7,   
+//       WZ = 5,
+      TotalMC = 5,
+      Data = 6,   
       MAX_NUM_OF_PROCESSES
    };
    

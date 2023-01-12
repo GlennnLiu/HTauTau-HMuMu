@@ -21,7 +21,7 @@
 #include "TLorentzVector.h"
 #include "THStack.h"
 
-#include <HTauTauHMuMu/AnalysisStep/test/ZpXEstimation/include/FakeRates.h>
+#include <HTauTauHMuMu/AnalysisStep/test/Plotter/include/FakeRates.h>
 #include <HTauTauHMuMu/AnalysisStep/interface/TauIDSFTool.h>
 #include <HTauTauHMuMu/AnalysisStep/test/Plotter/include/Settings.h>
 #include <HTauTauHMuMu/AnalysisStep/test/Plotter/include/TreeToHist.h>
@@ -50,13 +50,13 @@ int main( int argc, char *argv[] )
     
     TH->SetPaths(path,file_name,savepath);
     
-    //TH->ToHistos(H,size(H),Settings::H,true);
+//     TH->ToHistos(H,size(H),Settings::H,true);
 //     TH->ToHistos(qqZZ,size(qqZZ),Settings::qqZZ,true);
-    ///TH->ToHistos(ggZZ,size(ggZZ),Settings::ggZZ,true);
-    //TH->ToHistos(rare,size(rare),Settings::rare,false);
+//     TH->ToHistos(ggZZ,size(ggZZ),Settings::ggZZ,true);
+//     TH->ToHistos(rare,size(rare),Settings::rare,false);
 //     TH->ToHistos(WZ,size(WZ),Settings::WZ,false);
-//     TH->ToHistosZXSS(Data,Settings::ZX,false,"/eos/home-g/geliu/LepUni/FakeRates/Test/FakeRates_SS.root");
-    TH->ToHistosZXOS(Data,Settings::ZX,false,"/eos/home-g/geliu/LepUni/FakeRates/withMET/FakeRates_OS.root");
+//     TH->ToHistosZXSS(Data,Settings::ZX,false,"/eos/home-g/geliu/LepUni/FakeRates/withDM_MET/FakeRates_SS.root");
+//     TH->ToHistosCR(Data,Settings::ZX,false,"/eos/home-g/geliu/LepUni/FakeRates/withDM_MET/FakeRates_SS.root");
 
 //     TH->ToHistos(Data,size(Data),Settings::Data,false);
     
@@ -68,14 +68,14 @@ int main( int argc, char *argv[] )
     TH->GetHistos(qqZZ,size(qqZZ),Settings::qqZZ,true);
     TH->GetHistos(ggZZ,size(ggZZ),Settings::ggZZ,true);
     TH->GetHistos(rare,size(rare),Settings::rare,false);
-//     TH->GetHistos(ZX,size(ZX),Settings::ZX,false);
-    TH->GetHistos(WZ,size(WZ),Settings::WZ,false);
-    TH->GetHistos(Data,1,Settings::ZX,false);
-    //TH->GetHistos(Data,1,Settings::TotalMC,false);
+    TH->GetHistos(ZX,size(ZX),Settings::ZX,false);
+//     TH->GetHistos(WZ,size(WZ),Settings::WZ,false);
+//     TH->GetHistos(Data,1,Settings::ZX,false);
+//     //TH->GetHistos(Data,1,Settings::TotalMC,false);
     TH->GetHistos(Data,size(Data),Settings::Data,false);
     //TH->SumTotalMC();
 
-    bool addData=true;
+    bool addData=false;
     //TH->ToPlots(addData);
     TH->ToPlotsMC(addData);
     //addData=false;

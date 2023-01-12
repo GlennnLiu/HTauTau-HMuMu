@@ -17,18 +17,18 @@ FakeRates::FakeRates( TString input_file_FR_name )
       g_FR_mu_EE = (TH1F*)input_file_FR->Get("FR_OS_muon_EE");
       g_FR_e_EB  = (TH1F*)input_file_FR->Get("FR_OS_electron_EB");
       g_FR_e_EE  = (TH1F*)input_file_FR->Get("FR_OS_electron_EE");
-      g_FR_tauE_Decay0 = (TH2F*)input_file_FR->Get("FR_OS_tauE_Decay0_njet0");
-      g_FR_tauE_Decay1 = (TH2F*)input_file_FR->Get("FR_OS_tauE_Decay1_njet0");
-      g_FR_tauE_Decay10 = (TH2F*)input_file_FR->Get("FR_OS_tauE_Decay10_njet0");
-      g_FR_tauE_Decay11 = (TH2F*)input_file_FR->Get("FR_OS_tauE_Decay11_njet0");
-      g_FR_tauMu_Decay0 = (TH2F*)input_file_FR->Get("FR_OS_tauMu_Decay0_njet0");
-      g_FR_tauMu_Decay1 = (TH2F*)input_file_FR->Get("FR_OS_tauMu_Decay1_njet0");
-      g_FR_tauMu_Decay10 = (TH2F*)input_file_FR->Get("FR_OS_tauMu_Decay10_njet0");
-      g_FR_tauMu_Decay11 = (TH2F*)input_file_FR->Get("FR_OS_tauMu_Decay11_njet0");
-      g_FR_tauTau_Decay0 = (TH2F*)input_file_FR->Get("FR_OS_tauTau_Decay0_njet0");
-      g_FR_tauTau_Decay1 = (TH2F*)input_file_FR->Get("FR_OS_tauTau_Decay1_njet0");
-      g_FR_tauTau_Decay10 = (TH2F*)input_file_FR->Get("FR_OS_tauTau_Decay10_njet0");
-      g_FR_tauTau_Decay11 = (TH2F*)input_file_FR->Get("FR_OS_tauTau_Decay11_njet0");
+      g_FR_tauE_Decay0 = (TH2F*)input_file_FR->Get("FR_OS_tauE_Decay0");
+      g_FR_tauE_Decay1 = (TH2F*)input_file_FR->Get("FR_OS_tauE_Decay1");
+      g_FR_tauE_Decay10 = (TH2F*)input_file_FR->Get("FR_OS_tauE_Decay10");
+      g_FR_tauE_Decay11 = (TH2F*)input_file_FR->Get("FR_OS_tauE_Decay11");
+      g_FR_tauMu_Decay0 = (TH2F*)input_file_FR->Get("FR_OS_tauMu_Decay0");
+      g_FR_tauMu_Decay1 = (TH2F*)input_file_FR->Get("FR_OS_tauMu_Decay1");
+      g_FR_tauMu_Decay10 = (TH2F*)input_file_FR->Get("FR_OS_tauMu_Decay10");
+      g_FR_tauMu_Decay11 = (TH2F*)input_file_FR->Get("FR_OS_tauMu_Decay11");
+      g_FR_tauTau_Decay0 = (TH2F*)input_file_FR->Get("FR_OS_tauTau_Decay0");
+      g_FR_tauTau_Decay1 = (TH2F*)input_file_FR->Get("FR_OS_tauTau_Decay1");
+      g_FR_tauTau_Decay10 = (TH2F*)input_file_FR->Get("FR_OS_tauTau_Decay10");
+      g_FR_tauTau_Decay11 = (TH2F*)input_file_FR->Get("FR_OS_tauTau_Decay11");
    }
    
    // for SS FR files
@@ -38,18 +38,18 @@ FakeRates::FakeRates( TString input_file_FR_name )
       g_FR_mu_EE = (TH1F*)input_file_FR->Get("FR_SS_muon_EE");
       g_FR_e_EB  = (TH1F*)input_file_FR->Get("FR_SS_electron_EB");
       g_FR_e_EE  = (TH1F*)input_file_FR->Get("FR_SS_electron_EE");
-      g_FR_tauE_Decay0 = (TH2F*)input_file_FR->Get("FR_SS_tauE_Decay0_njet0");
-      g_FR_tauE_Decay1 = (TH2F*)input_file_FR->Get("FR_SS_tauE_Decay1_njet0");
-      g_FR_tauE_Decay10 = (TH2F*)input_file_FR->Get("FR_SS_tauE_Decay10_njet0");
-      g_FR_tauE_Decay11 = (TH2F*)input_file_FR->Get("FR_SS_tauE_Decay11_njet0");
-      g_FR_tauMu_Decay0 = (TH2F*)input_file_FR->Get("FR_SS_tauMu_Decay0_njet0");
-      g_FR_tauMu_Decay1 = (TH2F*)input_file_FR->Get("FR_SS_tauMu_Decay1_njet0");
-      g_FR_tauMu_Decay10 = (TH2F*)input_file_FR->Get("FR_SS_tauMu_Decay10_njet0");
-      g_FR_tauMu_Decay11 = (TH2F*)input_file_FR->Get("FR_SS_tauMu_Decay11_njet0");
-      g_FR_tauTau_Decay0 = (TH2F*)input_file_FR->Get("FR_SS_tauTau_Decay0_njet0");
-      g_FR_tauTau_Decay1 = (TH2F*)input_file_FR->Get("FR_SS_tauTau_Decay1_njet0");
-      g_FR_tauTau_Decay10 = (TH2F*)input_file_FR->Get("FR_SS_tauTau_Decay10_njet0");
-      g_FR_tauTau_Decay11 = (TH2F*)input_file_FR->Get("FR_SS_tauTau_Decay11_njet0");
+      g_FR_tauE_Decay0 = (TH2F*)input_file_FR->Get("FR_SS_tauE_Decay0");
+      g_FR_tauE_Decay1 = (TH2F*)input_file_FR->Get("FR_SS_tauE_Decay1");
+      g_FR_tauE_Decay10 = (TH2F*)input_file_FR->Get("FR_SS_tauE_Decay10");
+      g_FR_tauE_Decay11 = (TH2F*)input_file_FR->Get("FR_SS_tauE_Decay11");
+      g_FR_tauMu_Decay0 = (TH2F*)input_file_FR->Get("FR_SS_tauMu_Decay0");
+      g_FR_tauMu_Decay1 = (TH2F*)input_file_FR->Get("FR_SS_tauMu_Decay1");
+      g_FR_tauMu_Decay10 = (TH2F*)input_file_FR->Get("FR_SS_tauMu_Decay10");
+      g_FR_tauMu_Decay11 = (TH2F*)input_file_FR->Get("FR_SS_tauMu_Decay11");
+      g_FR_tauTau_Decay0 = (TH2F*)input_file_FR->Get("FR_SS_tauTau_Decay0");
+      g_FR_tauTau_Decay1 = (TH2F*)input_file_FR->Get("FR_SS_tauTau_Decay1");
+      g_FR_tauTau_Decay10 = (TH2F*)input_file_FR->Get("FR_SS_tauTau_Decay10");
+      g_FR_tauTau_Decay11 = (TH2F*)input_file_FR->Get("FR_SS_tauTau_Decay11");
    }
 
 }

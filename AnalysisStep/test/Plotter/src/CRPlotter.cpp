@@ -119,13 +119,14 @@ void CRPlotter::Plotter(bool addData)
         for (int i_fs=0;i_fs<=(region=="CRZLLTree"?(Settings::fs4l):(Settings::fs3l));i_fs++) {
             TString name=var+"_"+(region=="CRZLLTree"?_s_region.at(i_re)+"_":"")+(region=="CRZLLTree"?_s_final_state.at(i_fs):_s_zl_final_state.at(i_fs));
             TCanvas *c=new TCanvas(name,name,0,0,1000,800);
+            c->SetLeftMargin(0.13);
 
             THStack *mc=new THStack(name,name);
             float x=0.55;//(i_fs==0 || i_fs==4)?0.2:0.55);
-            TLegend *l=new TLegend( x, 0.4, x+0.35, 0.9 ,ToFSName(region=="CRZLLTree"?_s_final_state.at(i_fs):_s_zl_final_state.at(i_fs)));
+            TLegend *l=new TLegend( x, 0.5, x+0.35, 0.9 ,ToFSName(region=="CRZLLTree"?_s_final_state.at(i_fs):_s_zl_final_state.at(i_fs)));
             l->SetFillStyle(0);
             l->SetBorderSize(0);
-            l->SetTextSize(0.05);
+            l->SetTextSize(0.045);
             vector<TH1F *> HList;
 
             for (size_t i_proc=0;i_proc<pathSim.size();i_proc++) {
@@ -158,7 +159,7 @@ void CRPlotter::Plotter(bool addData)
             base->GetXaxis()->SetTitleSize(0.05);
             base->GetXaxis()->SetLabelSize(0.045);
             base->GetYaxis()->SetTitleSize(0.05);
-            base->GetYaxis()->SetTitleOffset(0.9);
+            base->GetYaxis()->SetTitleOffset(1.1);
             base->GetYaxis()->SetLabelSize(0.045);
             if (addData)
                 base->SetMaximum(max(hData[i_re][i_fs]->GetMaximum(),mc->GetMaximum())*1.3);
@@ -284,7 +285,7 @@ void CRPlotter::FillHistosData()
         if (_current_final_state<0) {continue;}
         
 //         cout<<"Fill "<<LepPt->at(2)<<","<<_current_region<<","<<_current_final_state<<endl;
-        hData[_current_region][_current_final_state]->Fill(LepPt->at(2));
+        hData[_current_region][_current_final_state]->Fill(Z2GoodMass);
 //         if (varType==1) hData[_current_final_state]->Fill(varShort);
 //         else if (varType==2) hData[_current_final_state]->Fill(varFloat);
     }
@@ -349,7 +350,7 @@ void CRPlotter::FillHistosSim(size_t i)
         _event_weight = (_lumi * 1000 * xsec * _k_factor * _TauIDSF * overallEventWeight * L1prefiringWeight) / gen_sum_weights;
 //         if (varType==1) hSim[i][_current_final_state]->Fill(varShort, _event_weight);
 //         else if (varType==2) hSim[i][_current_final_state]->Fill(varFloat, _event_weight);
-        hSim[i][_current_region][_current_final_state]->Fill(LepPt->at(2), _event_weight);
+        hSim[i][_current_region][_current_final_state]->Fill(Z2GoodMass, _event_weight);
     }
     input_file->Close();
     cout<<"[INFO] Processing "<<pathSim.at(i)<<" done"<<endl;
