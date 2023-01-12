@@ -165,7 +165,7 @@ void dumpUserData::analyze(const Event & event, const EventSetup& eventSetup){
       cout << "#" << i << " mu"  << ((lep->charge()>0)?"+ ":"- ") << " pt= " << lep->pt() << " eta= " << lep->eta() << " phi= " << lep->phi() << " GLB= " << lep->isGlobalMuon() << " TK= " << lep->isTrackerMuon() << " matches= " << lep->numberOfMatches() << " BTT= " << lep->muonBestTrackType() << " t0_nDof: " << lep->time().nDof << " t0(ns): " << lep->time().timeAtIpInOut << " genID= " << genID <<  " genPT= " << genPT << " combRelIsoPF=" << combRelIsoPF << " SIP=" << SIP << " dxy=" << dxy << " dz=" << dz << " isPFMuon= " << lep->isPFMuon() << " muonBestTrackType= " << lep->muonBestTrackType();
 
 //	 << " BTPT: " <<  lep->muonBestTrack()->pt() << " " << lep->innerTrack()->pt() << " " <<  lep->innerTrack()->eta() << " " << lep->innerTrack()->phi();
-      dumpUserVal(*lep);
+//       dumpUserVal(*lep);
       if (lep->hasUserData("FSRCandidates")){
 	const PhotonPtrVector* fsrEle = lep->userData<PhotonPtrVector>("FSRCandidates");
 	if (fsrEle->size()) {
@@ -198,7 +198,7 @@ void dumpUserData::analyze(const Event & event, const EventSetup& eventSetup){
 
       cout << "#" << i << " e"  << ((lep->charge()>0)?"+  ":"-  ") << " pt= " << lep->pt() << " eta= " << lep->eta() << " phi= " << lep->phi() << " genID= " << genID <<  " genPT= " << genPT;
 
-      dumpUserVal(*lep);
+//       dumpUserVal(*lep);
       if (lep->hasUserData("FSRCandidates")){
 	const PhotonPtrVector* fsrEle = lep->userData<PhotonPtrVector>("FSRCandidates");
 	if (fsrEle->size()) {
@@ -234,7 +234,7 @@ void dumpUserData::analyze(const Event & event, const EventSetup& eventSetup){
       if(jet->pt()>30){
 	int i = distance(jets->begin(),jet);
 	cout << "#" << i << " pt=" << jet->pt() << " eta=" << jet->eta() << " phi=" << jet->phi() << " combinedInclusiveSecondaryVertexV2BJetTags=" << jet->bDiscriminator("combinedInclusiveSecondaryVertexV2BJetTags");
-	dumpUserVal(*jet);
+// 	dumpUserVal(*jet);
 	cout << endl;
       }
     }

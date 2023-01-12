@@ -152,17 +152,38 @@ TreeSetup = cms.EDAnalyzer("HZZ4lNtupleMaker",
                            skimPaths = cms.vstring(SkimPaths),
                            PD = cms.string(PD),
                            MCFilterPath = cms.string(MCFILTER),
-                           metSrc = srcMETTag,#metTag,
+                           
+                           #for MET and SV fit
+                           metSrc = cms.InputTag("ShiftMETcentral"),#srcMETTag,#metTag,
+                           covSrc = cms.InputTag("METSignificance", "METCovariance"),
+                           METdxUPTES = cms.InputTag("ShiftMETforTES", "METdxUP"),
+                           METdyUPTES = cms.InputTag("ShiftMETforTES", "METdyUP"),
+                           METdxDOWNTES = cms.InputTag("ShiftMETforTES", "METdxDOWN"),
+                           METdyDOWNTES = cms.InputTag("ShiftMETforTES", "METdyDOWN"),
+                           METdxUPEES = cms.InputTag("ShiftMETforEES", "METdxUPEES"),
+                           METdyUPEES = cms.InputTag("ShiftMETforEES", "METdyUPEES"),
+                           METdxDOWNEES = cms.InputTag("ShiftMETforEES", "METdxDOWNEES"),
+                           METdyDOWNEES = cms.InputTag("ShiftMETforEES", "METdyDOWNEES"),
+                           METdxUPMES = cms.InputTag("ShiftMETforMES", "METdxUPMES"),
+                           METdyUPMES = cms.InputTag("ShiftMETforMES", "METdyUPMES"),
+                           METdxDOWNMES = cms.InputTag("ShiftMETforMES", "METdxDOWNMES"),
+                           METdyDOWNMES = cms.InputTag("ShiftMETforMES", "METdyDOWNMES"),
+                           METdxUPJES = cms.InputTag("ShiftMETforJES", "METdxUPJES"),
+                           METdyUPJES = cms.InputTag("ShiftMETforJES", "METdyUPJES"),
+                           METdxDOWNJES = cms.InputTag("ShiftMETforJES", "METdxDOWNJES"),
+                           METdyDOWNJES = cms.InputTag("ShiftMETforJES", "METdyDOWNJES"),
+                           METdxUPJER = cms.InputTag("ShiftMETforJER", "METdxUPJER"),
+                           METdyUPJER = cms.InputTag("ShiftMETforJER", "METdyUPJER"),
+                           METdxDOWNJER = cms.InputTag("ShiftMETforJER", "METdxDOWNJER"),
+                           METdyDOWNJER = cms.InputTag("ShiftMETforJER", "METdyDOWNJER"),
+                           
                            applyTrigger = cms.bool(APPLYTRIG), #Skip events failing required triggers. They are stored with sel<0 if set to false
                            applyTrigEff = cms.bool(False), #Add trigger efficiency as a weight, for samples where the trigger cannot be applied (obsoltete)
                            skipEmptyEvents = cms.bool(SKIP_EMPTY_EVENTS),
                            failedTreeLevel = cms.int32(FAILED_TREE_LEVEL),
                            sampleName = cms.string(SAMPLENAME),
-									GenXSEC = cms.double(GENXSEC),
-									GenBR = cms.double(GENBR),
-									
-                           # MELA parameters
-                           #superMelaMass = cms.double(SUPERMELA_MASS),
+                           GenXSEC = cms.double(GENXSEC),
+                           GenBR = cms.double(GENBR),
 
                            # Reco MEs to pick from the candidate
                            recoProbabilities = cms.vstring(),
@@ -176,7 +197,7 @@ TreeSetup = cms.EDAnalyzer("HZZ4lNtupleMaker",
                            Apply_K_NNLOQCD_ZZGG = cms.int32(APPLY_K_NNLOQCD_ZZGG),
                            Apply_K_NNLOQCD_ZZQQB = cms.bool(APPLY_K_NNLOQCD_ZZQQB),
                            Apply_K_NLOEW_ZZQQB = cms.bool(APPLY_K_NLOEW_ZZQQB),
-			   Apply_QCD_GGF_UNCERT = cms.bool(APPLY_QCD_GGF_UNCERT),
+                           Apply_QCD_GGF_UNCERT = cms.bool(APPLY_QCD_GGF_UNCERT),
                            )
 
 ### Signal region
@@ -296,7 +317,7 @@ process.dumpUserData =  cms.EDAnalyzer("dumpUserData",
         ZZ  = cms.InputTag("ZZCand"),
         ZLL   =cms.InputTag("ZLLCand"),    # Starting point for all CRs
      ),
-    jetSrc = cms.InputTag("cleanJets"),
+    jetSrc = cms.InputTag("dressedJets"),
 )
 
 if (PROCESS_CR or not IsMC):
