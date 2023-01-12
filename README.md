@@ -44,4 +44,7 @@ git clone https://github.com/bonanomi/MuonMVAReader.git MuonMVAReader
 #NanoAODTools
 git clone https://github.com/cms-nanoAOD/nanoAOD-tools.git PhysicsTools/NanoAODTools
 (cd PhysicsTools/NanoAODTools ; git checkout -b from-c32f055 c32f055)
+
+# compile
+scramv1 b -j 8
 ```
