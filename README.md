@@ -18,7 +18,6 @@ git cms-addpkg  RecoJets/JetProducers
 git cms-addpkg GeneratorInterface/RivetInterface
 git cms-addpkg SimDataFormats/HTXS
 
-
 # Updated for UL. See: https://twiki.cern.ch/twiki/bin/view/CMS/EgammaUL2016To2018
 git cms-addpkg RecoEgamma/EgammaTools
 git clone https://github.com/cms-egamma/EgammaPostRecoTools.git
@@ -26,6 +25,26 @@ mv EgammaPostRecoTools/python/EgammaPostRecoTools.py RecoEgamma/EgammaTools/pyth
 git cms-addpkg EgammaAnalysis/ElectronTools
 (rm -rf EgammaAnalysis/ElectronTools/data;git clone https://github.com/jainshilpi/EgammaAnalysis-ElectronTools.git -b ULSSfiles_correctScaleSysMC EgammaAnalysis/ElectronTools/data;)
 
-#### Please do not add any custom (non-CMSSW) package before this line ####
+#Add TauPOG corrections (TES and EES)
+git clone https://github.com/cms-tau-pog/TauIDSFs TauPOG/TauIDSFs
+
+# SVfit
+git clone https://github.com/LLRCMS/ClassicSVfit.git TauAnalysis/ClassicSVfit -b bbtautau_LegacyRun2
+git clone https://github.com/svfit/SVfitTF TauAnalysis/SVfitTF
+
+# This package
 git clone git@github.com:GlennnLiu/HTauTauHMuMu.git -b Run2_UL
 
+# Muon MVA
+git cms-addpkg CondFormats/EgammaObjects
+git cms-addpkg CommonTools/MVAUtils
+git clone https://github.com/bonanomi/MuonMVAReader.git MuonMVAReader
+(cd MuonMVAReader; git checkout 3d53269)
+
+#NanoAODTools
+git clone https://github.com/cms-nanoAOD/nanoAOD-tools.git PhysicsTools/NanoAODTools
+(cd PhysicsTools/NanoAODTools ; git checkout -b from-c32f055 c32f055)
+
+
+
+'''
