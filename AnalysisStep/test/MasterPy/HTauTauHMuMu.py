@@ -538,16 +538,16 @@ process.cleanSoftElectrons = cms.EDProducer("PATElectronCleaner",
 
 #------- TAU LEPTONS -------
 
-TAUCUT       = "pt>10 & abs(eta)<2.4"#"tauID('byCombinedIsolationDeltaBetaCorrRaw3Hits') < 1000.0 && pt>18"
-SOSOTAU      = "decayMode()!=5 && decayMode()!=6 && tauID('decayModeFindingNewDMs') == 1 && userFloat('dz') < 10"
-GOODTAU      = SOSOTAU + " && tauID('byVVVLooseDeepTau2017v2p1VSjet') == 1 && tauID('byVVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byVLooseDeepTau2017v2p1VSmu') == 1"
-GOODTAU_MU   = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
-GOODTAU_ELE  = SOSOTAU + " && tauID('byVLooseDeepTau2017v2p1VSmu') == 1 && tauID('byTightDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
-GOODTAU_TAU  = SOSOTAU + " && tauID('byVLooseDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
+TAUCUT       = "pt>20 & abs(eta)<2.3"#"tauID('byCombinedIsolationDeltaBetaCorrRaw3Hits') < 1000.0 && pt>18"
+SOSOTAU      = "decayMode()!=5 && decayMode()!=6 && tauID('decayModeFindingNewDMs') == 1 && userFloat('dz') < 1"
+GOODTAU      = SOSOTAU# + " && tauID('byVVVLooseDeepTau2017v2p1VSjet') == 1 && tauID('byVVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byVLooseDeepTau2017v2p1VSmu') == 1"
+#GOODTAU_MU   = SOSOTAU# + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
+#GOODTAU_ELE  = SOSOTAU# + " && tauID('byVLooseDeepTau2017v2p1VSmu') == 1 && tauID('byTightDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
+#GOODTAU_TAU  = SOSOTAU# + " && tauID('byVLooseDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
 
-#GOODTAU_MU   = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byTightDeepTau2017v2p1VSjet') == 1"
-#GOODTAU_ELE  = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byMediumDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
-#GOODTAU_TAU  = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byTightDeepTau2017v2p1VSjet') == 1"
+GOODTAU_MU   = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byTightDeepTau2017v2p1VSjet') == 1"
+GOODTAU_ELE  = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byMediumDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
+GOODTAU_TAU  = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byTightDeepTau2017v2p1VSjet') == 1"
 
 import RecoTauTag.RecoTau.tools.runTauIdMVA as tauIdConfig
 
@@ -804,7 +804,16 @@ if YEAR == 2018:
     #process.patJetsReapplyJEC.userData.userFloats.src += ['pileupJetIdUpdated:fullDiscriminant']
     #process.patJetsReapplyJEC.userData.userInts.src += ['pileupJetIdUpdated:fullId']
 
+    # Shift met due to central corrections of TES, EES, JER and JES
+process.ShiftMETcentral = cms.EDProducer ("ShiftMETcentral",
+					srcMET = uncorrPFMetTag,
+					tauUncorrected = cms.InputTag("bareTaus"),
+					tauCorrected = cms.InputTag("softTaus"),
+                    jetCollection = cms.InputTag("dressedJets")
+					)
 
+srcMETTag = None
+srcMETTag = cms.InputTag("ShiftMETcentral")
 
 process.METSignificance = cms.EDProducer ("ExtractMETSignificance", 
 					srcMET=uncorrPFMetTag 
@@ -812,21 +821,32 @@ process.METSignificance = cms.EDProducer ("ExtractMETSignificance",
 
     # add variables with MET shifted for TES corrections
 process.ShiftMETforTES = cms.EDProducer ("ShiftMETforTES", 
-					srcMET  = uncorrPFMetTag, 
+					srcMET  = srcMETTag, 
 					tauCollection = cms.InputTag("softTaus")
 					)
 
     # add variables with MET shifted for EES corrections (E->tau ES)
 process.ShiftMETforEES = cms.EDProducer ("ShiftMETforEES",
-					srcMET  = uncorrPFMetTag,
+					srcMET  = srcMETTag,
 					tauCollection = cms.InputTag("softTaus")
 					)
 
-    # Shift met due to central corrections of TES and EES
-process.ShiftMETcentral = cms.EDProducer ("ShiftMETcentral",
-					srcMET = uncorrPFMetTag,
-					tauUncorrected = cms.InputTag("bareTaus"),
-					tauCorrected = cms.InputTag("softTaus")
+    # add variables with MET shifted for MES corrections (Mu->tau ES)
+process.ShiftMETforMES = cms.EDProducer ("ShiftMETforMES",
+					srcMET  = srcMETTag,
+					tauCollection = cms.InputTag("softTaus")
+					)
+
+    # add variables with MET shifted for JES corrections
+process.ShiftMETforJES = cms.EDProducer ("ShiftMETforJES", 
+					srcMET  = srcMETTag, 
+					jetCollection = cms.InputTag("dressedJets")
+					)
+
+    # add variables with MET shifted for EES corrections (E->tau ES)
+process.ShiftMETforJER = cms.EDProducer ("ShiftMETforJER",
+					srcMET  = srcMETTag,
+					jetCollection = cms.InputTag("dressedJets")
 					)
 
     # Get a standalone Puppi MET significance collection
@@ -842,9 +862,12 @@ process.ShiftMETcentral = cms.EDProducer ("ShiftMETcentral",
 #					)
 
 process.METSequence += process.METSignificance
+process.METSequence += process.ShiftMETcentral
 process.METSequence += process.ShiftMETforTES
 process.METSequence += process.ShiftMETforEES
-process.METSequence += process.ShiftMETcentral
+process.METSequence += process.ShiftMETforMES
+process.METSequence += process.ShiftMETforJES
+process.METSequence += process.ShiftMETforJER
 #process.METSequence += process.PuppiMETSignificance
 #process.METSequence += process.ShiftPuppiMETcentral
 metTag=uncorrPFMetTag
@@ -877,36 +900,13 @@ process.ecalBadCalibReducedMINIAODFilter = cms.EDFilter(
         debug = cms.bool(False)
     )
 
-srcMETTag = None
-srcMETTag = cms.InputTag("ShiftMETcentral")
 
 
-## ----------------------------------------------------------------------
-## SV fit
-## ----------------------------------------------------------------------
-
-#process.SVZCand = cms.EDProducer("ClassicSVfitInterface",
-#                                  srcPairs   = cms.InputTag("bareZCand"),
-#                                  srcSig     = cms.InputTag("METSignificance", "METSignificance"),
-#                                  srcCov     = cms.InputTag("METSignificance", "METCovariance"),
-#                                  usePairMET = cms.bool(False),
-#                                  srcMET     = srcMETTag,
-#                                  computeForUpDownTES = cms.bool(True if IsMC else False),
-#                                  computeForUpDownMET = cms.bool(True if IsMC else False),
-#                                  METdxUP    = cms.InputTag("ShiftMETforTES", "METdxUP"),
-#                                  METdyUP    = cms.InputTag("ShiftMETforTES", "METdyUP"),
-#                                  METdxDOWN  = cms.InputTag("ShiftMETforTES", "METdxDOWN"),
-#                                  METdyDOWN  = cms.InputTag("ShiftMETforTES", "METdyDOWN"),
-#                                  METdxUP_EES   = cms.InputTag("ShiftMETforEES", "METdxUPEES"),
-#                                  METdyUP_EES   = cms.InputTag("ShiftMETforEES", "METdyUPEES"),
-#                                  METdxDOWN_EES = cms.InputTag("ShiftMETforEES", "METdxDOWNEES"),
-#                                  METdyDOWN_EES = cms.InputTag("ShiftMETforEES", "METdyDOWNEES")
-#)
 
 
 ZLEPTONSEL     = TWOGOODLEPTONS # Note: this is without ISO
 
-Z1PRESEL    = (ZLEPTONSEL + " && userFloat('goodMass') >= 81.1876 && userFloat('goodMass') <= 101.1876") # Note: this is without ISO
+Z1PRESEL    = (ZLEPTONSEL + " && mass >= 81.1876 && mass <= 101.1876") # Note: this is without ISO
 
 FLAVOUR	    = "((daughter(0).pdgId()*daughter(1).pdgId()==-121 && userFloat('eleHLTMatch')) ||  (daughter(0).pdgId()*daughter(1).pdgId()==-169 && userFloat('muHLTMatch')))"
 
@@ -917,25 +917,10 @@ TWOGOODISOLEPTONS = ( TWOGOODLEPTONS + "&&" + TWOISOLEPTONS )
 
 process.ZCand = cms.EDProducer("ZCandidateFiller",
     src	       = cms.InputTag("bareZCand"),
-
-    srcSig     = cms.InputTag("METSignificance", "METSignificance"),
-    srcCov     = cms.InputTag("METSignificance", "METCovariance"),
-    usePairMET = cms.bool(False),
-    srcMET     = srcMETTag,
-    computeForUpDownTES = cms.bool(True if IsMC else False),
-    computeForUpDownMET = cms.bool(True if IsMC else False),
-    METdxUP    = cms.InputTag("ShiftMETforTES", "METdxUP"),
-    METdyUP    = cms.InputTag("ShiftMETforTES", "METdyUP"),
-    METdxDOWN  = cms.InputTag("ShiftMETforTES", "METdxDOWN"),
-    METdyDOWN  = cms.InputTag("ShiftMETforTES", "METdyDOWN"),
-    METdxUP_EES   = cms.InputTag("ShiftMETforEES", "METdxUPEES"),
-    METdyUP_EES   = cms.InputTag("ShiftMETforEES", "METdyUPEES"),
-    METdxDOWN_EES = cms.InputTag("ShiftMETforEES", "METdxDOWNEES"),
-    METdyDOWN_EES = cms.InputTag("ShiftMETforEES", "METdyDOWNEES"),
-
+                               
     TriggerResults = cms.InputTag('TriggerResults','','HLT'),
     TriggerSet = cms.InputTag(TRIGGERSET),
-
+                               
     sampleType = cms.int32(SAMPLE_TYPE),
     setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
     bestZAmong = cms.string(BESTZ_AMONG),
@@ -946,18 +931,6 @@ process.ZCand = cms.EDProducer("ZCandidateFiller",
         Z1Presel = cms.string(Z1PRESEL),
     )
 )
-#process.ZCand = cms.EDProducer("ZCandidateFiller",
-#    src = cms.InputTag("SVZCand"),
-#    sampleType = cms.int32(SAMPLE_TYPE),
-#    setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
-#    bestZAmong = cms.string(BESTZ_AMONG),
-#    FSRMode = cms.string(FSRMODE), # "skip", "Legacy", "RunII"
-#    flags = cms.PSet(
-#        GoodLeptons = cms.string(ZLEPTONSEL),
-#        GoodIsoLeptons = cms.string(TWOGOODISOLEPTONS),
-#        Z1Presel = cms.string(Z1PRESEL),
-#    )
-#)
 
 
 # ll, same flavour/any charge, for control regions only
@@ -996,21 +969,6 @@ process.LLCand = cms.EDProducer("ZCandidateFiller",
 
     TriggerResults = cms.InputTag('TriggerResults','','HLT'),
     TriggerSet = cms.InputTag(TRIGGERSET),
-
-                                  srcSig     = cms.InputTag("METSignificance", "METSignificance"),
-                                  srcCov     = cms.InputTag("METSignificance", "METCovariance"),
-                                  usePairMET = cms.bool(False),
-                                  srcMET     = srcMETTag,
-                                  computeForUpDownTES = cms.bool(True if IsMC else False),
-                                  computeForUpDownMET = cms.bool(True if IsMC else False),
-                                  METdxUP    = cms.InputTag("ShiftMETforTES", "METdxUP"),
-                                  METdyUP    = cms.InputTag("ShiftMETforTES", "METdyUP"),
-                                  METdxDOWN  = cms.InputTag("ShiftMETforTES", "METdxDOWN"),
-                                  METdyDOWN  = cms.InputTag("ShiftMETforTES", "METdyDOWN"),
-                                  METdxUP_EES   = cms.InputTag("ShiftMETforEES", "METdxUPEES"),
-                                  METdyUP_EES   = cms.InputTag("ShiftMETforEES", "METdyUPEES"),
-                                  METdxDOWN_EES = cms.InputTag("ShiftMETforEES", "METdxDOWNEES"),
-                                  METdyDOWN_EES = cms.InputTag("ShiftMETforEES", "METdyDOWNEES"),
 
     flags = cms.PSet(
         GoodLeptons = cms.string(ZLEPTONSEL),
@@ -1139,7 +1097,7 @@ elif SELSETUP=="allCutsAtOncePlusSmart": # Apply smarter mZb cut
 		      HLTMATCH	      + "&&" +
 		      BESTZ1	      + "&&" +
 		      #OSSF	      + "&&" +
-                      "userFloat('goodMass')>70"       + "&&" +
+                      "mass>70"       + "&&" +
                       SMARTMALLCOMB#   + "&&" +
               #        "daughter('Z2').masterClone.userFloat('goodMass')>12"
                       )
@@ -1193,7 +1151,6 @@ process.ZZCand = cms.EDProducer("ZZCandidateFiller",
     bestCandAmong = cms.PSet(isBestCand = cms.string(BESTCAND_AMONG)),
     bestCandComparator = cms.string(BESTCANDCOMPARATOR),
     ZRolesByMass = cms.bool(True),
-    doKinFit = cms.bool(False),#KINFIT),
     doKinFitOld = cms.bool(KINFITOLD),
     debug = cms.bool(False),
     flags = cms.PSet(
@@ -1327,7 +1284,6 @@ process.ZLLCand = cms.EDProducer("ZZCandidateFiller",
 
     ),
     ZRolesByMass = cms.bool(False),  # daughter('Z1') = daughter(0)
-    doKinFit = cms.bool(False),#KINFIT),
     doKinFitOld = cms.bool(KINFITOLD),
     debug = cms.bool(False),
     flags = cms.PSet(
@@ -1472,7 +1428,7 @@ process.dressedJets = cms.EDProducer("JetFiller",
     src = cms.InputTag("slimmedJets"),
     sampleType = cms.int32(SAMPLE_TYPE),
     setup = cms.int32(LEPTON_SETUP),
-    cut = cms.string("pt>20 && abs(eta)<4.7 && userFloat('JetID') && (userFloat('PUjetID') || pt>50)"),
+    cut = cms.string(""),#("pt>20 && abs(eta)<4.7 && userFloat('JetID') && (userFloat('PUjetID') || pt>50)"),
     isMC = cms.bool(IsMC),
     bTaggerName = cms.string(theBTagger),
     bTaggerThreshold = cms.double(theBTaggerThr),
@@ -1771,25 +1727,25 @@ if (APPLYJER and SAMPLE_TYPE == 2018):
     process.es_prefer_jer = cms.ESPrefer('PoolDBESSource', 'jer')
 
 ### Clean jets wrt. good (preFSR-)isolated leptons
-process.cleanJets = cms.EDProducer("JetsWithLeptonsRemover",
-                                   Jets      = cms.InputTag("dressedJets"),
-                                   Muons     = cms.InputTag("appendPhotons:muons"),
-                                   Electrons = cms.InputTag("appendPhotons:electrons"),
-				   Taus	     = cms.InputTag("softTaus"),
-                                   Diboson   = cms.InputTag(""),
-                                   JetPreselection      = cms.string(""),
-                                   MuonPreselection = cms.string("userFloat('isGood') && userFloat('passCombRelIsoPFFSRCorr')"),
-                                   ElectronPreselection = cms.string("userFloat('isGood')"),
-				   TauPreselection = cms.string("userFloat('isGood')"),
-                                   DiBosonPreselection  = cms.string(""),
-                                   MatchingType = cms.string("byDeltaR"),
-                                   cleanFSRFromLeptons = cms.bool(True),
-                                   DebugPlots = cms.untracked.bool(False),
-                                   DebugPrintOuts = cms.untracked.bool(False)
-                                   )
+# process.cleanJets = cms.EDProducer("JetsWithLeptonsRemover",
+#                                    Jets      = cms.InputTag("dressedJets"),
+#                                    Muons     = cms.InputTag("appendPhotons:muons"),
+#                                    Electrons = cms.InputTag("appendPhotons:electrons"),
+#                                    Taus	     = cms.InputTag("softTaus"),
+#                                    Diboson   = cms.InputTag(""),
+#                                    JetPreselection      = cms.string(""),
+#                                    MuonPreselection = cms.string("userFloat('isGood') && userFloat('passCombRelIsoPFFSRCorr')"),
+#                                    ElectronPreselection = cms.string("userFloat('isGood')"),
+#                                    TauPreselection = cms.string("userFloat('isGood')"),
+#                                    DiBosonPreselection  = cms.string(""),
+#                                    MatchingType = cms.string("byDeltaR"),
+#                                    cleanFSRFromLeptons = cms.bool(True),
+#                                    DebugPlots = cms.untracked.bool(False),
+#                                    DebugPrintOuts = cms.untracked.bool(False)
+#                                    )
 
-if FSRMODE=="Legacy" :
-    process.cleanJets.cleanFSRFromLeptons = False
+# if FSRMODE=="Legacy" :
+#     process.cleanJets.cleanFSRFromLeptons = False
 
 
 ### ----------------------------------------------------------------------
@@ -1924,7 +1880,7 @@ process.Candidates = cms.Path(
        process.fsrPhotons        + process.boostedFsrPhotons +
        process.appendPhotons     +
        process.softLeptons       +
-       process.cleanJets         +
+       process.dressedJets       +#cleanJets         +
        process.METSequence	 +
 # Build 4-lepton candidates
        process.bareZCand	 + process.ZCand	+

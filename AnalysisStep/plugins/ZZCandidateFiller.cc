@@ -44,28 +44,6 @@
 
 #include <KinZfitter/KinZfitter/interface/KinZfitter.h>
 
-#include <HHKinFit2/interface/HHKinFitMasterHeavyHiggs.h>
-#include <HHKinFit2/interface/exceptions/HHInvMConstraintException.h>
-#include <HHKinFit2/interface/exceptions/HHEnergyRangeException.h>
-#include <HHKinFit2/interface/exceptions/HHEnergyConstraintException.h>
-
-#include <HHKinFit2/src/HHKinFitMasterHeavyHiggs.cpp>
-#include <HHKinFit2/src/HHKinFit.cpp>
-#include <HHKinFit2/src/HHFitObjectEConstM.cpp>
-#include <HHKinFit2/src/HHFitObjectEConstBeta.cpp>
-#include <HHKinFit2/src/HHFitObjectE.cpp>
-#include <HHKinFit2/src/HHFitObjectMET.cpp>
-#include <HHKinFit2/src/HHFitObject.cpp>
-#include <HHKinFit2/src/HHFitObjectComposite.cpp>
-#include <HHKinFit2/src/HHFitConstraint4Vector.cpp>
-#include <HHKinFit2/src/HHFitConstraint4VectorBJet.cpp>
-#include <HHKinFit2/src/HHFitConstraint.cpp>
-#include <HHKinFit2/src/HHFitConstraintEHardM.cpp>
-#include <HHKinFit2/src/HHFitConstraintSoftBoundary.cpp>
-#include <HHKinFit2/src/HHLorentzVector.cpp>
-#include <HHKinFit2/src/PSMath.cpp>
-
-
 #include "TH2F.h"
 #include "TFile.h"
 #include "TLorentzVector.h"
@@ -97,7 +75,6 @@ private:
   virtual void endJob(){};
 
   void getPairMass(const reco::Candidate* lp, const reco::Candidate* lm, FSRToLepMap& photons, float& mass, int& ID);
-//  void getSVMass(const reco::Candidate* l1, const reco::Candidate* l2, 
 
   edm::EDGetTokenT<edm::View<reco::CompositeCandidate> > candidateToken;
   edm::EDGetTokenT<edm::View<pat::MET> > metToken;
@@ -139,7 +116,6 @@ ZZCandidateFiller::ZZCandidateFiller(const edm::ParameterSet& iConfig) :
   embedDaughterFloats(iConfig.getUntrackedParameter<bool>("embedDaughterFloats", true)),
   ZRolesByMass(iConfig.getParameter<bool>("ZRolesByMass")),
   isMC(iConfig.getParameter<bool>("isMC")),
-  doKinFit(iConfig.getParameter<bool>("doKinFit")),
   doKinFitOld(iConfig.getParameter<bool>("doKinFitOld")),
   debug(iConfig.getParameter<bool>("debug")),
   corrSigmaMu(0),
@@ -148,7 +124,7 @@ ZZCandidateFiller::ZZCandidateFiller(const edm::ParameterSet& iConfig) :
 {
   produces<pat::CompositeCandidateCollection>();
 
-  jetToken = consumes<edm::View<pat::Jet> >(edm::InputTag("cleanJets"));
+  jetToken = consumes<edm::View<pat::Jet> >(edm::InputTag("dressedJets"));
   metToken = consumes<edm::View<pat::MET> >(iConfig.getParameter<edm::InputTag>("srcMET"));//("slimmedMETs"));
   metCovToken = consumes<math::Error<2>::type>(iConfig.getParameter<edm::InputTag>("srcCov"));
   softLeptonToken = consumes<edm::View<reco::Candidate> >(edm::InputTag("softLeptons"));
@@ -392,7 +368,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 
     if (debug) cout<<"Other combination options and smart cut"<<endl;
     // Build the other SF/OS combination
-    float mZ1= userdatahelpers::getUserFloat(Z1,"goodMass");
+    float mZ1= Z1->mass();
     float mZa, mZb;
     int ZaID, ZbID;
     getPairMass(Z1Lp,Z2Lm,FSRMap,mZa,ZaID);
@@ -730,129 +706,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
       nCandidates++;
     }
 
-    //----------------------------------------------------------------------
-    //--- kinematic fit for ZZ containing taus
-    if (debug) cout<<"Kinematic fit"<<endl;
-    float ZZKMass = -999;
-    float ZZKChi2 = -999;
-    if (doKinFit){
-    bool wrongFit=false;
-    bool checkFlavor=false;
-    TLorentzVector p_L1, p_L2, p_Tau1, p_Tau2;
-    if ( (abs(id11)==15 or abs(id12)==15) && abs(id21)!=15 && abs(id22)!=15 ){
-	checkFlavor=true;
-	p_L1.SetPxPyPzE(p21.x(),p21.y(),p21.z(),p21.t());
-	p_L2.SetPxPyPzE(p22.x(),p22.y(),p22.z(),p22.t());
-	p_Tau1.SetPxPyPzE(p11.x(),p11.y(),p11.z(),p11.t());
-	p_Tau2.SetPxPyPzE(p12.x(),p12.y(),p12.z(),p12.t());
-    }
-    else if ( (abs(id21)==15 or abs(id22)==15) && abs(id11)!=15 && abs(id12)!=15 ){
-	checkFlavor=true;
-	p_L1.SetPxPyPzE(p11.x(),p11.y(),p11.z(),p11.t());
-        p_L2.SetPxPyPzE(p12.x(),p12.y(),p12.z(),p12.t());
-        p_Tau1.SetPxPyPzE(p21.x(),p21.y(),p21.z(),p21.t());
-        p_Tau2.SetPxPyPzE(p22.x(),p22.y(),p22.z(),p22.t());
-    }
-    if (checkFlavor){
-	HHKinFit2::HHKinFitMasterHeavyHiggs kinFits = HHKinFit2::HHKinFitMasterHeavyHiggs(p_L1, p_L2, p_Tau1, p_Tau2, ptmiss, covMET, 0., 0.);
-	for (int i = 0; i<10; i++){
-	    double mZ2=(i+1)*0.1*ZmassValue;
-	    kinFits.addHypo(ZmassValue,mZ2);
-	    kinFits.addHypo(mZ2,ZmassValue);
-	}
-	try{ kinFits.fit();}
-	catch(HHKinFit2::HHInvMConstraintException &e){
-	    cout<<"INVME THIS EVENT WAS WRONG, INV MASS CONSTRAIN EXCEPTION"<<endl;
-            wrongFit=true;
-	}
-	catch (HHKinFit2::HHEnergyRangeException &e){
-	    cout<<"ERANGE THIS EVENT WAS WRONG, ENERGY RANGE EXCEPTION"<<endl;
-	    wrongFit=true;
-	}
-	catch(HHKinFit2::HHEnergyConstraintException &e){
-	    cout<<"ECON THIS EVENT WAS WRONG, ENERGY CONSTRAIN EXCEPTION"<<endl;
-	    wrongFit=true;
-	}
-	if (!wrongFit){
-	    ZZKMass=kinFits.getMH();
-	    ZZKChi2=kinFits.getChi2();
-	}
-	else{
-	    ZZKMass=-333.;
-	    ZZKChi2=-333.;
-	}
-    }
-    else{
-        ZZKMass=-666.;
-	ZZKChi2=-666.;
-    }
-    }
-    myCand.addUserFloat("ZZKMass",ZZKMass);
-    myCand.addUserFloat("ZZKChi2",ZZKChi2);
 
-
-    //----------------------------------------------------------------------
-    //--- Get the mass by combining l1l2 + SVFit momentum
-    if (debug) cout<<"SV fit propagation"<<endl;
-    bool checkFlavor=false;
-    float SVfitMass=-999., SVpt=-999., SVeta=-999., SVphi=-999.;
-    TLorentzVector pZtt,pZll,pZZ;
-    if ( (abs(id11)==15 or abs(id12)==15) && abs(id21)!=15 && abs(id22)!=15 ){
-	if (userdatahelpers::hasUserFloat(Z1,"ComputeSV") && userdatahelpers::getUserFloat(Z1,"ComputeSV")){
-	    pZtt.SetPtEtaPhiM(userdatahelpers::getUserFloat(Z1,"SVfit_pt"),userdatahelpers::getUserFloat(Z1,"SVfit_eta"),userdatahelpers::getUserFloat(Z1,"SVfit_phi"),userdatahelpers::getUserFloat(Z1,"SVfitMass"));
-	    pZll.SetPtEtaPhiM(Z2->pt(),Z2->eta(),Z2->phi(),Z2->mass());
-	    checkFlavor=true;
-	}
-	else{
-	    SVfitMass=-666.;
-	    SVpt=-666.;
-	    SVeta=-666.;
-	    SVphi=-666.;
-	}
-    }
-    else if ( (abs(id21)==15 or abs(id22)==15) && abs(id11)!=15 && abs(id12)!=15 ){
-	if (userdatahelpers::hasUserFloat(Z2,"ComputeSV") && userdatahelpers::getUserFloat(Z2,"ComputeSV")){
-            pZtt.SetPtEtaPhiM(userdatahelpers::getUserFloat(Z2,"SVfit_pt"),userdatahelpers::getUserFloat(Z2,"SVfit_eta"),userdatahelpers::getUserFloat(Z2,"SVfit_phi"),userdatahelpers::getUserFloat(Z2,"SVfitMass"));
-	    pZll.SetPtEtaPhiM(Z1->pt(),Z1->eta(),Z1->phi(),Z1->mass());
-	    checkFlavor=true;
-        }
-        else{
-            SVfitMass=-666.;
-            SVpt=-666.;
-            SVeta=-666.;
-            SVphi=-666.;
-        }
-    }
-    else{
-	SVfitMass=-333.;
-        SVpt=-333.;
-        SVeta=-333.;
-        SVphi=-333.;
-    }
-    if (checkFlavor){
-	pZZ=pZtt+pZll;
-	SVfitMass=pZZ.M();
-	SVpt=pZZ.Pt();
-	SVeta=pZZ.Eta();
-	SVphi=pZZ.Phi();
-    }
-    
-    myCand.addUserFloat("SVfitMass",SVfitMass);
-    myCand.addUserFloat("SVpt",SVpt);
-    myCand.addUserFloat("SVeta",SVeta);
-    myCand.addUserFloat("SVphi",SVphi);
-
-
-    //----------------------------------------------------------------------
-    //--- Decide which 4l mass to be used
-    if (debug) cout<<"Good mass"<<endl;
-    float goodMass;
-    if (SVfitMass < 0)
-	goodMass=myCand.mass();
-    else
-	goodMass=SVfitMass;//ZZKMass;
-    myCand.addUserFloat("goodMass",goodMass);
-	
     //----------------------------------------------------------------------
     //--- kinematic refitting using Z mass constraint
     if (debug) cout<<"Kinamtic refitting"<<endl;

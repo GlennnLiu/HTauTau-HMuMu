@@ -68,8 +68,11 @@
 #include <HTauTauHMuMu/AnalysisStep/interface/ggF_qcd_uncertainty_2017.h>
 #include <HTauTauHMuMu/AnalysisStep/interface/LeptonSFHelper.h>
 
-//#include <MelaAnalytics/CandidateLOCaster/interface/MELACandidateRecaster.h>
-//#include <CommonLHETools/LHEHandler/interface/LHEHandler.h>
+#include <HTauTauHMuMu/AnalysisStep/interface/SVfit.h>
+#include <TauAnalysis/ClassicSVfit/interface/ClassicSVfit.h>
+#include <TauAnalysis/ClassicSVfit/interface/ClassicSVfitIntegrand.h>
+#include <TauAnalysis/ClassicSVfit/interface/MeasuredTauLepton.h>
+#include <TauAnalysis/ClassicSVfit/interface/svFitHistogramAdapter.h>
 
 #include "ZZ4lConfigHelper.h"
 #include "HZZ4lNtupleFactory.h"
@@ -83,10 +86,10 @@
 #include <string>
 
 namespace {
-  bool writeJets = true;     // Write jets in the tree. FIXME: make this configurable
-  bool writePhotons = true; // Write photons in the tree. FIXME: make this configurable
-  bool addKinRefit = true;
-  bool addZZKinfit = true;
+  bool writeJets = false;     // Write jets in the tree. FIXME: make this configurable
+  bool writePhotons = false; // Write photons in the tree. FIXME: make this configurable
+  bool addKinRefit = false;
+  bool addZZKinfit = false;
   bool addSVfit = true;
   bool addVtxFit = false;
   bool addFSRDetails = false;
@@ -124,11 +127,38 @@ namespace {
   Float_t KFactor_QCD_qqZZ_dPhi = 0;
   Float_t KFactor_QCD_qqZZ_M = 0;
   Float_t KFactor_QCD_qqZZ_Pt = 0;
-  // Generic MET object
-  METObject metobj;
-  METObject metobj_corrected;
+  
+  //-------------------------------
+  //-------------MET object--------
+  //-------------------------------
   Float_t GenMET = -99;
   Float_t GenMETPhi = -99;
+  Float_t PFMET = -99;
+  Float_t PFMETPhi = -99;
+  Float_t METx = -99;
+  Float_t METy = -99;
+  TMatrixD covMET(2, 2);
+  Float_t METxUPTES = -99;
+  Float_t METyUPTES = -99;
+  Float_t METxDOWNTES = -99;
+  Float_t METyDOWNTES = -99;
+  Float_t METxUPEES = -99;
+  Float_t METyUPEES = -99;
+  Float_t METxDOWNEES = -99;
+  Float_t METyDOWNEES = -99;
+  Float_t METxUPMES = -99;
+  Float_t METyUPMES = -99;
+  Float_t METxDOWNMES = -99;
+  Float_t METyDOWNMES = -99;
+  Float_t METxUPJES = -99;
+  Float_t METyUPJES = -99;
+  Float_t METxDOWNJES = -99;
+  Float_t METyDOWNJES = -99;
+  Float_t METxUPJER = -99;
+  Float_t METyUPJER = -99;
+  Float_t METxDOWNJER = -99;
+  Float_t METyDOWNJER = -99;
+    
   // MET with no HF
   //Float_t PFMETNoHF  =  -99;
   //Float_t PFMETNoHFPhi  =  -99;
@@ -158,7 +188,7 @@ namespace {
   Float_t ZZPhi  = 0;
   Float_t ZZjjPt = 0;
  
-  Float_t ZZGoodMass  = 0;
+//   Float_t ZZGoodMass  = 0;
   Bool_t muHLTMatch  = false;
   Bool_t eleHLTMatch  = false;
  
@@ -202,44 +232,89 @@ namespace {
   Bool_t Z2eleHLTMatch1 = false;
   Bool_t Z2eleHLTMatch2 = false;
   Bool_t Z2eleHLTMatch = false;
+  Short_t Z2isGoodTau = 0;
 
-  //ZZ kinematic fit
-  Float_t ZZKMass  = 0;
-  Float_t ZZKChi2  = 0;
-  // SV fit
-  Float_t ZZSVMass  = 0;
-  Float_t ZZSVPt  = 0;
-  Float_t ZZSVEta = 0;
-  Float_t ZZSVPhi = 0;
+//-------------------------------------------------------------------
+//---------------------SV Fit variables------------------------------
+//-------------------------------------------------------------------
 
-  Float_t Z1SVMass = 0;
-  Float_t Z1SVMt = 0;
-  Float_t Z1SVPt = 0;
-  Float_t Z1SVEta = 0;
-  Float_t Z1SVPhi = 0;
-  Float_t Z1SVMassUnc = 0;
-  Float_t Z1SVMtUnc = 0;
-  Float_t Z1SVPtUnc = 0;
-  Float_t Z1SVEtaUnc = 0;
-  Float_t Z1SVPhiUnc = 0;
-  Float_t Z1SVMETRho = 0;
-  Float_t Z1SVMETPhi = 0;
-  Float_t Z1GoodMass = 0;
+  Float_t Z2SVMass = -999;
+  Float_t Z2SVPt = -999;
+  Float_t Z2SVEta = -999;
+  Float_t Z2SVPhi = -999;
+  Float_t Z2GoodMass = -999;
+    
+  Float_t Z2Mass_TESup = -999;
+  Float_t Z2SVMass_TESup = -999;
+  Float_t Z2SVPt_TESup = -999;
+  Float_t Z2SVEta_TESup = -999;
+  Float_t Z2SVPhi_TESup = -999;
+  Float_t Z2GoodMass_TESup = -999;
+    
+  Float_t Z2Mass_EESup = -999;
+  Float_t Z2SVMass_EESup = -999;
+  Float_t Z2SVPt_EESup = -999;
+  Float_t Z2SVEta_EESup = -999;
+  Float_t Z2SVPhi_EESup = -999;
+  Float_t Z2GoodMass_EESup = -999;
 
-  Float_t Z2SVMass = 0;
-  Float_t Z2SVMt = 0;
-  Float_t Z2SVPt = 0;
-  Float_t Z2SVEta = 0;
-  Float_t Z2SVPhi = 0;
-  Float_t Z2SVMassUnc = 0;
-  Float_t Z2SVMtUnc = 0;
-  Float_t Z2SVPtUnc = 0;
-  Float_t Z2SVEtaUnc = 0;
-  Float_t Z2SVPhiUnc = 0;
-  Float_t Z2SVMETRho = 0;
-  Float_t Z2SVMETPhi = 0;
-  Float_t Z2GoodMass = 0;
+  Float_t Z2Mass_MESup = -999;
+  Float_t Z2SVMass_MESup = -999;
+  Float_t Z2SVPt_MESup = -999;
+  Float_t Z2SVEta_MESup = -999;
+  Float_t Z2SVPhi_MESup = -999;
+  Float_t Z2GoodMass_MESup = -999;
+    
+  Float_t Z2Mass_JESup = -999;
+  Float_t Z2SVMass_JESup = -999;
+  Float_t Z2SVPt_JESup = -999;
+  Float_t Z2SVEta_JESup = -999;
+  Float_t Z2SVPhi_JESup = -999;
+  Float_t Z2GoodMass_JESup = -999;
+    
+  Float_t Z2Mass_JERup = -999;
+  Float_t Z2SVMass_JERup = -999;
+  Float_t Z2SVPt_JERup = -999;
+  Float_t Z2SVEta_JERup = -999;
+  Float_t Z2SVPhi_JERup = -999;
+  Float_t Z2GoodMass_JERup = -999;
+      
+  Float_t Z2Mass_TESdn = -999;
+  Float_t Z2SVMass_TESdn = -999;
+  Float_t Z2SVPt_TESdn = -999;
+  Float_t Z2SVEta_TESdn = -999;
+  Float_t Z2SVPhi_TESdn = -999;
+  Float_t Z2GoodMass_TESdn = -999;
+    
+  Float_t Z2Mass_EESdn = -999;
+  Float_t Z2SVMass_EESdn = -999;
+  Float_t Z2SVPt_EESdn = -999;
+  Float_t Z2SVEta_EESdn = -999;
+  Float_t Z2SVPhi_EESdn = -999;
+  Float_t Z2GoodMass_EESdn = -999;
 
+  Float_t Z2Mass_MESdn = -999;
+  Float_t Z2SVMass_MESdn = -999;
+  Float_t Z2SVPt_MESdn = -999;
+  Float_t Z2SVEta_MESdn = -999;
+  Float_t Z2SVPhi_MESdn = -999;
+  Float_t Z2GoodMass_MESdn = -999;
+    
+  Float_t Z2Mass_JESdn = -999;
+  Float_t Z2SVMass_JESdn = -999;
+  Float_t Z2SVPt_JESdn = -999;
+  Float_t Z2SVEta_JESdn = -999;
+  Float_t Z2SVPhi_JESdn = -999;
+  Float_t Z2GoodMass_JESdn = -999;
+    
+  Float_t Z2Mass_JERdn = -999;
+  Float_t Z2SVMass_JERdn = -999;
+  Float_t Z2SVPt_JERdn = -999;
+  Float_t Z2SVEta_JERdn = -999;
+  Float_t Z2SVPhi_JERdn = -999;
+  Float_t Z2GoodMass_JERdn = -999;
+  //------------------------------End SV fit variables--------------------------------
+    
   //MET
   Float_t MET = 0;
   Float_t METPhi = 0;
@@ -584,8 +659,30 @@ private:
   edm::EDGetTokenT<vector<reco::Vertex> > vtxToken;
   edm::EDGetTokenT<edm::View<pat::Jet> > jetToken;
   edm::EDGetTokenT<pat::PhotonCollection> photonToken;
+  
   edm::EDGetTokenT<pat::METCollection> metToken;
-  //edm::EDGetTokenT<pat::METCollection> metNoHFToken;
+  edm::EDGetTokenT<math::Error<2>::type> theCovTag;
+  edm::EDGetTokenT<double> theMETdxUPTESTag;
+  edm::EDGetTokenT<double> theMETdyUPTESTag;
+  edm::EDGetTokenT<double> theMETdxDOWNTESTag;
+  edm::EDGetTokenT<double> theMETdyDOWNTESTag;
+  edm::EDGetTokenT<double> theMETdxUPEESTag;
+  edm::EDGetTokenT<double> theMETdyUPEESTag;
+  edm::EDGetTokenT<double> theMETdxDOWNEESTag;
+  edm::EDGetTokenT<double> theMETdyDOWNEESTag;
+  edm::EDGetTokenT<double> theMETdxUPMESTag;
+  edm::EDGetTokenT<double> theMETdyUPMESTag;
+  edm::EDGetTokenT<double> theMETdxDOWNMESTag;
+  edm::EDGetTokenT<double> theMETdyDOWNMESTag;
+  edm::EDGetTokenT<double> theMETdxUPJESTag;
+  edm::EDGetTokenT<double> theMETdyUPJESTag;
+  edm::EDGetTokenT<double> theMETdxDOWNJESTag;
+  edm::EDGetTokenT<double> theMETdyDOWNJESTag;
+  edm::EDGetTokenT<double> theMETdxUPJERTag;
+  edm::EDGetTokenT<double> theMETdyUPJERTag;
+  edm::EDGetTokenT<double> theMETdxDOWNJERTag;
+  edm::EDGetTokenT<double> theMETdyDOWNJERTag;
+    
   edm::EDGetTokenT<pat::MuonCollection> muonToken;
   edm::EDGetTokenT<pat::ElectronCollection> electronToken;
   edm::EDGetTokenT<HTXS::HiggsClassification> htxsToken;
@@ -660,7 +757,9 @@ HZZ4lNtupleMaker::HZZ4lNtupleMaker(const edm::ParameterSet& pset) :
   myTree(nullptr),
   skipEmptyEvents(pset.getParameter<bool>("skipEmptyEvents")), // Do not store events with no selected candidate (normally: true)
   failedTreeLevel(FailedTreeLevel(pset.getParameter<int>("failedTreeLevel"))),
+
   metTag(pset.getParameter<edm::InputTag>("metSrc")),
+  
   applyTrigger(pset.getParameter<bool>("applyTrigger")), // Reject events that do not pass trigger (normally: true)
   applyTrigEffWeight(pset.getParameter<bool>("applyTrigEff")), //Apply an additional efficiency weights for MC samples where triggers are not present (normally: false)
   xsec(pset.getParameter<double>("xsec")),
@@ -695,9 +794,32 @@ HZZ4lNtupleMaker::HZZ4lNtupleMaker(const edm::ParameterSet& pset) :
   }
   triggerResultToken = consumes<edm::TriggerResults>(edm::InputTag("TriggerResults"));
   vtxToken = consumes<vector<reco::Vertex> >(edm::InputTag("goodPrimaryVertices"));
-  jetToken = consumes<edm::View<pat::Jet> >(edm::InputTag("cleanJets"));
+  jetToken = consumes<edm::View<pat::Jet> >(edm::InputTag("dressedJets"));
   photonToken = consumes<pat::PhotonCollection>(edm::InputTag("slimmedPhotons"));
-  metToken = consumes<pat::METCollection>(metTag);
+      
+  metToken = consumes<pat::METCollection>(pset.getParameter<edm::InputTag>("metSrc"));
+  theCovTag = consumes<math::Error<2>::type>(pset.getParameter<edm::InputTag>("covSrc"));
+  theMETdxUPTESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdxUPTES"));
+  theMETdyUPTESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdyUPTES"));
+  theMETdxDOWNTESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdxDOWNTES"));
+  theMETdyDOWNTESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdyDOWNTES"));
+  theMETdxUPEESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdxUPEES"));
+  theMETdyUPEESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdyUPEES"));
+  theMETdxDOWNEESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdxDOWNEES"));
+  theMETdyDOWNEESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdyDOWNEES"));
+  theMETdxUPMESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdxUPMES"));
+  theMETdyUPMESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdyUPMES"));
+  theMETdxDOWNMESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdxDOWNMES"));
+  theMETdyDOWNMESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdyDOWNMES"));
+  theMETdxUPJESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdxUPJES"));
+  theMETdyUPJESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdyUPJES"));
+  theMETdxDOWNJESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdxDOWNJES"));
+  theMETdyDOWNJESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdyDOWNJES"));
+  theMETdxUPJERTag = consumes<double>(pset.getParameter<edm::InputTag>("METdxUPJER"));
+  theMETdyUPJERTag = consumes<double>(pset.getParameter<edm::InputTag>("METdyUPJER"));
+  theMETdxDOWNJERTag = consumes<double>(pset.getParameter<edm::InputTag>("METdxDOWNJER"));
+  theMETdyDOWNJERTag = consumes<double>(pset.getParameter<edm::InputTag>("METdyDOWNJER"));
+      
   //metNoHFToken = consumes<pat::METCollection>(edm::InputTag("slimmedMETsNoHF"));
   muonToken = consumes<pat::MuonCollection>(edm::InputTag("slimmedMuons"));
   electronToken = consumes<pat::ElectronCollection>(edm::InputTag("slimmedElectrons"));
@@ -891,13 +1013,6 @@ void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& e
     vector<Handle<std::vector< PileupSummaryInfo > > >  PupInfos; //FIXME support for miniAOD v1/v2 where name changed; catch does not work...
     event.getManyByType(PupInfos);
     Handle<std::vector< PileupSummaryInfo > > PupInfo = PupInfos.front();
-//     try {
-//       cout << "TRY HZZ4lNtupleMaker" <<endl;
-//       event.getByLabel(edm::InputTag("addPileupInfo"), PupInfo);
-//     } catch (const cms::Exception& e){
-//       cout << "FAIL HZZ4lNtupleMaker" <<endl;
-//       event.getByLabel(edm::InputTag("slimmedAddPileupInfo"), PupInfo);
-//     }
 
     std::vector<PileupSummaryInfo>::const_iterator PVI;
     for(PVI = PupInfo->begin(); PVI != PupInfo->end(); ++PVI) {
@@ -1070,19 +1185,6 @@ void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& e
         FillAssocLepGenInfo(genAssocLeps);
       }
 
-      // LHE information
-      //edm::Handle<LHEEventProduct> lhe_evt;
-      //vector<edm::Handle<LHEEventProduct> > lhe_handles;
-      //event.getManyByType(lhe_handles);
-      //if (!lhe_handles.empty()){
-      //  lhe_evt = lhe_handles.front();
-      //  lheHandler->setHandle(&lhe_evt);
-      //  lheHandler->extract();
-      //  FillLHECandidate(); // Also writes weights
-      //  lheHandler->clear();
-      //}
-      //else cerr << "lhe_handles.size()==0" << endl;
-
       // keep track of sum of weights
       addweight(gen_sumPUWeight, PUWeight);
       addweight(gen_sumGenMCWeight, genHEPMCweight);
@@ -1212,86 +1314,74 @@ void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& e
   // MET
   Handle<pat::METCollection> metHandle;
   event.getByToken(metToken, metHandle);
-
+  Handle<math::Error<2>::type> covHandle;
+  event.getByToken(theCovTag, covHandle);
+  Handle<double> METdxUPTESHandle, METdyUPTESHandle, METdxDOWNTESHandle, METdyDOWNTESHandle, METdxUPEESHandle, METdyUPEESHandle, METdxDOWNEESHandle, METdyDOWNEESHandle, METdxUPMESHandle, METdyUPMESHandle, METdxDOWNMESHandle, METdyDOWNMESHandle, METdxUPJESHandle, METdyUPJESHandle, METdxDOWNJESHandle, METdyDOWNJESHandle, METdxUPJERHandle, METdyUPJERHandle, METdxDOWNJERHandle, METdyDOWNJERHandle;
+  
+  event.getByToken(theMETdxUPTESTag, METdxUPTESHandle);
+  event.getByToken(theMETdyUPTESTag, METdyUPTESHandle);
+  event.getByToken(theMETdxDOWNTESTag, METdxDOWNTESHandle);
+  event.getByToken(theMETdyDOWNTESTag, METdyDOWNTESHandle);
+  event.getByToken(theMETdxUPEESTag, METdxUPEESHandle);
+  event.getByToken(theMETdyUPEESTag, METdyUPEESHandle);
+  event.getByToken(theMETdxDOWNEESTag, METdxDOWNEESHandle);
+  event.getByToken(theMETdyDOWNEESTag, METdyDOWNEESHandle);
+  event.getByToken(theMETdxUPMESTag, METdxUPMESHandle);
+  event.getByToken(theMETdyUPMESTag, METdyUPMESHandle);
+  event.getByToken(theMETdxDOWNMESTag, METdxDOWNMESHandle);
+  event.getByToken(theMETdyDOWNMESTag, METdyDOWNMESHandle);
+  event.getByToken(theMETdxUPJESTag, METdxUPJESHandle);
+  event.getByToken(theMETdyUPJESTag, METdyUPJESHandle);
+  event.getByToken(theMETdxDOWNJESTag, METdxDOWNJESHandle);
+  event.getByToken(theMETdyDOWNJESTag, METdyDOWNJESHandle);
+  event.getByToken(theMETdxUPJERTag, METdxUPJERHandle);
+  event.getByToken(theMETdyUPJERTag, METdyUPJERHandle);
+  event.getByToken(theMETdxDOWNJERTag, METdxDOWNJERHandle);
+  event.getByToken(theMETdyDOWNJERTag, METdyDOWNJERHandle);
+    
+  const pat::MET &met = metHandle->front();
+  PFMET = met.pt();
+  PFMETPhi = met.phi();
+  METx = met.px();
+  METy = met.py();
+  covMET[0][0] = (*covHandle)(0,0);
+  covMET[1][0] = (*covHandle)(1,0);
+  covMET[0][1] = covMET[1][0]; // (1,0) is the only one saved
+  covMET[1][1] = (*covHandle)(1,1);
+  METxUPTES=*METdxUPTESHandle;
+  METyUPTES=*METdyUPTESHandle;
+  METxDOWNTES=*METdxDOWNTESHandle;
+  METyDOWNTES=*METdyDOWNTESHandle;
+  METxUPEES=*METdxUPEESHandle;
+  METyUPEES=*METdyUPEESHandle;
+  METxDOWNEES=*METdxDOWNEESHandle;
+  METyDOWNEES=*METdyDOWNEESHandle;
+  METxUPMES=*METdxUPMESHandle;
+  METyUPMES=*METdyUPMESHandle;
+  METxDOWNMES=*METdxDOWNMESHandle;
+  METyDOWNMES=*METdyDOWNMESHandle;
+  METxUPJES=*METdxUPJESHandle;
+  METyUPJES=*METdyUPJESHandle;
+  METxDOWNJES=*METdxDOWNJESHandle;
+  METyDOWNJES=*METdyDOWNJESHandle;
+  METxUPJER=*METdxUPJERHandle;
+  METyUPJER=*METdyUPJERHandle;
+  METxDOWNJER=*METdxDOWNJERHandle;
+  METyDOWNJER=*METdyDOWNJERHandle;
+    
   GenMET=GenMETPhi=-99;
-  if (metHandle.isValid()){
-    const pat::MET &met = metHandle->front();
-
-    metobj.extras.met = metobj.extras.met_original = metobj.extras.met_raw
-      = metobj.extras.met_METup = metobj.extras.met_METdn
-      = metobj.extras.met_JERup = metobj.extras.met_JERdn
-      = metobj.extras.met_PUup = metobj.extras.met_PUdn
-
-      = metobj_corrected.extras.met = metobj_corrected.extras.met_original = metobj_corrected.extras.met_raw
-      = metobj_corrected.extras.met_METup = metobj_corrected.extras.met_METdn
-      = metobj_corrected.extras.met_JERup = metobj_corrected.extras.met_JERdn
-      = metobj_corrected.extras.met_PUup = metobj_corrected.extras.met_PUdn
-
-      = met.pt();
-    metobj.extras.phi = metobj.extras.phi_original = metobj.extras.phi_raw
-      = metobj.extras.phi_METup = metobj.extras.phi_METdn
-      = metobj.extras.phi_JECup = metobj.extras.phi_JECdn
-      = metobj.extras.phi_JERup = metobj.extras.phi_JERdn
-      = metobj.extras.phi_PUup = metobj.extras.phi_PUdn
-
-      = metobj_corrected.extras.phi = metobj_corrected.extras.phi_original = metobj_corrected.extras.phi_raw
-      = metobj_corrected.extras.phi_METup = metobj_corrected.extras.phi_METdn
-      = metobj_corrected.extras.phi_JECup = metobj_corrected.extras.phi_JECdn
-      = metobj_corrected.extras.phi_JERup = metobj_corrected.extras.phi_JERdn
-      = metobj_corrected.extras.phi_PUup = metobj_corrected.extras.phi_PUdn
-
-      = met.phi();
-
-    metobj.extras.met_JECup = metobj_corrected.extras.met_JECup = met.shiftedPt(pat::MET::JetEnUp);
-    metobj.extras.met_JECdn = metobj_corrected.extras.met_JECdn = met.shiftedPt(pat::MET::JetEnDown);
-    metobj.extras.phi_JECup = metobj_corrected.extras.phi_JECup = met.shiftedPhi(pat::MET::JetEnUp);
-    metobj.extras.phi_JECdn = metobj_corrected.extras.phi_JECdn = met.shiftedPhi(pat::MET::JetEnDown);
-
-    if (isMC && metCorrHandler && met.genMET()){
+  if (isMC && met.genMET()){
       GenMET = met.genMET()->pt();
       GenMETPhi = met.genMET()->phi();
-      metCorrHandler->correctMET(GenMET, GenMETPhi, &metobj_corrected, false); // FIXME: Last argument should be for isFastSim, but we don't have it yet
-    }
-    else if (isMC){
-      cms::Exception e("METCorrectionHandler");
-      e << "Either no met.genMET or metCorrHandler!";
+  }
+  else if (isMC){
+      cms::Exception e("GenMET");
+      e << "No met.genMET!";
       throw e;
     }
-  }
-  else{
-    metobj.extras.met = metobj.extras.met_original = metobj.extras.met_raw
-      = metobj.extras.met_METup = metobj.extras.met_METdn
-      = metobj.extras.met_JECup = metobj.extras.met_JECdn
-      = metobj.extras.met_JERup = metobj.extras.met_JERdn
-      = metobj.extras.met_PUup = metobj.extras.met_PUdn
-
-      = metobj_corrected.extras.met = metobj_corrected.extras.met_original = metobj_corrected.extras.met_raw
-      = metobj_corrected.extras.met_METup = metobj_corrected.extras.met_METdn
-      = metobj_corrected.extras.met_JECup = metobj_corrected.extras.met_JECdn
-      = metobj_corrected.extras.met_JERup = metobj_corrected.extras.met_JERdn
-      = metobj_corrected.extras.met_PUup = metobj_corrected.extras.met_PUdn
-
-      = metobj.extras.phi = metobj.extras.phi_original = metobj.extras.phi_raw
-      = metobj.extras.phi_METup = metobj.extras.phi_METdn
-      = metobj.extras.phi_JECup = metobj.extras.phi_JECdn
-      = metobj.extras.phi_JERup = metobj.extras.phi_JERdn
-      = metobj.extras.phi_PUup = metobj.extras.phi_PUdn
-
-      = metobj_corrected.extras.phi = metobj_corrected.extras.phi_original = metobj_corrected.extras.phi_raw
-      = metobj_corrected.extras.phi_METup = metobj_corrected.extras.phi_METdn
-      = metobj_corrected.extras.phi_JECup = metobj_corrected.extras.phi_JECdn
-      = metobj_corrected.extras.phi_JERup = metobj_corrected.extras.phi_JERdn
-      = metobj_corrected.extras.phi_PUup = metobj_corrected.extras.phi_PUdn
-
-      = -99;
-  }
-  //Handle<pat::METCollection> metNoHFHandle;
-  //event.getByToken(metNoHFToken, metNoHFHandle);
-  //if(metNoHFHandle.isValid()){
-  //  PFMETNoHF = metNoHFHandle->front().pt();
-  //  PFMETNoHFPhi = metNoHFHandle->front().phi();
-  //}
-
+//   if (metHandle.isValid()){
+//     const pat::MET &met = metHandle->front();
+//   }
 
   // number of reconstructed leptons
   edm::Handle<pat::MuonCollection> muonHandle;
@@ -1725,7 +1815,7 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
     
     ZZjjPt = cand.userFloat("ZZjjPt");
     
-    ZZGoodMass = cand.userFloat("goodMass");
+//     ZZGoodMass = cand.userFloat("goodMass");
     eleHLTMatch = cand.userFloat("eleHLTMatch");
     muHLTMatch  = cand.userFloat("muHLTMatch");
 
@@ -1743,16 +1833,16 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
       ZZMassCFit = cand.userFloat("CFitM");
       ZZChi2CFit = cand.userFloat("CFitChi2");
     }
-    if(addZZKinfit){
-      ZZKMass  = cand.userFloat("ZZKMass");
-      ZZKChi2  = cand.userFloat("ZZKChi2");
-    }
-    if(addSVfit){
-      ZZSVMass	= cand.userFloat("SVfitMass");
-      ZZSVPt	= cand.userFloat("SVpt");
-      ZZSVEta 	= cand.userFloat("SVeta");
-      ZZSVPhi 	= cand.userFloat("SVphi");
-    }
+//     if(addZZKinfit){
+//       ZZKMass  = cand.userFloat("ZZKMass");
+//       ZZKChi2  = cand.userFloat("ZZKChi2");
+//     }
+//     if(addSVfit){
+//       ZZSVMass	= cand.userFloat("SVfitMass");
+//       ZZSVPt	= cand.userFloat("SVpt");
+//       ZZSVEta 	= cand.userFloat("SVeta");
+//       ZZSVPhi 	= cand.userFloat("SVphi");
+//     }
 
     DiJetMass  = cand.userFloat("DiJetMass");
     DiJetDEta  = cand.userFloat("DiJetDEta");
@@ -1795,7 +1885,7 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
   Z1Eta =  Z1->eta();
   Z1Phi =  Z1->phi();
   Z1Flav =  getPdgId(Z1->daughter(0)) * getPdgId(Z1->daughter(1));
-  Z1GoodMass = userdatahelpers::getUserFloat(Z1,"goodMass");
+//   Z1GoodMass = userdatahelpers::getUserFloat(Z1,"goodMass");
   Z1muHLTMatch1 = userdatahelpers::getUserFloat(Z1,"muHLTMatch1");
   Z1muHLTMatch2 = userdatahelpers::getUserFloat(Z1,"muHLTMatch2");
   Z1muHLTMatch = userdatahelpers::getUserFloat(Z1,"muHLTMatch");
@@ -1803,32 +1893,15 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
   Z1eleHLTMatch2 = userdatahelpers::getUserFloat(Z1,"eleHLTMatch2");
   Z1eleHLTMatch = userdatahelpers::getUserFloat(Z1,"eleHLTMatch");
 
-  if(addSVfit && userdatahelpers::hasUserFloat(Z1,"ComputeSV")){
-    //if(userdatahelpers::getUserFloat(Z1,"ComputeSV")){
-	Z1SVMass	= userdatahelpers::getUserFloat(Z1,"SVfitMass");
-	Z1SVPt		= userdatahelpers::getUserFloat(Z1,"SVfit_pt");
-	Z1SVEta		= userdatahelpers::getUserFloat(Z1,"SVfit_eta");
-	Z1SVPhi		= userdatahelpers::getUserFloat(Z1,"SVfit_phi");
-	
-	Z1SVMt		= userdatahelpers::getUserFloat(Z1,"SVfitTransverseMass");
-	Z1SVMassUnc 	= userdatahelpers::getUserFloat(Z1,"SVfitMassUnc");
-	Z1SVMtUnc 	= userdatahelpers::getUserFloat(Z1,"SVfitTransverseMassUnc");
-	Z1SVPtUnc	= userdatahelpers::getUserFloat(Z1,"SVfit_ptUnc");
-	Z1SVEtaUnc	= userdatahelpers::getUserFloat(Z1,"SVfit_etaUnc");
-	Z1SVPhiUnc	= userdatahelpers::getUserFloat(Z1,"SVfit_phiUnc");
-	Z1SVMETRho	= userdatahelpers::getUserFloat(Z1,"SVfit_METRho");
-	Z1SVMETPhi	= userdatahelpers::getUserFloat(Z1,"SVfit_METPhi");
-    //}
-  }
  
   Z2Mass = Z2->mass();
   Z2Pt =   Z2->pt();
   Z2Eta  = Z2->eta();
   Z2Phi  = Z2->phi();
   Z2Flav = theChannel==ZL ? getPdgId(Z2) : getPdgId(Z2->daughter(0)) * getPdgId(Z2->daughter(1));
-  if(userdatahelpers::hasUserFloat(Z2,"goodMass")){
-    Z2GoodMass = userdatahelpers::getUserFloat(Z2,"goodMass");
-  }
+//   if(userdatahelpers::hasUserFloat(Z2,"goodMass")){
+//     Z2GoodMass = userdatahelpers::getUserFloat(Z2,"goodMass");
+//   }
   if(userdatahelpers::hasUserFloat(Z2,"muHLTMatch")){
     Z2muHLTMatch1 = userdatahelpers::getUserFloat(Z2,"muHLTMatch1");
     Z2muHLTMatch2 = userdatahelpers::getUserFloat(Z2,"muHLTMatch2");
@@ -1839,24 +1912,304 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
     Z2eleHLTMatch2 = userdatahelpers::getUserFloat(Z2,"eleHLTMatch2");
     Z2eleHLTMatch = userdatahelpers::getUserFloat(Z2,"eleHLTMatch");
   }
+  Z2isGoodTau=userdatahelpers::hasUserFloat(Z2,"isGoodTau");
 
-  if(addSVfit && userdatahelpers::hasUserFloat(Z2,"ComputeSV")){
-    //if(userdatahelpers::getUserFloat(Z2,"ComputeSV")){
-	Z2SVMass	= userdatahelpers::getUserFloat(Z2,"SVfitMass");
-	Z2SVPt		= userdatahelpers::getUserFloat(Z2,"SVfit_pt");
-	Z2SVEta		= userdatahelpers::getUserFloat(Z2,"SVfit_eta");
-	Z2SVPhi		= userdatahelpers::getUserFloat(Z2,"SVfit_phi");
-	
-	Z2SVMt		= userdatahelpers::getUserFloat(Z2,"SVfitTransverseMass");
-	Z2SVMassUnc 	= userdatahelpers::getUserFloat(Z2,"SVfitMassUnc");
-	Z2SVMtUnc 	= userdatahelpers::getUserFloat(Z2,"SVfitTransverseMassUnc");
-	Z2SVPtUnc	= userdatahelpers::getUserFloat(Z2,"SVfit_ptUnc");
-	Z2SVEtaUnc	= userdatahelpers::getUserFloat(Z2,"SVfit_etaUnc");
-	Z2SVPhiUnc	= userdatahelpers::getUserFloat(Z2,"SVfit_phiUnc");
-	Z2SVMETRho	= userdatahelpers::getUserFloat(Z2,"SVfit_METRho");
-	Z2SVMETPhi	= userdatahelpers::getUserFloat(Z2,"SVfit_METPhi");
-    //}
+//-------------------------------------------------------------------------------------------------------
+//----------------------------------------SV FIT---------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------
+  bool doSVFit=false;
+  if (theChannel!=ZL && (abs(Z2Flav)==165 || abs(Z2Flav)==195 || abs(Z2Flav)==225)) doSVFit=true;
+  bool swi;
+  if (abs(leptons[2]->pdgId()) > abs(leptons[3]->pdgId())) swi=true;
+  else if (abs(leptons[2]->pdgId()) < abs(leptons[3]->pdgId())) swi=false;
+  else if (leptons[2]->pt() < leptons[3]->pt()) swi=true;
+  else swi=false;
+  int idx1,idx2;
+  if (swi) {idx1=3;idx2=2;}
+  else {idx1=2;idx2=3;}
+
+  //central
+  TLorentzVector Z2p4;
+  Z2p4.SetPtEtaPhiM(Z2Pt,Z2Eta,Z2Phi,Z2Mass);
+  TLorentzVector tau1,tau2,met;
+  int pairType;
+  int dm1,dm2;
+  tau1.SetPxPyPzE(leptons[idx1]->px(),leptons[idx1]->py(),leptons[idx1]->pz(),leptons[idx1]->energy());
+  tau2.SetPxPyPzE(leptons[idx2]->px(),leptons[idx2]->py(),leptons[idx2]->pz(),leptons[idx2]->energy());
+  met.SetPxPyPzE(METx,METy,0,std::hypot(METx,METy));
+  if (abs(Z2Flav)==195) pairType=0;
+  else if (abs(Z2Flav)==165) pairType=1;
+  else pairType=2;
+  dm1=abs(leptons[idx1]->pdgId())==15?userdatahelpers::getUserFloat(leptons[idx1],"decayMode"):-1;
+  dm2=abs(leptons[idx2]->pdgId())==15?userdatahelpers::getUserFloat(leptons[idx2],"decayMode"):-1;
+  if (doSVFit) {
+      SVfit algo_central(0,tau1,tau2,met,covMET,pairType,dm1,dm2);
+      std::vector<double> results_central=algo_central.FitAndGetResult();
+      Z2SVPt=results_central.at(0);
+      Z2SVEta=results_central.at(1);
+      Z2SVPhi=results_central.at(2);
+      Z2SVMass=results_central.at(3);
   }
+
+  //TES UP/DOWN
+  TLorentzVector tau1_tesup,tau2_tesup,met_tesup;
+  if (abs(leptons[idx1]->pdgId())==15 && userdatahelpers::getUserInt(leptons[idx1],"isTESShifted")) tau1_tesup.SetPxPyPzE(
+      userdatahelpers::getUserFloat(leptons[idx1],"px_TauUp"),userdatahelpers::getUserFloat(leptons[idx1],"py_TauUp"),
+      userdatahelpers::getUserFloat(leptons[idx1],"pz_TauUp"),userdatahelpers::getUserFloat(leptons[idx1],"e_TauUp"));
+  else tau1_tesup.SetPxPyPzE(leptons[idx1]->px(),leptons[idx1]->py(),leptons[idx1]->pz(),leptons[idx1]->energy());
+  if (abs(leptons[idx2]->pdgId())==15 && userdatahelpers::getUserInt(leptons[idx2],"isTESShifted")) tau2_tesup.SetPxPyPzE(
+      userdatahelpers::getUserFloat(leptons[idx2],"px_TauUp"),userdatahelpers::getUserFloat(leptons[idx2],"py_TauUp"),
+      userdatahelpers::getUserFloat(leptons[idx2],"pz_TauUp"),userdatahelpers::getUserFloat(leptons[idx2],"e_TauUp"));
+  else tau2_tesup.SetPxPyPzE(leptons[idx2]->px(),leptons[idx2]->py(),leptons[idx2]->pz(),leptons[idx2]->energy());
+  Z2Mass_TESup=(Z2p4-tau1+tau1_tesup-tau2+tau2_tesup).M();
+  met_tesup.SetPxPyPzE(METxUPTES,METyUPTES,0,std::hypot(METxUPTES,METyUPTES));
+  if (doSVFit) {
+      if (METxUPTES==METx && METyUPTES==METy) {
+          Z2SVPt_TESup=Z2SVPt;
+          Z2SVEta_TESup=Z2SVEta;
+          Z2SVPhi_TESup=Z2SVPhi;
+          Z2SVMass_TESup=Z2SVMass;
+      }
+      else {
+          SVfit algo_tesup(0,tau1_tesup,tau2_tesup,met_tesup,covMET,pairType,dm1,dm2);
+          std::vector<double> results_tesup=algo_tesup.FitAndGetResult();
+          Z2SVPt_TESup=results_tesup.at(0);
+          Z2SVEta_TESup=results_tesup.at(1);
+          Z2SVPhi_TESup=results_tesup.at(2);
+          Z2SVMass_TESup=results_tesup.at(3);
+      }
+  }
+
+  TLorentzVector tau1_tesdn,tau2_tesdn,met_tesdn;
+  if (abs(leptons[idx1]->pdgId())==15 && userdatahelpers::getUserInt(leptons[idx1],"isTESShifted")) tau1_tesdn.SetPxPyPzE(
+      userdatahelpers::getUserFloat(leptons[idx1],"px_TauDown"),userdatahelpers::getUserFloat(leptons[idx1],"py_TauDown"),
+      userdatahelpers::getUserFloat(leptons[idx1],"pz_TauDown"),userdatahelpers::getUserFloat(leptons[idx1],"e_TauDown"));
+  else tau1_tesdn.SetPxPyPzE(leptons[idx1]->px(),leptons[idx1]->py(),leptons[idx1]->pz(),leptons[idx1]->energy());
+  if (abs(leptons[idx2]->pdgId())==15 && userdatahelpers::getUserInt(leptons[idx2],"isTESShifted")) tau2_tesdn.SetPxPyPzE(
+      userdatahelpers::getUserFloat(leptons[idx2],"px_TauDown"),userdatahelpers::getUserFloat(leptons[idx2],"py_TauDown"),
+      userdatahelpers::getUserFloat(leptons[idx2],"pz_TauDown"),userdatahelpers::getUserFloat(leptons[idx2],"e_TauDown"));
+  else tau2_tesdn.SetPxPyPzE(leptons[idx2]->px(),leptons[idx2]->py(),leptons[idx2]->pz(),leptons[idx2]->energy());
+  Z2Mass_TESdn=(Z2p4-tau1+tau1_tesdn-tau2+tau2_tesdn).M();
+  met_tesdn.SetPxPyPzE(METxDOWNTES,METyDOWNTES,0,std::hypot(METxDOWNTES,METyDOWNTES));
+  if (doSVFit) {
+      if (METxDOWNTES==METx && METyDOWNTES==METy) {
+          Z2SVPt_TESdn=Z2SVPt;
+          Z2SVEta_TESdn=Z2SVEta;
+          Z2SVPhi_TESdn=Z2SVPhi;
+          Z2SVMass_TESdn=Z2SVMass;
+      }
+      else {
+          SVfit algo_tesdn(0,tau1_tesdn,tau2_tesdn,met_tesdn,covMET,pairType,dm1,dm2);
+          std::vector<double> results_tesdn=algo_tesdn.FitAndGetResult();
+          Z2SVPt_TESdn=results_tesdn.at(0);
+          Z2SVEta_TESdn=results_tesdn.at(1);
+          Z2SVPhi_TESdn=results_tesdn.at(2);
+          Z2SVMass_TESdn=results_tesdn.at(3);
+      }
+  }
+
+  //EES UP/DOWN
+  TLorentzVector tau1_eesup,tau2_eesup,met_eesup;
+  if (abs(leptons[idx1]->pdgId())==15 && userdatahelpers::getUserInt(leptons[idx1],"isEESShifted")) tau1_eesup.SetPxPyPzE(
+      userdatahelpers::getUserFloat(leptons[idx1],"px_EleUp"),userdatahelpers::getUserFloat(leptons[idx1],"py_EleUp"),
+      userdatahelpers::getUserFloat(leptons[idx1],"pz_EleUp"),userdatahelpers::getUserFloat(leptons[idx1],"e_EleUp"));
+  else tau1_eesup.SetPxPyPzE(leptons[idx1]->px(),leptons[idx1]->py(),leptons[idx1]->pz(),leptons[idx1]->energy());
+  if (abs(leptons[idx2]->pdgId())==15 && userdatahelpers::getUserInt(leptons[idx2],"isEESShifted")) tau2_eesup.SetPxPyPzE(
+      userdatahelpers::getUserFloat(leptons[idx2],"px_EleUp"),userdatahelpers::getUserFloat(leptons[idx2],"py_EleUp"),
+      userdatahelpers::getUserFloat(leptons[idx2],"pz_EleUp"),userdatahelpers::getUserFloat(leptons[idx2],"e_EleUp"));
+  else tau2_eesup.SetPxPyPzE(leptons[idx2]->px(),leptons[idx2]->py(),leptons[idx2]->pz(),leptons[idx2]->energy());
+  Z2Mass_EESup=(Z2p4-tau1+tau1_eesup-tau2+tau2_eesup).M();
+  met_eesup.SetPxPyPzE(METxUPEES,METyUPEES,0,std::hypot(METxUPEES,METyUPEES));
+  if (doSVFit) {
+      if (METxUPEES==METx && METyUPEES==METy) {
+          Z2SVPt_EESup=Z2SVPt;
+          Z2SVEta_EESup=Z2SVEta;
+          Z2SVPhi_EESup=Z2SVPhi;
+          Z2SVMass_EESup=Z2SVMass;
+      }
+      else {
+          SVfit algo_eesup(0,tau1_eesup,tau2_eesup,met_eesup,covMET,pairType,dm1,dm2);
+          std::vector<double> results_eesup=algo_eesup.FitAndGetResult();
+          Z2SVPt_EESup=results_eesup.at(0);
+          Z2SVEta_EESup=results_eesup.at(1);
+          Z2SVPhi_EESup=results_eesup.at(2);
+          Z2SVMass_EESup=results_eesup.at(3);
+      }
+  }
+
+  TLorentzVector tau1_eesdn,tau2_eesdn,met_eesdn;
+  if (abs(leptons[idx1]->pdgId())==15 && userdatahelpers::getUserInt(leptons[idx1],"isEESShifted")) tau1_eesdn.SetPxPyPzE(
+      userdatahelpers::getUserFloat(leptons[idx1],"px_EleDown"),userdatahelpers::getUserFloat(leptons[idx1],"py_EleDown"),
+      userdatahelpers::getUserFloat(leptons[idx1],"pz_EleDown"),userdatahelpers::getUserFloat(leptons[idx1],"e_EleDown"));
+  else tau1_eesdn.SetPxPyPzE(leptons[idx1]->px(),leptons[idx1]->py(),leptons[idx1]->pz(),leptons[idx1]->energy());
+  if (abs(leptons[idx2]->pdgId())==15 && userdatahelpers::getUserInt(leptons[idx2],"isEESShifted")) tau2_eesdn.SetPxPyPzE(
+      userdatahelpers::getUserFloat(leptons[idx2],"px_EleDown"),userdatahelpers::getUserFloat(leptons[idx2],"py_EleDown"),
+      userdatahelpers::getUserFloat(leptons[idx2],"pz_EleDown"),userdatahelpers::getUserFloat(leptons[idx2],"e_EleDown"));
+  else tau2_eesdn.SetPxPyPzE(leptons[idx2]->px(),leptons[idx2]->py(),leptons[idx2]->pz(),leptons[idx2]->energy());
+  Z2Mass_EESdn=(Z2p4-tau1+tau1_eesdn-tau2+tau2_eesdn).M();
+  met_eesdn.SetPxPyPzE(METxDOWNEES,METyDOWNEES,0,std::hypot(METxDOWNEES,METyDOWNEES));
+  if (doSVFit) {
+      if (METxDOWNEES==METx && METyDOWNEES==METy) {
+          Z2SVPt_EESdn=Z2SVPt;
+          Z2SVEta_EESdn=Z2SVEta;
+          Z2SVPhi_EESdn=Z2SVPhi;
+          Z2SVMass_EESdn=Z2SVMass;
+      }
+      else {
+          SVfit algo_eesdn(0,tau1_eesdn,tau2_eesdn,met_eesdn,covMET,pairType,dm1,dm2);
+          std::vector<double> results_eesdn=algo_eesdn.FitAndGetResult();
+          Z2SVPt_EESdn=results_eesdn.at(0);
+          Z2SVEta_EESdn=results_eesdn.at(1);
+          Z2SVPhi_EESdn=results_eesdn.at(2);
+          Z2SVMass_EESdn=results_eesdn.at(3);
+      }
+  }
+
+  //MES UP/DOWN
+  TLorentzVector tau1_mesup,tau2_mesup,met_mesup;
+  if (abs(leptons[idx1]->pdgId())==15 && (userdatahelpers::getUserFloat(leptons[idx1],"genmatch")==2 || userdatahelpers::getUserFloat(leptons[idx1],"genmatch")==4)) tau1_mesup.SetPxPyPzE(leptons[idx1]->px()*1.01,leptons[idx1]->py()*1.01,leptons[idx1]->pz()*1.01,leptons[idx1]->energy()*1.01);
+  else tau1_mesup.SetPxPyPzE(leptons[idx1]->px(),leptons[idx1]->py(),leptons[idx1]->pz(),leptons[idx1]->energy());
+  if (abs(leptons[idx2]->pdgId())==15 && (userdatahelpers::getUserFloat(leptons[idx2],"genmatch")==2 || userdatahelpers::getUserFloat(leptons[idx2],"genmatch")==4)) tau2_mesup.SetPxPyPzE(leptons[idx2]->px()*1.01,leptons[idx2]->py()*1.01,leptons[idx2]->pz()*1.01,leptons[idx2]->energy()*1.01);
+  else tau2_mesup.SetPxPyPzE(leptons[idx2]->px(),leptons[idx2]->py(),leptons[idx2]->pz(),leptons[idx2]->energy());
+  Z2Mass_MESup=(Z2p4-tau1+tau1_mesup-tau2+tau2_mesup).M();
+  met_mesup.SetPxPyPzE(METxUPMES,METyUPMES,0,std::hypot(METxUPMES,METyUPMES));
+  if (doSVFit) {
+      if (METxUPMES==METx && METyUPMES==METy) {
+          Z2SVPt_MESup=Z2SVPt;
+          Z2SVEta_MESup=Z2SVEta;
+          Z2SVPhi_MESup=Z2SVPhi;
+          Z2SVMass_MESup=Z2SVMass;
+      }
+      else {
+          SVfit algo_mesup(0,tau1_mesup,tau2_mesup,met_mesup,covMET,pairType,dm1,dm2);
+          std::vector<double> results_mesup=algo_mesup.FitAndGetResult();
+          Z2SVPt_MESup=results_mesup.at(0);
+          Z2SVEta_MESup=results_mesup.at(1);
+          Z2SVPhi_MESup=results_mesup.at(2);
+          Z2SVMass_MESup=results_mesup.at(3);
+      }
+  }
+
+  TLorentzVector tau1_mesdn,tau2_mesdn,met_mesdn;
+  if (abs(leptons[idx1]->pdgId())==15 && (userdatahelpers::getUserFloat(leptons[idx1],"genmatch")==2 || userdatahelpers::getUserFloat(leptons[idx1],"genmatch")==4)) tau1_mesdn.SetPxPyPzE(leptons[idx1]->px()*0.99,leptons[idx1]->py()*0.99,leptons[idx1]->pz()*0.99,leptons[idx1]->energy()*0.99);
+  else tau1_mesdn.SetPxPyPzE(leptons[idx1]->px(),leptons[idx1]->py(),leptons[idx1]->pz(),leptons[idx1]->energy());
+  if (abs(leptons[idx2]->pdgId())==15 && (userdatahelpers::getUserFloat(leptons[idx2],"genmatch")==2 || userdatahelpers::getUserFloat(leptons[idx2],"genmatch")==4)) tau2_mesdn.SetPxPyPzE(leptons[idx2]->px()*0.99,leptons[idx2]->py()*0.99,leptons[idx2]->pz()*0.99,leptons[idx2]->energy()*0.99);
+  else tau2_mesdn.SetPxPyPzE(leptons[idx2]->px(),leptons[idx2]->py(),leptons[idx2]->pz(),leptons[idx2]->energy());
+  Z2Mass_MESdn=(Z2p4-tau1+tau1_mesdn-tau2+tau2_mesdn).M();
+  met_mesdn.SetPxPyPzE(METxDOWNMES,METyDOWNMES,0,std::hypot(METxDOWNMES,METyDOWNMES));
+  if (doSVFit) {
+      if (METxDOWNMES==METx && METyDOWNMES==METy) {
+          Z2SVPt_MESdn=Z2SVPt;
+          Z2SVEta_MESdn=Z2SVEta;
+          Z2SVPhi_MESdn=Z2SVPhi;
+          Z2SVMass_MESdn=Z2SVMass;
+      }
+      else {
+          SVfit algo_mesdn(0,tau1_mesdn,tau2_mesdn,met_mesdn,covMET,pairType,dm1,dm2);
+          std::vector<double> results_mesdn=algo_mesdn.FitAndGetResult();
+          Z2SVPt_MESdn=results_mesdn.at(0);
+          Z2SVEta_MESdn=results_mesdn.at(1);
+          Z2SVPhi_MESdn=results_mesdn.at(2);
+          Z2SVMass_MESdn=results_mesdn.at(3);
+      }
+  }
+
+  Z2Mass_JESup=Z2Mass_JESdn=Z2Mass_JERup=Z2Mass_JERdn=Z2Mass;
+  if (doSVFit) {
+      //JES UP/DOWN
+      TLorentzVector tau1_jesup,tau2_jesup,met_jesup;
+      tau1_jesup.SetPxPyPzE(leptons[idx1]->px(),leptons[idx1]->py(),leptons[idx1]->pz(),leptons[idx1]->energy());
+      tau2_jesup.SetPxPyPzE(leptons[idx2]->px(),leptons[idx2]->py(),leptons[idx2]->pz(),leptons[idx2]->energy());
+      met_jesup.SetPxPyPzE(METxUPJES,METyUPJES,0,std::hypot(METxUPJES,METyUPJES));
+      if (METxUPJES==METx && METyUPJES==METy) {
+          Z2SVPt_JESup=Z2SVPt;
+          Z2SVEta_JESup=Z2SVEta;
+          Z2SVPhi_JESup=Z2SVPhi;
+          Z2SVMass_JESup=Z2SVMass;
+      }
+      else {
+          SVfit algo_jesup(0,tau1_jesup,tau2_jesup,met_jesup,covMET,pairType,dm1,dm2);
+          std::vector<double> results_jesup=algo_jesup.FitAndGetResult();
+          Z2SVPt_JESup=results_jesup.at(0);
+          Z2SVEta_JESup=results_jesup.at(1);
+          Z2SVPhi_JESup=results_jesup.at(2);
+          Z2SVMass_JESup=results_jesup.at(3);
+      }
+
+      TLorentzVector tau1_jesdn,tau2_jesdn,met_jesdn;
+      tau1_jesdn.SetPxPyPzE(leptons[idx1]->px(),leptons[idx1]->py(),leptons[idx1]->pz(),leptons[idx1]->energy());
+      tau2_jesdn.SetPxPyPzE(leptons[idx2]->px(),leptons[idx2]->py(),leptons[idx2]->pz(),leptons[idx2]->energy());
+      met_jesdn.SetPxPyPzE(METxDOWNJES,METyDOWNJES,0,std::hypot(METxDOWNJES,METyDOWNJES));
+      if (METxDOWNJES==METx && METyDOWNJES==METy) {
+          Z2SVPt_JESdn=Z2SVPt;
+          Z2SVEta_JESdn=Z2SVEta;
+          Z2SVPhi_JESdn=Z2SVPhi;
+          Z2SVMass_JESdn=Z2SVMass;
+      }
+      else {
+          SVfit algo_jesdn(0,tau1_jesdn,tau2_jesdn,met_jesdn,covMET,pairType,dm1,dm2);
+          std::vector<double> results_jesdn=algo_jesdn.FitAndGetResult();
+          Z2SVPt_JESdn=results_jesdn.at(0);
+          Z2SVEta_JESdn=results_jesdn.at(1);
+          Z2SVPhi_JESdn=results_jesdn.at(2);
+          Z2SVMass_JESdn=results_jesdn.at(3);
+      }
+
+      //JER UP/DOWN
+      TLorentzVector tau1_jerup,tau2_jerup,met_jerup;
+      tau1_jerup.SetPxPyPzE(leptons[idx1]->px(),leptons[idx1]->py(),leptons[idx1]->pz(),leptons[idx1]->energy());
+      tau2_jerup.SetPxPyPzE(leptons[idx2]->px(),leptons[idx2]->py(),leptons[idx2]->pz(),leptons[idx2]->energy());
+      met_jerup.SetPxPyPzE(METxUPJER,METyUPJER,0,std::hypot(METxUPJER,METyUPJER));
+      if (METxUPJER==METx && METyUPJER==METy) {
+          Z2SVPt_JERup=Z2SVPt;
+          Z2SVEta_JERup=Z2SVEta;
+          Z2SVPhi_JERup=Z2SVPhi;
+          Z2SVMass_JERup=Z2SVMass;
+      }
+      else {
+          SVfit algo_jerup(0,tau1_jerup,tau2_jerup,met_jerup,covMET,pairType,dm1,dm2);
+          std::vector<double> results_jerup=algo_jerup.FitAndGetResult();
+          Z2SVPt_JERup=results_jerup.at(0);
+          Z2SVEta_JERup=results_jerup.at(1);
+          Z2SVPhi_JERup=results_jerup.at(2);
+          Z2SVMass_JERup=results_jerup.at(3);
+      }
+
+      TLorentzVector tau1_jerdn,tau2_jerdn,met_jerdn;
+      tau1_jerdn.SetPxPyPzE(leptons[idx1]->px(),leptons[idx1]->py(),leptons[idx1]->pz(),leptons[idx1]->energy());
+      tau2_jerdn.SetPxPyPzE(leptons[idx2]->px(),leptons[idx2]->py(),leptons[idx2]->pz(),leptons[idx2]->energy());
+      met_jerdn.SetPxPyPzE(METxDOWNJER,METyDOWNJER,0,std::hypot(METxDOWNJER,METyDOWNJER));
+      if (METxDOWNJER==METx && METyDOWNJER==METy) {
+          Z2SVPt_JERdn=Z2SVPt;
+          Z2SVEta_JERdn=Z2SVEta;
+          Z2SVPhi_JERdn=Z2SVPhi;
+          Z2SVMass_JERdn=Z2SVMass;
+      }
+      else {
+          SVfit algo_jerdn(0,tau1_jerdn,tau2_jerdn,met_jerdn,covMET,pairType,dm1,dm2);
+          std::vector<double> results_jerdn=algo_jerdn.FitAndGetResult();
+          Z2SVPt_JERdn=results_jerdn.at(0);
+          Z2SVEta_JERdn=results_jerdn.at(1);
+          Z2SVPhi_JERdn=results_jerdn.at(2);
+          Z2SVMass_JERdn=results_jerdn.at(3);
+      }
+  }
+  
+  Z2GoodMass=(Z2SVMass>0?Z2SVMass:Z2Mass);
+  Z2GoodMass_TESup=(Z2SVMass_TESup>0?Z2SVMass_TESup:Z2Mass_TESup);
+  Z2GoodMass_TESdn=(Z2SVMass_TESdn>0?Z2SVMass_TESdn:Z2Mass_TESdn);
+  Z2GoodMass_EESup=(Z2SVMass_EESup>0?Z2SVMass_EESup:Z2Mass_EESup);
+  Z2GoodMass_EESdn=(Z2SVMass_EESdn>0?Z2SVMass_EESdn:Z2Mass_EESdn);
+  Z2GoodMass_MESup=(Z2SVMass_MESup>0?Z2SVMass_MESup:Z2Mass_MESup);
+  Z2GoodMass_MESdn=(Z2SVMass_MESdn>0?Z2SVMass_MESdn:Z2Mass_MESdn);
+  Z2GoodMass_JESup=(Z2SVMass_JESup>0?Z2SVMass_JESup:Z2Mass_JESup);
+  Z2GoodMass_JESdn=(Z2SVMass_JESdn>0?Z2SVMass_JESdn:Z2Mass_JESdn);
+  Z2GoodMass_JERup=(Z2SVMass_JERup>0?Z2SVMass_JERup:Z2Mass_JERup);
+  Z2GoodMass_JERdn=(Z2SVMass_JERdn>0?Z2SVMass_JERdn:Z2Mass_JERdn);
+
+//-------------------------------------------------------------------------------------------------------
+//----------------------------------------END SV FIT-----------------------------------------------------
+//-------------------------------------------------------------------------------------------------------
 
   const reco::Candidate* non_TLE_Z = nullptr;
   size_t TLE_index = 999;
@@ -1876,11 +2229,11 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
     bool candPass70Z2Loose = cand.userFloat("Z2Mass") &&
                              cand.userFloat("MAllComb") &&
                              cand.userFloat("pt1")>20 && cand.userFloat("pt2")>10. &&
-                             ZZGoodMass>70.;
+                             ZZMass>70.;
     bool candPassFullSel70 = cand.userFloat("SR");
     bool candPassFullSel   = cand.userFloat("FullSel");
     bool candIsBest = cand.userFloat("isBestCand");
-    bool passMz_zz = (Z1GoodMass>60. && Z1GoodMass<120. && Z2GoodMass>60. && Z2GoodMass<120.);   //FIXME hardcoded cut
+    bool passMz_zz = (Z1Mass>60. && Z1Mass<120. && Z2Mass>60. && Z2Mass<120.);   //FIXME hardcoded cut
 
     if (candIsBest) {
       //    sel = 10; //FIXME see above
@@ -2508,33 +2861,31 @@ void HZZ4lNtupleMaker::BookAllBranches(){
 
   myTree->Book("GenMET", GenMET, failedTreeLevel >= minimalFailedTree);
   myTree->Book("GenMETPhi", GenMETPhi, failedTreeLevel >= minimalFailedTree);
-  myTree->Book("PFMET", metobj.extras.met, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMET_jesUp", metobj.extras.met_JECup, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMET_jesDn", metobj.extras.met_JECdn, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMETPhi", metobj.extras.phi, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMETPhi_jesUp", metobj.extras.phi_JECup, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMETPhi_jesDn", metobj.extras.phi_JECdn, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMET_corrected", metobj_corrected.extras.met, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMET_corrected_jesUp", metobj_corrected.extras.met_JECup, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMET_corrected_jesDn", metobj_corrected.extras.met_JECdn, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMET_corrected_jerUp", metobj_corrected.extras.met_JERup, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMET_corrected_jerDn", metobj_corrected.extras.met_JERdn, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMET_corrected_puUp", metobj_corrected.extras.met_PUup, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMET_corrected_puDn", metobj_corrected.extras.met_PUdn, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMET_corrected_metUp", metobj_corrected.extras.met_METup, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMET_corrected_metDn", metobj_corrected.extras.met_METdn, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMETPhi_corrected", metobj_corrected.extras.phi, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMETPhi_corrected_jesUp", metobj_corrected.extras.phi_JECup, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMETPhi_corrected_jesDn", metobj_corrected.extras.phi_JECdn, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMETPhi_corrected_jerUp", metobj_corrected.extras.phi_JERup, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMETPhi_corrected_jerDn", metobj_corrected.extras.phi_JERdn, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMETPhi_corrected_puUp", metobj_corrected.extras.phi_PUup, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMETPhi_corrected_puDn", metobj_corrected.extras.phi_PUdn, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMETPhi_corrected_metUp", metobj_corrected.extras.phi_METup, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMETPhi_corrected_metDn", metobj_corrected.extras.phi_METdn, failedTreeLevel >= fullFailedTree);
-  //myTree->Book("PFMETNoHF",PFMETNoHF, failedTreeLevel >= fullFailedTree);
-  //myTree->Book("PFMETNoHFPhi",PFMETNoHFPhi, failedTreeLevel >= fullFailedTree);
-
+  myTree->Book("PFMET", PFMET, failedTreeLevel >= fullFailedTree);
+  myTree->Book("PFMETPhi", PFMETPhi, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METx", METx, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METy", METy, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METxUPTES", METxUPTES, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METyUPTES", METyUPTES, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METxDOWNTES", METxDOWNTES, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METyDOWNTES", METyDOWNTES, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METxUPEES", METxUPEES, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METyUPEES", METyUPEES, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METxDOWNEES", METxDOWNEES, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METyDOWNEES", METyDOWNEES, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METxUPMES", METxUPMES, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METyUPMES", METyUPMES, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METxDOWNMES", METxDOWNMES, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METyDOWNMES", METyDOWNMES, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METxUPJES", METxUPJES, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METyUPJES", METyUPJES, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METxDOWNJES", METxDOWNJES, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METyDOWNJES", METyDOWNJES, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METxUPJER", METxUPJER, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METyUPJER", METyUPJER, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METxDOWNJER", METxDOWNJER, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METyDOWNJER", METyDOWNJER, failedTreeLevel >= fullFailedTree);
+    
   myTree->Book("nCleanedJets",nCleanedJets, failedTreeLevel >= fullFailedTree);
   myTree->Book("nCleanedJetsPt30",nCleanedJetsPt30, failedTreeLevel >= fullFailedTree);
   myTree->Book("nCleanedJetsPt30_jesUp",nCleanedJetsPt30_jesUp, failedTreeLevel >= fullFailedTree);
@@ -2560,7 +2911,7 @@ void HZZ4lNtupleMaker::BookAllBranches(){
   myTree->Book("ZZEta",ZZEta, false);
   myTree->Book("ZZPhi",ZZPhi, false);
   myTree->Book("ZZjjPt",ZZjjPt, false);
-  myTree->Book("ZZGoodMass",ZZGoodMass, false);
+//   myTree->Book("ZZGoodMass",ZZGoodMass, false);
   myTree->Book("eleHLTMatch",eleHLTMatch, false);
   myTree->Book("muHLTMatch",muHLTMatch, false);
   myTree->Book("CRflag",CRflag, false);
@@ -2577,38 +2928,24 @@ void HZZ4lNtupleMaker::BookAllBranches(){
     myTree->Book("ZZMassCFit",ZZMassCFit, false);
     myTree->Book("ZZChi2CFit",ZZChi2CFit, false);
   }
-  if (addZZKinfit){
-    myTree->Book("ZZKMass",ZZKMass, false);
-    myTree->Book("ZZKChi2",ZZKChi2, false);
-  }
-  if (addSVfit){
-    myTree->Book("ZZSVMass",ZZSVMass, false);
-    myTree->Book("ZZSVPt",ZZSVPt, false);
-    myTree->Book("ZZSVEta",ZZSVEta, false);
-    myTree->Book("ZZSVPhi",ZZSVPhi, false);
-  }
+//   if (addZZKinfit){
+//     myTree->Book("ZZKMass",ZZKMass, false);
+//     myTree->Book("ZZKChi2",ZZKChi2, false);
+//   }
+//   if (addSVfit){
+//     myTree->Book("ZZSVMass",ZZSVMass, false);
+//     myTree->Book("ZZSVPt",ZZSVPt, false);
+//     myTree->Book("ZZSVEta",ZZSVEta, false);
+//     myTree->Book("ZZSVPhi",ZZSVPhi, false);
+//   }
 
   //Z1 variables
   myTree->Book("Z1Mass",Z1Mass, false);
-  myTree->Book("Z1GoodMass",Z1GoodMass, false);
+//   myTree->Book("Z1GoodMass",Z1GoodMass, false);
   myTree->Book("Z1Pt",Z1Pt, false);
   myTree->Book("Z1Eta",Z1Eta, false);
   myTree->Book("Z1Phi",Z1Phi, false);
   myTree->Book("Z1Flav",Z1Flav, false);
-  if (addSVfit){
-    myTree->Book("Z1SVMass",Z1SVMass, false);
-    myTree->Book("Z1SVMt",Z1SVMt, false);
-    myTree->Book("Z1SVPt",Z1SVPt, false);
-    myTree->Book("Z1SVEta",Z1SVEta, false);
-    myTree->Book("Z1SVPhi",Z1SVPhi, false);
-    myTree->Book("Z1SVMassUnc",Z1SVMassUnc, false);
-    myTree->Book("Z1SVMtUnc",Z1SVMtUnc, false);
-    myTree->Book("Z1SVPtUnc",Z1SVPtUnc, false);
-    myTree->Book("Z1SVEtaUnc",Z1SVEtaUnc, false);
-    myTree->Book("Z1SVPhiUnc",Z1SVPhiUnc, false);
-    myTree->Book("Z1SVMETRho",Z1SVMETRho, false);
-    myTree->Book("Z1SVMETPhi",Z1SVMETPhi, false);
-  }
   myTree->Book("Z1muHLTMatch1",Z1muHLTMatch1, false);
   myTree->Book("Z1muHLTMatch2",Z1muHLTMatch2, false);
   myTree->Book("Z1muHLTMatch",Z1muHLTMatch, false);
@@ -2618,24 +2955,88 @@ void HZZ4lNtupleMaker::BookAllBranches(){
 
   //Z2 variables
   myTree->Book("Z2Mass",Z2Mass, false);
-  myTree->Book("Z2GoodMass",Z2GoodMass, false);
+//   myTree->Book("Z2GoodMass",Z2GoodMass, false);
   myTree->Book("Z2Pt",Z2Pt, false);
   myTree->Book("Z2Eta",Z2Eta, false);
   myTree->Book("Z2Phi",Z2Phi, false);
   myTree->Book("Z2Flav",Z2Flav, false);
+  myTree->Book("Z2isGoodTau",Z2isGoodTau, false);
   if (addSVfit){
     myTree->Book("Z2SVMass",Z2SVMass, false);
-    myTree->Book("Z2SVMt",Z2SVMt, false);
     myTree->Book("Z2SVPt",Z2SVPt, false);
     myTree->Book("Z2SVEta",Z2SVEta, false);
     myTree->Book("Z2SVPhi",Z2SVPhi, false);
-    myTree->Book("Z2SVMassUnc",Z2SVMassUnc, false);
-    myTree->Book("Z2SVMtUnc",Z2SVMtUnc, false);
-    myTree->Book("Z2SVPtUnc",Z2SVPtUnc, false);
-    myTree->Book("Z2SVEtaUnc",Z2SVEtaUnc, false);
-    myTree->Book("Z2SVPhiUnc",Z2SVPhiUnc, false);
-    myTree->Book("Z2SVMETRho",Z2SVMETRho, false);
-    myTree->Book("Z2SVMETPhi",Z2SVMETPhi, false);
+    myTree->Book("Z2GoodMass",Z2GoodMass, false);
+      
+    myTree->Book("Z2Mass_TESup",Z2Mass_TESup, false);
+    myTree->Book("Z2SVMass_TESup",Z2SVMass_TESup, false);
+    myTree->Book("Z2SVPt_TESup",Z2SVPt_TESup, false);
+    myTree->Book("Z2SVEta_TESup",Z2SVEta_TESup, false);
+    myTree->Book("Z2SVPhi_TESup",Z2SVPhi_TESup, false);
+    myTree->Book("Z2GoodMass_TESup",Z2GoodMass_TESup, false);
+
+    myTree->Book("Z2Mass_TESdn",Z2Mass_TESdn, false);
+    myTree->Book("Z2SVMass_TESdn",Z2SVMass_TESdn, false);
+    myTree->Book("Z2SVPt_TESdn",Z2SVPt_TESdn, false);
+    myTree->Book("Z2SVEta_TESdn",Z2SVEta_TESdn, false);
+    myTree->Book("Z2SVPhi_TESdn",Z2SVPhi_TESdn, false);
+    myTree->Book("Z2GoodMass_TESdn",Z2GoodMass_TESdn, false);
+
+    myTree->Book("Z2Mass_EESup",Z2Mass_EESup, false);
+    myTree->Book("Z2SVMass_EESup",Z2SVMass_EESup, false);
+    myTree->Book("Z2SVPt_EESup",Z2SVPt_EESup, false);
+    myTree->Book("Z2SVEta_EESup",Z2SVEta_EESup, false);
+    myTree->Book("Z2SVPhi_EESup",Z2SVPhi_EESup, false);
+    myTree->Book("Z2GoodMass_EESup",Z2GoodMass_EESup, false);
+
+    myTree->Book("Z2Mass_EESdn",Z2Mass_EESdn, false);
+    myTree->Book("Z2SVMass_EESdn",Z2SVMass_EESdn, false);
+    myTree->Book("Z2SVPt_EESdn",Z2SVPt_EESdn, false);
+    myTree->Book("Z2SVEta_EESdn",Z2SVEta_EESdn, false);
+    myTree->Book("Z2SVPhi_EESdn",Z2SVPhi_EESdn, false);
+    myTree->Book("Z2GoodMass_EESdn",Z2GoodMass_EESdn, false);
+
+    myTree->Book("Z2Mass_MESup",Z2Mass_MESup, false);
+    myTree->Book("Z2SVMass_MESup",Z2SVMass_MESup, false);
+    myTree->Book("Z2SVPt_MESup",Z2SVPt_MESup, false);
+    myTree->Book("Z2SVEta_MESup",Z2SVEta_MESup, false);
+    myTree->Book("Z2SVPhi_MESup",Z2SVPhi_MESup, false);
+    myTree->Book("Z2GoodMass_MESup",Z2GoodMass_MESup, false);
+
+    myTree->Book("Z2Mass_MESdn",Z2Mass_MESdn, false);
+    myTree->Book("Z2SVMass_MESdn",Z2SVMass_MESdn, false);
+    myTree->Book("Z2SVPt_MESdn",Z2SVPt_MESdn, false);
+    myTree->Book("Z2SVEta_MESdn",Z2SVEta_MESdn, false);
+    myTree->Book("Z2SVPhi_MESdn",Z2SVPhi_MESdn, false);
+    myTree->Book("Z2GoodMass_MESdn",Z2GoodMass_MESdn, false);
+
+    myTree->Book("Z2Mass_JESup",Z2Mass_JESup, false);
+    myTree->Book("Z2SVMass_JESup",Z2SVMass_JESup, false);
+    myTree->Book("Z2SVPt_JESup",Z2SVPt_JESup, false);
+    myTree->Book("Z2SVEta_JESup",Z2SVEta_JESup, false);
+    myTree->Book("Z2SVPhi_JESup",Z2SVPhi_JESup, false);
+    myTree->Book("Z2GoodMass_JESup",Z2GoodMass_JESup, false);
+
+    myTree->Book("Z2Mass_JESdn",Z2Mass_JESdn, false);
+    myTree->Book("Z2SVMass_JESdn",Z2SVMass_JESdn, false);
+    myTree->Book("Z2SVPt_JESdn",Z2SVPt_JESdn, false);
+    myTree->Book("Z2SVEta_JESdn",Z2SVEta_JESdn, false);
+    myTree->Book("Z2SVPhi_JESdn",Z2SVPhi_JESdn, false);
+    myTree->Book("Z2GoodMass_JESdn",Z2GoodMass_JESdn, false);
+
+    myTree->Book("Z2Mass_JERup",Z2Mass_JERup, false);
+    myTree->Book("Z2SVMass_JERup",Z2SVMass_JERup, false);
+    myTree->Book("Z2SVPt_JERup",Z2SVPt_JERup, false);
+    myTree->Book("Z2SVEta_JERup",Z2SVEta_JERup, false);
+    myTree->Book("Z2SVPhi_JERup",Z2SVPhi_JERup, false);
+    myTree->Book("Z2GoodMass_JERup",Z2GoodMass_JERup, false);
+
+    myTree->Book("Z2Mass_JERdn",Z2Mass_JERdn, false);
+    myTree->Book("Z2SVMass_JERdn",Z2SVMass_JERdn, false);
+    myTree->Book("Z2SVPt_JERdn",Z2SVPt_JERdn, false);
+    myTree->Book("Z2SVEta_JERdn",Z2SVEta_JERdn, false);
+    myTree->Book("Z2SVPhi_JERdn",Z2SVPhi_JERdn, false);
+    myTree->Book("Z2GoodMass_JERdn",Z2GoodMass_JERdn, false);
   }
   myTree->Book("Z2muHLTMatch1",Z2muHLTMatch1, false);
   myTree->Book("Z2muHLTMatch2",Z2muHLTMatch2, false);
@@ -2909,36 +3310,6 @@ void HZZ4lNtupleMaker::BookAllBranches(){
 	myTree->Book("qcd_ggF_uncertSF", qcd_ggF_uncertSF, failedTreeLevel >= minimalFailedTree);
       }	  
 
-//  if (addLHEKinematics){
-//      myTree->Book("LHEMotherPz", LHEMotherPz, failedTreeLevel >= LHEFailedTree);
-//      myTree->Book("LHEMotherE", LHEMotherE, failedTreeLevel >= LHEFailedTree);
-//      myTree->Book("LHEMotherId", LHEMotherId, failedTreeLevel >= LHEFailedTree);
-//      myTree->Book("LHEDaughterPt", LHEDaughterPt, failedTreeLevel >= LHEFailedTree);
-//      myTree->Book("LHEDaughterEta", LHEDaughterEta, failedTreeLevel >= LHEFailedTree);
-//      myTree->Book("LHEDaughterPhi", LHEDaughterPhi, failedTreeLevel >= LHEFailedTree);
-//      myTree->Book("LHEDaughterMass", LHEDaughterMass, failedTreeLevel >= LHEFailedTree);
-//      myTree->Book("LHEDaughterId", LHEDaughterId, failedTreeLevel >= LHEFailedTree);
-//      myTree->Book("LHEAssociatedParticlePt", LHEAssociatedParticlePt, failedTreeLevel >= LHEFailedTree);
-//      myTree->Book("LHEAssociatedParticleEta", LHEAssociatedParticleEta, failedTreeLevel >= LHEFailedTree);
-//      myTree->Book("LHEAssociatedParticlePhi", LHEAssociatedParticlePhi, failedTreeLevel >= LHEFailedTree);
-//      myTree->Book("LHEAssociatedParticleMass", LHEAssociatedParticleMass, failedTreeLevel >= LHEFailedTree);
-//      myTree->Book("LHEAssociatedParticleId", LHEAssociatedParticleId, failedTreeLevel >= LHEFailedTree);
-//    }
-//
-//    myTree->Book("LHEPDFScale", LHEPDFScale, failedTreeLevel >= minimalFailedTree);
-//    myTree->Book("LHEweight_QCDscale_muR1_muF1", LHEweight_QCDscale_muR1_muF1, failedTreeLevel >= minimalFailedTree);
-//    myTree->Book("LHEweight_QCDscale_muR1_muF2", LHEweight_QCDscale_muR1_muF2, failedTreeLevel >= minimalFailedTree);
-//    myTree->Book("LHEweight_QCDscale_muR1_muF0p5", LHEweight_QCDscale_muR1_muF0p5, failedTreeLevel >= minimalFailedTree);
-//    myTree->Book("LHEweight_QCDscale_muR2_muF1", LHEweight_QCDscale_muR2_muF1, failedTreeLevel >= minimalFailedTree);
-//    myTree->Book("LHEweight_QCDscale_muR2_muF2", LHEweight_QCDscale_muR2_muF2, failedTreeLevel >= minimalFailedTree);
-//    myTree->Book("LHEweight_QCDscale_muR2_muF0p5", LHEweight_QCDscale_muR2_muF0p5, failedTreeLevel >= minimalFailedTree);
-//    myTree->Book("LHEweight_QCDscale_muR0p5_muF1", LHEweight_QCDscale_muR0p5_muF1, failedTreeLevel >= minimalFailedTree);
-//    myTree->Book("LHEweight_QCDscale_muR0p5_muF2", LHEweight_QCDscale_muR0p5_muF2, failedTreeLevel >= minimalFailedTree);
-//    myTree->Book("LHEweight_QCDscale_muR0p5_muF0p5", LHEweight_QCDscale_muR0p5_muF0p5, failedTreeLevel >= minimalFailedTree);
-//    myTree->Book("LHEweight_PDFVariation_Up", LHEweight_PDFVariation_Up, failedTreeLevel >= minimalFailedTree);
-//    myTree->Book("LHEweight_PDFVariation_Dn", LHEweight_PDFVariation_Dn, failedTreeLevel >= minimalFailedTree);
-//    myTree->Book("LHEweight_AsMZ_Up", LHEweight_AsMZ_Up, failedTreeLevel >= minimalFailedTree);
-//    myTree->Book("LHEweight_AsMZ_Dn", LHEweight_AsMZ_Dn, failedTreeLevel >= minimalFailedTree);
     myTree->Book("PythiaWeight_isr_muR4", PythiaWeight_isr_muR4, failedTreeLevel >= minimalFailedTree);
     myTree->Book("PythiaWeight_isr_muR2", PythiaWeight_isr_muR2, failedTreeLevel >= minimalFailedTree);
     myTree->Book("PythiaWeight_isr_muRsqrt2", PythiaWeight_isr_muRsqrt2, failedTreeLevel >= minimalFailedTree);

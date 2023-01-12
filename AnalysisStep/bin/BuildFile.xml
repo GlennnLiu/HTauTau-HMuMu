@@ -11,6 +11,9 @@
 <library   file="../test/Plotter/src/*.cpp" name="ZZAnalysisAnalysisStepTestPlotterSrc">
 </library>
 
+<library   file="../test/Datacards/src/*.cpp" name="ZZAnalysisAnalysisStepTestDatacardsSrc">
+</library>
+
 <bin   name="run_OS" file="../test/ZpXEstimation/run_OS.cpp">
    <lib   name="ZZAnalysisAnalysisStepTestZpXEstimationSrc"/>
 </bin>
@@ -29,5 +32,9 @@
 
 <bin   name="CRPlots" file="../test/Plotter/CRPlots.cpp">
    <lib   name="ZZAnalysisAnalysisStepTestPlotterSrc"/>
+</bin>
+
+<bin   name="CreateDatacards" file="../test/Datacards/CreateDatacards.cpp">
+   <lib   name="ZZAnalysisAnalysisStepTestDatacardsSrc"/>
 </bin>
 

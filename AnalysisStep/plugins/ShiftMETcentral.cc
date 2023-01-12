@@ -19,6 +19,7 @@
 #include <DataFormats/METReco/interface/PFMETCollection.h>
 #include <DataFormats/METReco/interface/CommonMETData.h>
 #include <DataFormats/PatCandidates/interface/Tau.h>
+#include <DataFormats/PatCandidates/interface/Jet.h>
 #include "TLorentzVector.h"
 #include <HTauTauHMuMu/AnalysisStep/interface/DaughterDataHelpers.h>
 #include <DataFormats/Candidate/interface/Candidate.h>
@@ -47,12 +48,14 @@ class ShiftMETcentral : public edm::EDProducer {
         edm::EDGetTokenT<View<pat::MET>> theMETTag;
         edm::EDGetTokenT<pat::TauRefVector> theTauUncorrectedTag;
         edm::EDGetTokenT<pat::TauCollection> theTauCorrectedTag;
+        edm::EDGetTokenT<View<pat::Jet>> theJetTag;
 };
 
 ShiftMETcentral::ShiftMETcentral(const edm::ParameterSet& iConfig) :
 theMETTag(consumes<View<pat::MET>>(iConfig.getParameter<edm::InputTag>("srcMET"))),
 theTauUncorrectedTag(consumes<pat::TauRefVector>(iConfig.getParameter<edm::InputTag>("tauUncorrected"))),
-theTauCorrectedTag(consumes<pat::TauCollection>(iConfig.getParameter<edm::InputTag>("tauCorrected")))
+theTauCorrectedTag(consumes<pat::TauCollection>(iConfig.getParameter<edm::InputTag>("tauCorrected"))),
+theJetTag(consumes<View<pat::Jet>>(iConfig.getParameter<edm::InputTag>("jetCollection")))
 {
     produces<pat::METCollection>();
 }
@@ -74,9 +77,13 @@ void ShiftMETcentral::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     // Get the Corrected Taus
     Handle<pat::TauCollection> tauCorrectedHandle;
     iEvent.getByToken(theTauCorrectedTag, tauCorrectedHandle);
+    
+    // Get Jets
+    Handle<View<pat::Jet>> jetHandle;
+    iEvent.getByToken(theJetTag, jetHandle);
 
     // Define the correction of the met
-    TLorentzVector deltaTaus;
+    TLorentzVector deltaTaus, deltaJets;
     //cout << "-- Delta : " << deltaTaus.Pt() << " / " << deltaTaus.Eta() << endl;
     //cout << "-- MET   : " << patMET.px() << " / " << patMET.py() << endl;
     //cout << "tauUncorrected size: " << tauUncorrectedHandle->size() << endl;
@@ -118,16 +125,21 @@ void ShiftMETcentral::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
     } // end loop on taus
 
-    //cout << "------- endl loop ------" << endl;
-    //cout << "-- AFTER Delta: " << deltaTaus.Pt() << " / " << deltaTaus.Eta() << endl;
-    //cout << "--            : " << deltaTaus.Px() << " / " << deltaTaus.Py() << endl;
-    //cout << "-- ORIGINAL MET  : " << patMET.momentum() << endl;
-    //cout << "-- ORIGINAL MET  : " << patMET.pt() << " / " << patMET.phi() << endl;
+    for(auto jet = jetHandle->begin(); jet != jetHandle->end(); ++jet) {
+
+      pat::Jet j(*jet);
+      
+      TLorentzVector pfour, pfourShifted;
+      pfourShifted.SetPxPyPzE(j.px(),j.py(),j.pz(),j.energy());
+      
+      if (j.pt()>0) deltaJets += pfourShifted*(1-j.userFloat("RawPt")/j.pt());
+    }
     
     // Calculate the correction
-    float shiftMetPx = patMET.px() - deltaTaus.Px();
-    float shiftMetPy = patMET.py() - deltaTaus.Py();
-
+    float shiftMetPx = patMET.px() - deltaTaus.Px() - deltaJets.Px();
+    float shiftMetPy = patMET.py() - deltaTaus.Py() - deltaJets.Py();
+//     cout<<"Original MET: "<<patMET.px()<<","<<patMET.py()<<endl;
+//     cout<<"Corrected MET: "<<shiftMetPx<<","<<shiftMetPy<<endl;
     reco::Candidate::LorentzVector shiftedMetP4(shiftMetPx, shiftMetPy, 0., sqrt(shiftMetPx*shiftMetPx + shiftMetPy*shiftMetPy));
     //cout << "-- shiftedMetP4 : " << shiftedMetP4 << endl;
 

@@ -150,15 +150,6 @@ JetFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     float ptD = (*ptDHandle)[jetRef];
 
 
-    //--- Get JEC uncertainties 
-    jecUnc.setJetEta(jeta);
-    jecUnc.setJetPt(jpt);
-    float jes_unc = jecUnc.getUncertainty(true);
-     
-    float pt_jesup = jpt * (1.0 + jes_unc);
-    float pt_jesdn = jpt * (1.0 - jes_unc);
-
-
     //--- loose jet ID, cf. https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID13TeVRun2016 
     float NHF  = j.neutralHadronEnergyFraction();
     float NEMF = j.neutralEmEnergyFraction();
@@ -364,6 +355,12 @@ JetFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
       j.setP4(reco::Particle::PolarLorentzVector(pt_jer, jeta, jphi, (pt_jer/jpt)*j.mass()));
     }
+     
+    jecUnc.setJetEta(j.eta());
+    jecUnc.setJetPt(j.pt());
+    float jes_unc = jecUnc.getUncertainty(true); //It takes as argument "bool fDirection": true = up, false = dn; symmetric values
+    float pt_jesup = j.pt() * (1.0 + jes_unc); // set the shifted pT up
+    float pt_jesdn = j.pt() * (1.0 - jes_unc); // set the shifted pT dn
 
     //cout<<"jet pT="<<jpt<<", eta="<<jeta<<endl;
     //--- Embed user variables

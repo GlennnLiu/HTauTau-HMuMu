@@ -95,7 +95,7 @@ TauIDSFTool::TauIDSFTool(const std::string& year, const std::string& id, const s
       TFile* file = ensureTFile(filename,verbose);
       func[""]     = extractTF1(file,Form("%s_cent",WP.data()));
       func["Up"]   = extractTF1(file,Form("%s_up",  WP.data()));
-      func["Down"] = extractTF1(file,Form("%s_down",WP.data()));
+      func["Dn"] = extractTF1(file,Form("%s_down",WP.data()));
       file->Close();
       delete file;
       isVsPT = true;
@@ -157,7 +157,7 @@ float TauIDSFTool::getSFvsDM(double pt, int dm, int genmatch, const std::string&
       float SF  = hist->GetBinContent(bin);
       if(unc=="Up")
         SF += hist->GetBinError(bin);
-      else if(unc=="Down")
+      else if(unc=="Dn")
         SF -= hist->GetBinError(bin);
       return SF;
     }
