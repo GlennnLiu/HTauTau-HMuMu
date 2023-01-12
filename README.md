@@ -45,18 +45,10 @@ git clone https://github.com/cms-tau-pog/TauIDSFs TauPOG/TauIDSFs
 #Add DeepTau code from Tau POG repository (note "-u" option preventing checkout of unnecessary stuff)
 git cms-merge-topic -u cms-tau-pog:CMSSW_10_2_X_tau-pog_DeepTau2017v2p1_nanoAOD
 
-# KinFit
-git clone git@github.com:LLRCMS/HHKinFit2.git -b bbtautau_LegacyRun2
-
-scramv1 b -j 8
-
-cd HHKinFit2/
-ln -ns interface include
-source setup.sh
-./compile.sh
-cd ..
-
 # This package
 git clone git@github.com:GlennnLiu/HTauTauHMuMu.git -b Run2_Legacy
+
+# compile
+scramv1 b -j 8
 ```
 
