@@ -1,0 +1,125 @@
+
+#DATA_TAG = "ReReco" # Change to PromptReco for Run2016 period H
+LEPTON_SETUP = 2016  # current default = 2017 = Moriond2017
+APPLYMUCORR = True  # Switch off muon scale corrections
+APPLYJEC = True     #
+APPLYJER = True     #
+RECORRECTMET = True #
+#KINREFIT = True    # control KinZFitter (very slow)
+PROCESS_CR = False   # Uncomment to run CR paths and trees
+#ADDLOOSEELE = True  # Run paths for loose electrons
+#APPLYTRIG = False    # hack for samples missing correct triggers - use with caution
+#KEEPLOOSECOMB = True # Do not skip loose lepton ZZ combinations (for debugging)
+ADDZTREE = False      # Add tree for Z analysis
+APPLY_QCD_GGF_UNCERT = True
+#For MC:
+PD = ""
+MCFILTER = ""
+IsMC = True
+OLDPATTRIGGER = False#True
+#For DATA: 
+#IsMC = False
+#PD = "DoubleMu"
+
+# Get absolute path
+import os
+PyFilePath = os.environ['CMSSW_BASE'] + "/src/HTauTauHMuMu/AnalysisStep/test/"
+
+### ----------------------------------------------------------------------
+### Standard sequence
+### ----------------------------------------------------------------------
+
+execfile(PyFilePath + "analyzer.py")
+#execfile(PyFilePath + "prod/pyFragments/RecoProbabilities.py")
+
+if not IsMC:
+	process.source.inputCommands = cms.untracked.vstring("keep *", "drop LHERunInfoProduct_*_*_*", "drop LHEEventProduct_*_*_*") ###FIXME In 9X this removes all collections for MC
+
+### ----------------------------------------------------------------------
+### Replace parameters
+### ----------------------------------------------------------------------
+
+process.source.fileNames = cms.untracked.vstring(
+### LEGACY PAPER - 2016 sync files
+#'/store/mc/RunIISummer16MiniAODv3/GluGluToHHTo2B2Tau_node_10_13TeV-madgraph/MINIAODSIM/PUMoriond17_94X_mcRun2_asymptotic_v3-v2/00000/3A546715-316A-E911-8FC5-002590FD5A48.root'
+#'/store/mc/RunIISummer16MiniAODv2/ZZTo4L_13TeV_powheg_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/221CC46F-2FC6-E611-8FFC-0CC47A1E0488.root'#,
+#'/store/test/xrootd/T2_UA_KIPT/store/data/Run2016B/DoubleMuon/MINIAOD/17Jul2018_ver2-v1/00000/085049B8-D18A-E811-A362-0CC47A4C8E34.root'
+#'root://cmsxrootd.fnal.gov///store/data/Run2016B/DoubleMuon/MINIAOD/17Jul2018_ver2-v1/00000/085049B8-D18A-E811-A362-0CC47A4C8E34.root'
+#'/store/data/Run2016C/DoubleMuon/MINIAOD/17Jul2018-v1/40000/6EFE06FB-B18B-E811-924D-A0369FD0B3A0.root'
+#'/store/data/Run2016B/DoubleMuon/MINIAOD/17Jul2018_ver2-v1/00000/04F38EB5-D18A-E811-815D-0CC47A4C8F2C.root'
+#'/store/mc/RunIISummer16MiniAODv2/GluGluToContinToZZTo2e2mu_13TeV_MCFM701_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/7C9CA3F7-95BE-E611-B653-0025905B858A.root'
+'/store/mc/RunIISummer16MiniAODv3/ZZTo4L_13TeV_powheg_pythia8/MINIAODSIM/PUMoriond17_94X_mcRun2_asymptotic_v3-v1/100000/0A064D6A-F0C6-E811-B803-001A649D4815.root'
+#'/store/mc/RunIISummer16MiniAODv3/GluGluHToZZTo4L_M125_13TeV_powheg2_JHUgenV6_pythia8/MINIAODSIM/PUMoriond17_94X_mcRun2_asymptotic_v3-v1/40000/90B61523-A720-E911-A35B-1866DA890B10.root'
+#'/store/mc/RunIISummer16MiniAODv2/GluGluHToZZTo4L_M125_13TeV_powheg2_JHUGenV709_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/20000/8A6DC1B7-D1D3-E711-8D88-002590DE6E32.root'#,
+#'/store/mc/RunIISummer16MiniAODv2/ttH_HToZZ_4LFilter_M125_13TeV_powheg2_JHUGenV709_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/30000/CCDA7461-FDD7-E711-AFA4-008CFAF2224C.root',                                                                                                                                                                                                        
+#'/store/mc/RunIISummer16MiniAODv2/ZH_HToZZ_4LFilter_M125_13TeV_powheg2-minlo-HZJ_JHUGenV709_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/20000/622DA168-2DD2-E711-AE8A-E0071B7A5650.root'
+)
+
+#process.calibratedPatElectrons.isSynchronization = cms.bool(True) #process.calibratedPatElectrons.isSynchronization = cms.bool(True) # Not needed anymore since new EGamma smearing is event deterministic
+#process.calibratedMuons.isSynchronization = cms.bool(True)
+
+process.maxEvents.input = 2000
+#process.source.skipEvents = cms.untracked.uint32(5750)
+
+# Silence output
+process.load("FWCore.MessageService.MessageLogger_cfi")
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+
+
+### ----------------------------------------------------------------------
+### Analyzer for Plots
+### ----------------------------------------------------------------------
+
+
+#process.source.eventsToProcess = cms.untracked.VEventRange("1:8670")
+
+# Debug
+process.dumpUserData =  cms.EDAnalyzer("dumpUserData",
+     dumpTrigger = cms.untracked.bool(True),
+     muonSrcs = cms.PSet(
+        muons = cms.InputTag("slimmedMuons"),
+#       slimmedMuons = cms.InputTag("slimmedMuons"),
+#        muons = cms.InputTag("appendPhotons:muons"),
+     ),
+     electronSrcs = cms.PSet(
+#       slimmedElectron = cms.InputTag("slimmedElectrons"),
+        electrons = cms.InputTag("appendPhotons:electrons"),
+#        RSE = cms.InputTag("appendPhotons:looseElectrons"),
+#        TLE = cms.InputTag("appendPhotons:electronstle"), #These are actually photons, should add a photonSrcs section for them.
+     ),
+     candidateSrcs = cms.PSet(
+        Z     = cms.InputTag("ZCand"),
+#        ZRSE     = cms.InputTag("ZCandlooseEle"),
+#        ZTLE     = cms.InputTag("ZCandtle"),
+        ZZ  = cms.InputTag("ZZCand"),
+#        ZZRSE     = cms.InputTag("ZZCandlooseEle"),
+#        ZZTLE     = cms.InputTag("ZZCandtle"),
+#        ZLL  = cms.InputTag("ZLLCand"),
+#        ZL  = cms.InputTag("ZlCand"),
+     ),
+     jetSrc = cms.InputTag("cleanJets"),
+)
+
+# Create lepton sync file
+#process.PlotsZZ.dumpForSync = True;
+#process.p = cms.EndPath( process.PlotsZZ)
+
+# Keep all events in the tree, even if no candidate is selected
+#process.ZZTree.skipEmptyEvents = False
+
+# replace the paths in analyzer.py
+#process.trees = cms.EndPath(process.ZZTree)
+
+#Dump reconstructed variables
+#process.appendPhotons.debug = cms.untracked.bool(True)
+#process.fsrPhotons.debug = cms.untracked.bool(True)
+#process.dump = cms.Path(process.dumpUserData)
+
+#Print MC history
+#process.mch = cms.EndPath(process.printTree)
+
+
+#Monitor memory usage
+#process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck",
+#    ignoreTotal = cms.untracked.int32(1)
+#)
