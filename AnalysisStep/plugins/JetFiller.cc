@@ -100,7 +100,7 @@ JetFiller::JetFiller(const edm::ParameterSet& iConfig) :
       
   if (setup == 2016)
     {
-      edm::FileInPath jecUncFile("ZZAnalysis/AnalysisStep/data/JEC/RegroupedV2_Summer16_07Aug2017_V11_MC_UncertaintySources_AK4PFchs.txt");
+      edm::FileInPath jecUncFile("HTauTauHMuMu/AnalysisStep/data/JEC/RegroupedV2_Summer16_07Aug2017_V11_MC_UncertaintySources_AK4PFchs.txt");
       jecUncFile_ = jecUncFile.fullPath();
       uncSources.push_back("Total");
       uncSources.push_back("Absolute"); uncSources.push_back("Absolute_2016");
@@ -113,7 +113,7 @@ JetFiller::JetFiller(const edm::ParameterSet& iConfig) :
     }
   else if (setup == 2017)
     {
-      edm::FileInPath jecUncFile("ZZAnalysis/AnalysisStep/data/JEC/RegroupedV2_Fall17_17Nov2017_V32_MC_UncertaintySources_AK4PFchs.txt");
+      edm::FileInPath jecUncFile("HTauTauHMuMu/AnalysisStep/data/JEC/RegroupedV2_Fall17_17Nov2017_V32_MC_UncertaintySources_AK4PFchs.txt");
       jecUncFile_ = jecUncFile.fullPath();
       uncSources.push_back("Total");
       uncSources.push_back("Absolute"); uncSources.push_back("Absolute_2017");
@@ -126,7 +126,7 @@ JetFiller::JetFiller(const edm::ParameterSet& iConfig) :
     }
   else if (setup == 2018)
     {
-      edm::FileInPath jecUncFile("ZZAnalysis/AnalysisStep/data/JEC/RegroupedV2_Autumn18_V19_MC_UncertaintySources_AK4PFchs.txt");
+      edm::FileInPath jecUncFile("HTauTauHMuMu/AnalysisStep/data/JEC/RegroupedV2_Autumn18_V19_MC_UncertaintySources_AK4PFchs.txt");
       jecUncFile_ = jecUncFile.fullPath();
       uncSources.push_back("Total");
       uncSources.push_back("Absolute"); uncSources.push_back("Absolute_2018");

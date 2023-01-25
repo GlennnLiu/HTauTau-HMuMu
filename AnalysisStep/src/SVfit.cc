@@ -50,7 +50,7 @@ SVfit::SVfit (int verbosity, TLorentzVector tau1, TLorentzVector tau2, TLorentzV
     kappa_ = 4.;
   }
 
-  else // TauTau
+  else if (pairType == 2)// TauTau
   {
     l1Type = classic_svFit::MeasuredTauLepton::kTauToHadDecay;
     mass1  = tau1.M();
@@ -60,6 +60,17 @@ SVfit::SVfit (int verbosity, TLorentzVector tau1, TLorentzVector tau2, TLorentzV
     decay2 = DM2; 
     kappa_ = 5.;
   }
+  else 
+  {
+    l1Type = classic_svFit::MeasuredTauLepton::kTauToElecDecay;
+    mass1  = 0.51100e-3;
+    decay1 = -1;
+    l2Type = classic_svFit::MeasuredTauLepton::kTauToMuDecay;
+    mass2  = 0.51100e-3;
+    decay2 = -1;
+    kappa_ = 3.;
+  }
+    
 
   // Fill the measuredTauLeptons
   measuredTauLeptons_.push_back(classic_svFit::MeasuredTauLepton(l1Type, tau1.Pt(), tau1.Eta(), tau1.Phi(), mass1, decay1));

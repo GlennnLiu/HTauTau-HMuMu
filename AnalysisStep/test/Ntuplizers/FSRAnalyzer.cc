@@ -17,6 +17,14 @@
 #include <HTauTauHMuMu/AnalysisStep/interface/MCHistoryTools.h>
 #include <HTauTauHMuMu/AnalysisStep/interface/FinalStates.h>
 #include <HTauTauHMuMu/AnalysisStep/interface/LeptonIsoHelper.h>
+#include "DataFormats/PatCandidates/interface/PackedGenParticle.h" //Atbbf
+
+//ATjets Additional libraries for GenJet variables
+#include <DataFormats/PatCandidates/interface/Jet.h>
+#include <CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h>
+#include <CondFormats/JetMETObjects/interface/JetCorrectorParameters.h>
+#include <JetMETCorrections/Objects/interface/JetCorrectionsRecord.h>
+#include <JetMETCorrections/Modules/interface/JetResolution.h>
 
 #include <Math/VectorUtil.h>
 
@@ -46,6 +54,8 @@ class FSRAnalyzer : public edm::EDAnalyzer {
   edm::EDGetTokenT<std::vector<reco::Vertex> > vtxToken;
   edm::EDGetTokenT<edm::View<reco::Candidate> > genParticleToken;
   edm::EDGetTokenT<GenEventInfoProduct> genInfoToken;
+  edm::EDGetTokenT<edm::View<reco::GenJet> > genJetsToken; //ATjets
+  edm::EDGetTokenT<edm::View<pat::PackedGenParticle> > packedgenParticlesToken; //ATbbf
 
 };
 
@@ -57,6 +67,8 @@ FSRAnalyzer::FSRAnalyzer(const edm::ParameterSet& pset)
   vtxToken = consumes<std::vector<reco::Vertex> >(edm::InputTag("goodPrimaryVertices"));
   genParticleToken = consumes<edm::View<reco::Candidate> >( edm::InputTag("prunedGenParticles"));
   genInfoToken = consumes<GenEventInfoProduct>( edm::InputTag("generator"));
+  genJetsToken = consumes<edm::View<reco::GenJet> >(edm::InputTag("slimmedGenJets")); //AT jets (Word between "" not so sure, BBF puts "genJetsSrc")
+  packedgenParticlesToken = consumes<edm::View<pat::PackedGenParticle> > (edm::InputTag("packedGenParticles")); //ATbbf
 }
 
 FSRAnalyzer::~FSRAnalyzer(){}
@@ -106,7 +118,12 @@ FSRAnalyzer::analyze(const edm::Event & event, const edm::EventSetup& eventSetup
   edm::Handle<GenEventInfoProduct> genInfo;
   event.getByToken(genInfoToken, genInfo);
   
-  MCHistoryTools mch(event, "", genParticles, genInfo);
+  edm::Handle<edm::View<reco::GenJet> > genJets; //ATjets
+  event.getByToken(genJetsToken, genJets); //ATjets
+  edm::Handle<edm::View<pat::PackedGenParticle> > packedgenParticles; //ATbbf
+  event.getByToken(packedgenParticlesToken, packedgenParticles); //ATbbf
+
+  MCHistoryTools mch(event, "", genParticles, genInfo, genJets, packedgenParticles);
   // These are all gen FSR photons coming from leptons from the H
   vector<const reco::Candidate *> genFSR = mch.genFSR();
   //  vector<const reco::Candidate *> genLep = mch.genZLeps();

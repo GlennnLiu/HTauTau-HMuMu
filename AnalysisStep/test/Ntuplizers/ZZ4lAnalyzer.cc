@@ -30,6 +30,12 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include <FWCore/ParameterSet/interface/FileInPath.h>
 
+//ATjets Additional libraries for GenJet variables
+#include <DataFormats/PatCandidates/interface/Jet.h>
+#include <CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h>
+#include <CondFormats/JetMETObjects/interface/JetCorrectorParameters.h>
+#include <JetMETCorrections/Objects/interface/JetCorrectionsRecord.h>
+#include <JetMETCorrections/Modules/interface/JetResolution.h>
 
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include <DataFormats/Common/interface/MergeableCounter.h>
@@ -176,6 +182,8 @@ private:
   edm::EDGetTokenT<double> rhoToken;
   edm::EDGetTokenT<edm::View<reco::Candidate> > genParticleToken;
   edm::EDGetTokenT<GenEventInfoProduct> genInfoToken;
+  edm::EDGetTokenT<edm::View<reco::GenJet> > genJetsToken; //ATjets
+  edm::EDGetTokenT<edm::View<pat::PackedGenParticle> > packedgenParticlesToken; //ATbbf
   //edm::EDGetTokenT<edm::View<pat::Jet> > jetToken;
   edm::EDGetTokenT<edm::TriggerResults> triggerResultToken;
   edm::EDGetTokenT<edm::View<reco::Candidate> > softLeptonToken;
@@ -220,6 +228,8 @@ ZZ4lAnalyzer::ZZ4lAnalyzer(const ParameterSet& pset) :
   rhoToken = consumes<double>(edm::InputTag("fixedGridRhoFastjetAll",""));
   genParticleToken = consumes<edm::View<reco::Candidate> >( edm::InputTag("prunedGenParticles"));
   genInfoToken = consumes<GenEventInfoProduct>( edm::InputTag("generator"));
+  genJetsToken = consumes<edm::View<reco::GenJet> >(edm::InputTag("slimmedGenJets")); //AT jets (Word between "" not so sure, BBF puts "genJetsSrc")
+  packedgenParticlesToken = consumes<edm::View<pat::PackedGenParticle> > (edm::InputTag("packedGenParticles")); //ATbbf
   consumesMany<std::vector< PileupSummaryInfo > >();
   //jetToken = consumes<edm::View<pat::Jet> >(edm::InputTag("cleanJets"));
   triggerResultToken = consumes<edm::TriggerResults>(edm::InputTag("TriggerResults"));
@@ -409,8 +419,12 @@ void ZZ4lAnalyzer::analyze(const Event & event, const EventSetup& eventSetup){
     edm::Handle<GenEventInfoProduct> genInfo;
     event.getByToken(genInfoToken, genInfo);
     
-    //cout<<"Begin MCHistoryTools"<<endl;
-    MCHistoryTools mch(event, sampleName, genParticles, genInfo);
+    edm::Handle<edm::View<reco::GenJet> > genJets; //ATjets
+    event.getByToken(genJetsToken, genJets); //ATjets
+    edm::Handle<edm::View<pat::PackedGenParticle> > packedgenParticles; //ATbbf
+    event.getByToken(packedgenParticlesToken, packedgenParticles); //ATbbf
+
+    MCHistoryTools mch(event, sampleName, genParticles, genInfo, genJets, packedgenParticles);
     genFinalState = mch.genFinalState();
     //cout<<"Executing"<<endl;
     const reco::Candidate* genH = mch.genH();
@@ -463,8 +477,10 @@ void ZZ4lAnalyzer::analyze(const Event & event, const EventSetup& eventSetup){
 
     PUweight = pileUpReweight->weight(nTrueInt);
 
+    // These plots are intended to cross-check the PU reweighting procedure, 
+    // by comparison of the PU-reweighted and original distributions.
     hNvtxWeight->Fill(Nvtx,PUweight);
-    hNTrueIntWeight->Fill(nTrueInt,genHEPMCweight);
+    hNTrueIntWeight->Fill(nTrueInt,PUweight);
     hRhoWeight->Fill(*rhoHandle,PUweight);
 
   }

@@ -780,6 +780,7 @@ TauFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     //--- Embed flags (ie flags specified in the "flags" pset)
     for(CutSet<pat::Tau>::const_iterator flag = flags.begin(); flag != flags.end(); ++flag) {
       l.addUserFloat(flag->first,int((*(flag->second))(l)));
+//       if (flag->first=="isSIP") cout<<flag->first<<","<<int((*(flag->second))(l))<<endl;
     }
     //cout << " ---------> DOPO pattau - p4: " << LorentzVectorE(l.p4()) << endl;
     result->push_back(l);

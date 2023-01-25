@@ -150,7 +150,7 @@ echo 'job done at: ' $(date) with exit status: ${exitStatus+0}
 gzip log.txt
 export ROOT_HIST=0
 if [ -s ZZ4lAnalysis.root ]; then
- root -q -b '${CMSSW_BASE}/src/ZZAnalysis/AnalysisStep/test/prod/rootFileIntegrity.r("ZZ4lAnalysis.root")'
+ root -q -b '${CMSSW_BASE}/src/HTauTauHMuMu/AnalysisStep/test/prod/rootFileIntegrity.r("ZZ4lAnalysis.root")'
 else
  echo moving empty file
  mv ZZ4lAnalysis.root ZZ4lAnalysis.root.empty
@@ -346,7 +346,7 @@ class MyBatchManager:
         scriptFileName = jobDir+'/batchScript.sh'
         scriptFile = open(scriptFileName,'w')
         if inputType=="miniAOD" :
-            scriptFile.write( batchScript( value ) )
+            scriptFile.write( batchScript( value, self.options_.trueOutputDir ) )
         elif inputType=="nanoAOD":
             scriptFile.write( batchScriptNano( value ) )    
         scriptFile.close()
@@ -375,7 +375,7 @@ class MyBatchManager:
                     new_job_cfg.write(line)
  
     def PrepareJobUserTemplate(self, jobDir, value, inputType="miniAOD" ):   
-        '''Prepare one job. This function is called by the base class.'''
+       '''Prepare one job. This function is called by the base class.'''
 #       print value
 #       print splitComponents[value]
 
@@ -441,7 +441,7 @@ class MyBatchManager:
 
 
        elif inputType=="nanoAOD" :
-            cfgFile.write('from ZZAnalysis.NanoAnalysis.tools import setConf\n')
+            cfgFile.write('from HTauTauHMuMu.NanoAnalysis.tools import setConf\n')
             for var in variables.keys():
                 val = variables[var]
                 if type(val) == str :
@@ -449,7 +449,7 @@ class MyBatchManager:
                 else : pval = str(val)
                 cfgFile.write('setConf("'+var+'",'+pval+')\n')
             cfgFile.write('setConf("files",REPLACE_WITH_FILES)\n')
-            cfgFile.write('from ZZAnalysis.NanoAnalysis.nanoZZ4lAnalysis import *\n')
+            cfgFile.write('from HTauTauHMuMu.NanoAnalysis.nanoZZ4lAnalysis import *\n')
             cfgFile.write('p.run()\n')
        
        cfgFile.close()

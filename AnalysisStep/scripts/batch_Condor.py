@@ -150,7 +150,7 @@ echo 'job done at: ' $(date) with exit status: ${exitStatus+0}
 gzip log.txt
 export ROOT_HIST=0
 if [ -s ZZ4lAnalysis.root ]; then
- root -q -b '${CMSSW_BASE}/src/ZZAnalysis/AnalysisStep/test/prod/rootFileIntegrity.r("ZZ4lAnalysis.root")'
+ root -q -b '${CMSSW_BASE}/src/HTauTauHMuMu/AnalysisStep/test/prod/rootFileIntegrity.r("ZZ4lAnalysis.root")'
 else
  echo moving empty file
  mv ZZ4lAnalysis.root ZZ4lAnalysis.root.empty
@@ -438,7 +438,7 @@ class MyBatchManager:
 
 
        elif inputType=="nanoAOD" :
-            cfgFile.write('from ZZAnalysis.NanoAnalysis.tools import setConf\n')
+            cfgFile.write('from HTauTauHMuMu.NanoAnalysis.tools import setConf\n')
             for var in variables.keys():
                 val = variables[var]
                 if type(val) == str :
@@ -446,7 +446,7 @@ class MyBatchManager:
                 else : pval = str(val)
                 cfgFile.write('setConf("'+var+'",'+pval+')\n')
             cfgFile.write('setConf("files",REPLACE_WITH_FILES)\n')
-            cfgFile.write('from ZZAnalysis.NanoAnalysis.nanoZZ4lAnalysis import *\n')
+            cfgFile.write('from HTauTauHMuMu.NanoAnalysis.nanoZZ4lAnalysis import *\n')
             cfgFile.write('p.run()\n')
        
        cfgFile.close()

@@ -153,6 +153,8 @@ TreeSetup = cms.EDAnalyzer("HZZ4lNtupleMaker",
                            PD = cms.string(PD),
                            MCFilterPath = cms.string(MCFILTER),
                            
+                           dataTag=cms.string(DATA_TAG), #added for recognizing UL16 pre/post VFP
+                           
                            #for MET and SV fit
                            metSrc = cms.InputTag("ShiftMETcentral"),#srcMETTag,#metTag,
                            covSrc = cms.InputTag("METSignificance", "METCovariance"),
@@ -275,7 +277,8 @@ process.ZTree = cms.EDAnalyzer("ZNtupleMaker",
                                metSrc = srcMETTag,#metTag,
                                skipEmptyEvents = cms.bool(True),
                                sampleName = cms.string(SAMPLENAME),
-                               xsec = cms.double(XSEC)
+                               xsec = cms.double(XSEC),
+                               dataTag = cms.string(DATA_TAG)
                                )
 
 

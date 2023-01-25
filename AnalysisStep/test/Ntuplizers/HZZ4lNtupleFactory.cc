@@ -44,7 +44,7 @@ HZZ4lNtupleFactory::HZZ4lNtupleFactory(TTree* outTree_input, TTree *failedTree_i
 ///--- Destructor ---
 HZZ4lNtupleFactory::~HZZ4lNtupleFactory()
 {
-  // Delete MELA branches
+  // Delete me_branches branches
 //  for (unsigned int ib=0; ib<recome_branches.size(); ib++) delete recome_branches.at(ib);
 //  for (unsigned int ib=0; ib<lheme_branches.size(); ib++) delete lheme_branches.at(ib);
 }
@@ -164,7 +164,7 @@ void HZZ4lNtupleFactory::InitializeVariables()
 /*
   for(int i=0;i<nBranches[kBool];i++){boolVector[i]=defaultVector[kBool].at(i);}
   for(int i=0;i<nBranches[kShort];i++){shortVector[i]=defaultVector[kShort].at(i);}
-  for(int i=0;i<nBranches[kInt];i++){intVector[i]=defaultVector[kInt].at(i);}
+  for(int i=0;i<nBranches[kInt];i++){intVector[i]=defaultVector[me_brancheskInt].at(i);}
   for(int i=0;i<nBranches[kChar];i++){charVector[i]=defaultVector[kChar].at(i);}
   for(int i=0;i<nBranches[kLong];i++){longVector[i]=defaultVector[kLong].at(i);}
   for(int i=0;i<nBranches[kFloat];i++){floatVector[i]=defaultVector[kFloat].at(i);}

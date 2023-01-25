@@ -10,7 +10,6 @@
 <use name="EgammaAnalysis/ElectronTools"/>
 <use name="PhysicsTools/KinFitter"/>
 <use name="JetMETCorrections/Modules"/>
-<use name="KinZfitter/KinZfitter"/>
 <use name="MuonMVAReader/Reader"/>
 <use name="TauAnalysis/ClassicSVfit"/>
 

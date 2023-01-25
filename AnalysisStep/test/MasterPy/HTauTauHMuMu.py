@@ -14,7 +14,6 @@ declareDefault("IsMC", True, globals())
 # Set of effective areas, rho corrections, etc. (can be 2011, 2012, 2015 or 2016)
 declareDefault("LEPTON_SETUP", 2018, globals())
 
-declareDefault("OLDPATTRIGGER", False, globals())
 # Flag that reflects the actual sqrts of the sample (can be 2011, 2012, 2015 or 2016)
 # Can differ from SAMPLE_TYPE for samples that are rescaled to a different sqrts.
 declareDefault("SAMPLE_TYPE", LEPTON_SETUP, globals())
@@ -53,12 +52,6 @@ declareDefault("BESTCANDCOMPARATOR", "byBestZ1bestZ2", globals())
 
 # Set to True to make candidates with the full combinatorial of loose leptons (for debug; much slower)
 declareDefault("KEEPLOOSECOMB", False, globals())
-
-# Activate the Z kinematic refit (very slow)
-declareDefault("KINFITOLD", False, globals())
-
-# ZZ kinematic fit
-declareDefault("KINFIT", True, globals())
 
 # Activate paths for loose electron categories
 declareDefault("ADDLOOSEELE", False, globals())
@@ -228,10 +221,8 @@ process.triggerDiMu   = cms.Path(process.hltFilterDiMu)
 process.triggerDiEle  = cms.Path(process.hltFilterDiEle)
 #process.triggerMuEle  = cms.Path(process.hltFilterMuEle)
 
-if OLDPATTRIGGER:
-   TRIGGERSET="selectedPatTrigger"
-else:
-   TRIGGERSET="slimmedPatTrigger"
+
+TRIGGERSET="slimmedPatTrigger"
 
 ### ----------------------------------------------------------------------
 ### MET FILTERS
@@ -338,6 +329,7 @@ APPLYTESCORRECTION = True
 #--- Set correct identifier for muon corrections
 #--- UL Rochester from: https://gitlab.cern.ch/akhukhun/roccor/-/tree/Run2.v5
 #--- Corresponding TWiki: https://twiki.cern.ch/twiki/bin/viewauth/CMS/RochcorMuon
+if LEPTON_SETUP == 2016: # Rochester corrections for 2016 data
     if ( DATA_TAG == 'ULAPV' ):
         process.calibratedMuons = cms.EDProducer("RochesterPATMuonCorrector",
                                             src = cms.InputTag("slimmedMuons"),
@@ -579,7 +571,7 @@ GOODTAU_TAU  = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID(
 
 
 process.bareTaus = cms.EDFilter("PATTauRefSelector",
-    src = cms.InputTag("slimmedTausNewID"),
+    src = cms.InputTag("slimmedTaus"),
     cut = cms.string(TAUCUT)
     )
 
@@ -628,7 +620,7 @@ APPLYTESCORRECTION = APPLYTESCORRECTION if IsMC else False # always false if dat
 
 TESyear = "UL2016_preVFP"
 
-if PERIOD=='postVFP':
+if YEAR=='postVFP':
     TESyear = 'UL2016_postVFP'
 
 if YEAR == 2017:
@@ -647,6 +639,7 @@ process.softTaus = cms.EDProducer("TauFiller",
 
    ApplyTESCentralCorr = cms.bool(APPLYTESCORRECTION),
    flags = cms.PSet(
+        isSIP = cms.string(""),
         ID = cms.string(GOODTAU),
         isGood = cms.string(GOODTAU),
         isGood_Mu  = cms.string(GOODTAU_MU),
@@ -871,7 +864,7 @@ process.ecalBadCalibReducedMINIAODFilter = cms.EDFilter(
 ### ----------------------------------------------------------------------
 TWOGOODLEPTONS = "( userFloat('d0.isGood') && userFloat('d1.isGood'))"# && userFloat('isGoodTau') )" # Z made of 2 good leptons (ISO not yet applied)
 TWOISOLEPTONS = "( userFloat('d0.passCombRelIsoPFFSRCorr') && userFloat('d1.passCombRelIsoPFFSRCorr') )"
-TWOSFLEPTONS = "( ( abs(daughter(0).pdgId())!=15 && abs(daughter(1).pdgId())!=15 && abs(daughter(0).pdgId())==abs(daughter(1).pdgId()) ) || abs(daughter(0).pdgId())==15 || abs(daughter(1).pdgId())==15 )"
+TWOSFLEPTONS = "( abs(daughter(0).pdgId())==abs(daughter(1).pdgId()) || abs(daughter(0).pdgId())==15 || abs(daughter(1).pdgId())==15 || abs(daughter(0).pdgId()*daughter(1).pdgId())==143 )"
 ### NOTE: Isolation cut has been moved to ZZ candidates as we now correct for FSR of all four photons.
 ### Because if this, isBestZ flags are no longer correct; BESTZ_AMONG is set to "" for safety
 
@@ -887,12 +880,12 @@ process.bareZCand = cms.EDProducer("PATCandViewShallowCloneCombiner",
 )
 
 if KEEPLOOSECOMB:
-    process.bareZCand.cut = cms.string('mass > 0 && abs(daughter(0).pdgId())==abs(daughter(1).pdgId())') # Propagate also combinations of loose leptons (for debugging)
+    process.bareZCand.cut = cms.string('mass > 0 && '+TWOSFLEPTONS) # Propagate also combinations of loose leptons (for debugging)
 else:
     if FSRMODE == "RunII" : # Just keep combinations of tight leptons (passing ID, SIP and ISO)
-        process.bareZCand.cut = cms.string("mass > 0 && abs(daughter(0).pdgId())==abs(daughter(1).pdgId()) && daughter(0).masterClone.userFloat('isGood') && daughter(1).masterClone.userFloat('isGood') && daughter(0).masterClone.userFloat('passCombRelIsoPFFSRCorr') &&  daughter(1).masterClone.userFloat('passCombRelIsoPFFSRCorr')")
+        process.bareZCand.cut = cms.string("mass > 0 && "+TWOSFLEPTONS+" && daughter(0).masterClone.userFloat('isGood') && daughter(1).masterClone.userFloat('isGood') && daughter(0).masterClone.userFloat('passCombRelIsoPFFSRCorr') &&  daughter(1).masterClone.userFloat('passCombRelIsoPFFSRCorr')")
     else : # Just keep combinations of tight leptons (passing ID and SIP; iso cannot be required at this point if FSRMode is "skip")
-        process.bareZCand.cut = cms.string("mass > 0 && abs(daughter(0).pdgId())==abs(daughter(1).pdgId()) && daughter(0).masterClone.userFloat('isGood') && daughter(1).masterClone.userFloat('isGood')")
+        process.bareZCand.cut = cms.string("mass > 0 && "+TWOSFLEPTONS+" && daughter(0).masterClone.userFloat('isGood') && daughter(1).masterClone.userFloat('isGood')")
         
 
 
@@ -1068,9 +1061,9 @@ elif SELSETUP=="allCutsAtOncePlusSmart": # Apply smarter mZb cut
                       Z2MASS          + "&&" +
                       MLLALLCOMB      + "&&" +
                       PT20_10         + "&&" +
-		      HLTMATCH	      + "&&" +
-		      BESTZ1	      + "&&" +
-		      #OSSF	      + "&&" +
+                      HLTMATCH	      + "&&" +
+                      BESTZ1	      + "&&" +
+                      #OSSF	      + "&&" +
                       "mass>70"       + "&&" +
                       SMARTMALLCOMB#   + "&&" +
               #        "daughter('Z2').masterClone.userFloat('goodMass')>12"
@@ -1121,7 +1114,6 @@ process.ZZCand = cms.EDProducer("ZZCandidateFiller",
     bestCandAmong = cms.PSet(isBestCand = cms.string(BESTCAND_AMONG)),
     bestCandComparator = cms.string(BESTCANDCOMPARATOR),
     ZRolesByMass = cms.bool(True),
-    doKinFitOld = cms.bool(KINFITOLD),
     debug = cms.bool(False),
     flags = cms.PSet(
         GoodLeptons =  cms.string(FOURGOODLEPTONS),
@@ -1148,7 +1140,7 @@ process.ZZCand = cms.EDProducer("ZZCandidateFiller",
 
 Z2MM = "abs(daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId())==169" 		#Z2 = mumu
 Z2EE = "abs(daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId())==121" 		#Z2 = ee
-Z2TT = "(abs(daughter(1).daughter(0).pdgId())==15 || abs(daughter(1).daughter(1).pdgId())==15)" #Z2 = tautau
+Z2TT = "(abs(daughter(1).daughter(0).pdgId())==15 || abs(daughter(1).daughter(1).pdgId())==15 || abs(daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId())==143 )" #Z2 = tautau->etau, mutau, tautau, emu
 Z2LL = "(" + Z2MM + "||" + Z2EE + "||" + Z2TT + ")"						#Z2 = mumu, ee, tautau
 Z2LL_SS = Z2LL + " && daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()>0"	#Z2 = same-sign
 Z2LL_OS = Z2LL + " && daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()<0"   	#Z2 = l+l-
@@ -1156,8 +1148,8 @@ Z2MM_OS = "daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()==-169
 Z2MM_SS = "daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()== 169" 		#Z2 = mu-mu-/mu+mu+
 Z2EE_OS = "daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()==-121" 		#Z2 = e+e-
 Z2EE_SS = "daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()== 121" 		#Z2 = e-e-/e+e+
-Z2TT_OS = Z2TT + "&& daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()<0"		#Z2 = etau, mutau, tautau, OS
-Z2TT_SS = Z2TT + "&& daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()>0"		#Z2 = etau, mutau, tautau, SS
+Z2TT_OS = Z2TT + "&& daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()<0"		#Z2 = etau, mutau, tautau, emu, OS
+Z2TT_SS = Z2TT + "&& daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()>0"		#Z2 = etau, mutau, tautau, emu, SS
 Z2ID    = "userFloat('d1.d0.ID')     && userFloat('d1.d1.ID')"                    		#ID on LL leptons
 Z2SIP   = "userFloat('d1.d0.isSIP') && userFloat('d1.d1.isSIP')"                  		#SIP on LL leptons, probably need to be modified because taus don't have SIP.
 CR_Z2MASS = "daughter(1).mass()>4  && daughter(1).mass()<140"	#Mass on LL; cut at 4
@@ -1254,7 +1246,6 @@ process.ZLLCand = cms.EDProducer("ZZCandidateFiller",
 
     ),
     ZRolesByMass = cms.bool(False),  # daughter('Z1') = daughter(0)
-    doKinFitOld = cms.bool(KINFITOLD),
     debug = cms.bool(False),
     flags = cms.PSet(
       SR = cms.string(SR),
@@ -1602,7 +1593,7 @@ if (APPLYJER and SAMPLE_TYPE == 2016):
    if ( DATA_TAG == 'ULAPV'):
        process.jer = cms.ESSource("PoolDBESSource",
                                      CondDBSetup,
-                                     connect = cms.string('sqlite_fip:ZZAnalysis/AnalysisStep/data/JER/Summer20UL16APV_JRV3_MC.db'),
+                                     connect = cms.string('sqlite_fip:HTauTauHMuMu/AnalysisStep/data/JER/Summer20UL16APV_JRV3_MC.db'),
                                      toGet = cms.VPSet(
                                                        cms.PSet(
                                                                 record = cms.string('JetResolutionRcd'),
@@ -1625,7 +1616,7 @@ if (APPLYJER and SAMPLE_TYPE == 2016):
    else:
        process.jer = cms.ESSource("PoolDBESSource",
                                      CondDBSetup,
-                                     connect = cms.string('sqlite_fip:ZZAnalysis/AnalysisStep/data/JER/Summer20UL16_JRV3_MC.db'),
+                                     connect = cms.string('sqlite_fip:HTauTauHMuMu/AnalysisStep/data/JER/Summer20UL16_JRV3_MC.db'),
                                      toGet = cms.VPSet(
                                                        cms.PSet(
                                                                 record = cms.string('JetResolutionRcd'),
@@ -1652,7 +1643,7 @@ if (APPLYJER and SAMPLE_TYPE == 2017):
    from CondCore.DBCommon.CondDBSetup_cfi import *
    process.jer = cms.ESSource("PoolDBESSource",
                                  CondDBSetup,
-                                 connect = cms.string('sqlite_fip:ZZAnalysis/AnalysisStep/data/JER/Summer19UL17_JRV3_MC.db'),
+                                 connect = cms.string('sqlite_fip:HTauTauHMuMu/AnalysisStep/data/JER/Summer19UL17_JRV3_MC.db'),
                                  toGet = cms.VPSet(
                                                    cms.PSet(
                                                             record = cms.string('JetResolutionRcd'),
@@ -1681,7 +1672,7 @@ if (APPLYJER and SAMPLE_TYPE == 2018):
     process.jer = cms.ESSource("PoolDBESSource",
                                CondDBSetup,
                                #connect = cms.string('sqlite_fip:HTauTauHMuMu/AnalysisStep/data/JER/Autumn18_V1_MC.db'),
-                               connect = cms.string('sqlite_fip:ZZAnalysis/AnalysisStep/data/JER/Summer19UL18_JRV2_MC.db'),
+                               connect = cms.string('sqlite_fip:HTauTauHMuMu/AnalysisStep/data/JER/Summer19UL18_JRV2_MC.db'),
                                toGet = cms.VPSet(
                                                  cms.PSet(
                                                           record = cms.string('JetResolutionRcd'),
@@ -1782,36 +1773,35 @@ process.preSkimCounter = cms.EDProducer("EventCountProducer")
 process.PVfilter =  cms.Path(process.preSkimCounter+process.goodPrimaryVertices)
 
 if APPLYJEC:
-    if (SAMPLE_TYPE == 2016 and IsMC):
     process.Jets = cms.Path(process.pileupJetIdUpdated + process.patJetCorrFactorsReapplyJEC + process.patJetsReapplyJEC + process.QGTagger + process.dressedJets )
 else:
     process.Jets = cms.Path( process.QGTagger + process.dressedJets )
 
 
-if (RECORRECTMET and SAMPLE_TYPE == 2016):
-    if IsMC:
-        process.MET = cms.Path(process.fullPatMetSequence)
-    else:
-        process.MET = cms.Path(process.fullPatMetSequence)
+# if (RECORRECTMET and SAMPLE_TYPE == 2016):
+#     if IsMC:
+#         process.MET = cms.Path(process.fullPatMetSequence)
+#     else:
+#         process.MET = cms.Path(process.fullPatMetSequence)
 
-#[FIXME] Does not work in CMSSW_10_3_1 currently                                                                                                         
-#if (RECORRECTMET and SAMPLE_TYPE == 2017):                                                                                                                       
-#    if IsMC:                                                                                                                                                   
-#        process.MET = cms.Path(process.fullPatMetSequenceModifiedMET)                                                                                              
-#    else:                                                                                                                                                                  
-#        process.MET = cms.Path(process.fullPatMetSequenceModifiedMET)                                                                                                     
+# #[FIXME] Does not work in CMSSW_10_3_1 currently                                                                                                         
+# #if (RECORRECTMET and SAMPLE_TYPE == 2017):                                                                                                                       
+# #    if IsMC:                                                                                                                                                   
+# #        process.MET = cms.Path(process.fullPatMetSequenceModifiedMET)                                                                                              
+# #    else:                                                                                                                                                                  
+# #        process.MET = cms.Path(process.fullPatMetSequenceModifiedMET)                                                                                                     
 
-if (RECORRECTMET and SAMPLE_TYPE == 2017):
-    if IsMC:
-        process.MET = cms.Path(process.fullPatMetSequenceModifiedMET)
-    else:
-        process.MET = cms.Path(process.fullPatMetSequenceModifiedMET)
+# if (RECORRECTMET and SAMPLE_TYPE == 2017):
+#     if IsMC:
+#         process.MET = cms.Path(process.fullPatMetSequence)
+#     else:
+#         process.MET = cms.Path(process.fullPatMetSequence)
 
-if (RECORRECTMET and SAMPLE_TYPE == 2018):
-    if IsMC:
-        process.MET = cms.Path(process.fullPatMetSequence)
-    else:
-        process.MET = cms.Path(process.fullPatMetSequence)
+# if (RECORRECTMET and SAMPLE_TYPE == 2018):
+#     if IsMC:
+#         process.MET = cms.Path(process.fullPatMetSequence)
+#     else:
+#         process.MET = cms.Path(process.fullPatMetSequence)
 
 
 

@@ -29,6 +29,7 @@
 #include <DataFormats/Common/interface/View.h>
 #include <DataFormats/Candidate/interface/Candidate.h>
 #include <DataFormats/PatCandidates/interface/CompositeCandidate.h>
+#include "DataFormats/PatCandidates/interface/PackedGenParticle.h" //Atbbf
 #include <DataFormats/PatCandidates/interface/Muon.h>
 #include <DataFormats/PatCandidates/interface/Electron.h>
 #include <DataFormats/PatCandidates/interface/Tau.h>
@@ -37,7 +38,6 @@
 #include <DataFormats/PatCandidates/interface/MET.h>
 #include <DataFormats/METReco/interface/PFMET.h>
 #include <DataFormats/METReco/interface/PFMETCollection.h>
-#include <HTauTauHMuMu/AnalysisStep/interface/METCorrectionHandler.h>
 #include <DataFormats/JetReco/interface/PFJet.h>
 #include <DataFormats/JetReco/interface/PFJetCollection.h>
 #include <DataFormats/Math/interface/LorentzVector.h>
@@ -55,6 +55,12 @@
 #include <HTauTauHMuMu/AnalysisStep/interface/PileUpWeight.h>
 #include "SimDataFormats/HTXS/interface/HiggsTemplateCrossSections.h"
 
+//ATjets Additional libraries for GenJet variables
+#include <DataFormats/PatCandidates/interface/Jet.h>
+#include <CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h>
+#include <CondFormats/JetMETObjects/interface/JetCorrectorParameters.h>
+#include <JetMETCorrections/Objects/interface/JetCorrectionsRecord.h>
+#include <JetMETCorrections/Modules/interface/JetResolution.h>
 
 #include "HTauTauHMuMu/AnalysisStep/interface/EwkCorrections.h"
 #include "HTauTauHMuMu/AnalysisStep/src/kFactors.C"
@@ -84,6 +90,8 @@
 
 #include <string>
 
+bool verbose = false; //ATbbf
+
 namespace {
   bool writeJets = false;     // Write jets in the tree. FIXME: make this configurable
   bool writePhotons = false; // Write photons in the tree. FIXME: make this configurable
@@ -93,6 +101,7 @@ namespace {
   bool addVtxFit = false;
   bool addFSRDetails = false;
   bool addQGLInputs = true;
+  bool addGenAngles = false;
   bool skipMuDataMCWeight = false; // skip computation of data/MC weight for mu 
   bool skipEleDataMCWeight = false; // skip computation of data/MC weight for ele
   bool skipFakeWeight = true;   // skip computation of fake rate weight for CRs
@@ -164,13 +173,61 @@ namespace {
   Short_t nCleanedJets  =  0;
   Short_t nCleanedJetsPt30  = 0;
   Short_t nCleanedJetsPt30_jesUp  = 0;
+  Short_t nCleanedJetsPt30_jesUp_Total           = 0;
+  Short_t nCleanedJetsPt30_jesUp_Abs             = 0;
+  Short_t nCleanedJetsPt30_jesUp_Abs_year        = 0;
+  Short_t nCleanedJetsPt30_jesUp_BBEC1           = 0;
+  Short_t nCleanedJetsPt30_jesUp_BBEC1_year      = 0;
+  Short_t nCleanedJetsPt30_jesUp_EC2             = 0;
+  Short_t nCleanedJetsPt30_jesUp_EC2_year        = 0;
+  Short_t nCleanedJetsPt30_jesUp_FlavQCD         = 0;
+  Short_t nCleanedJetsPt30_jesUp_HF              = 0;
+  Short_t nCleanedJetsPt30_jesUp_HF_year         = 0;
+  Short_t nCleanedJetsPt30_jesUp_RelBal          = 0;
+  Short_t nCleanedJetsPt30_jesUp_RelSample_year  = 0;
   Short_t nCleanedJetsPt30_jesDn  = 0;
+  Short_t nCleanedJetsPt30_jesDn_Total           = 0;
+  Short_t nCleanedJetsPt30_jesDn_Abs             = 0;
+  Short_t nCleanedJetsPt30_jesDn_Abs_year        = 0;
+  Short_t nCleanedJetsPt30_jesDn_BBEC1           = 0;
+  Short_t nCleanedJetsPt30_jesDn_BBEC1_year      = 0;
+  Short_t nCleanedJetsPt30_jesDn_EC2             = 0;
+  Short_t nCleanedJetsPt30_jesDn_EC2_year        = 0;
+  Short_t nCleanedJetsPt30_jesDn_FlavQCD         = 0;
+  Short_t nCleanedJetsPt30_jesDn_HF              = 0;
+  Short_t nCleanedJetsPt30_jesDn_HF_year         = 0;
+  Short_t nCleanedJetsPt30_jesDn_RelBal          = 0;
+  Short_t nCleanedJetsPt30_jesDn_RelSample_year  = 0;
   Short_t nCleanedJetsPt30_jerUp  = 0;
   Short_t nCleanedJetsPt30_jerDn  = 0;
   Short_t nCleanedJetsPt30BTagged  = 0;
   Short_t nCleanedJetsPt30BTagged_bTagSF  = 0;
   Short_t nCleanedJetsPt30BTagged_bTagSF_jesUp  = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesUp_Total           = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesUp_Abs             = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesUp_Abs_year        = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesUp_BBEC1           = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesUp_BBEC1_year      = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesUp_EC2             = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesUp_EC2_year        = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesUp_FlavQCD         = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesUp_HF              = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesUp_HF_year         = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesUp_RelBal          = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesUp_RelSample_year  = 0;
   Short_t nCleanedJetsPt30BTagged_bTagSF_jesDn  = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesDn_Total           = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesDn_Abs             = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesDn_Abs_year        = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesDn_BBEC1           = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesDn_BBEC1_year      = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesDn_EC2             = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesDn_EC2_year        = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesDn_FlavQCD         = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesDn_HF              = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesDn_HF_year         = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesDn_RelBal          = 0;
+  Short_t nCleanedJetsPt30BTagged_bTagSF_jesDn_RelSample_year  = 0;
   Short_t nCleanedJetsPt30BTagged_bTagSF_jerUp  = 0;
   Short_t nCleanedJetsPt30BTagged_bTagSF_jerDn  = 0;
   Short_t nCleanedJetsPt30BTagged_bTagSFUp  = 0;
@@ -232,6 +289,10 @@ namespace {
   Bool_t Z2eleHLTMatch2 = false;
   Bool_t Z2eleHLTMatch = false;
   Short_t Z2isGoodTau = 0;
+  Short_t Z2isGoodTau_Ele = 0;
+  Short_t Z2isGoodTau_Mu = 0;
+  Short_t Z2isGoodTau_Tau = 0;
+
 
 //-------------------------------------------------------------------
 //---------------------SV Fit variables------------------------------
@@ -391,6 +452,7 @@ namespace {
   std::vector<float> JetEta ;
   std::vector<float> JetPhi ;
   std::vector<float> JetMass ;
+  std::vector<float> JetEnergy ;
   std::vector<float> JetBTagger ;
   std::vector<float> JetIsBtagged;
   std::vector<float> JetIsBtaggedWithSF;
@@ -401,6 +463,18 @@ namespace {
   std::vector<float> JetMult;
   std::vector<float> JetPtD;
   std::vector<float> JetSigma ;
+  std::vector<float> JetSigma_Total ;
+  std::vector<float> JetSigma_Abs ;
+  std::vector<float> JetSigma_Abs_year ;
+  std::vector<float> JetSigma_BBEC1 ;
+  std::vector<float> JetSigma_BBEC1_year ;
+  std::vector<float> JetSigma_EC2 ;
+  std::vector<float> JetSigma_EC2_year ;
+  std::vector<float> JetSigma_FlavQCD ;
+  std::vector<float> JetSigma_HF ;
+  std::vector<float> JetSigma_HF_year ;
+  std::vector<float> JetSigma_RelBal ;
+  std::vector<float> JetSigma_RelSample_year ;
   std::vector<short> JetHadronFlavour;
   std::vector<short> JetPartonFlavour;
    
@@ -414,16 +488,38 @@ namespace {
   std::vector<short> JetID;
    
   std::vector<float> JetJESUp ;
+  std::vector<float> JetJESUp_Total ;
+  std::vector<float> JetJESUp_Abs ;
+  std::vector<float> JetJESUp_Abs_year ;
+  std::vector<float> JetJESUp_BBEC1 ;
+  std::vector<float> JetJESUp_BBEC1_year ;
+  std::vector<float> JetJESUp_EC2 ;
+  std::vector<float> JetJESUp_EC2_year ;
+  std::vector<float> JetJESUp_FlavQCD ;
+  std::vector<float> JetJESUp_HF ;
+  std::vector<float> JetJESUp_HF_year ;
+  std::vector<float> JetJESUp_RelBal ;
+  std::vector<float> JetJESUp_RelSample_year ;
   std::vector<float> JetJESDown ;
+  std::vector<float> JetJESDown_Total ;
+  std::vector<float> JetJESDown_Abs ;
+  std::vector<float> JetJESDown_Abs_year ;
+  std::vector<float> JetJESDown_BBEC1 ;
+  std::vector<float> JetJESDown_BBEC1_year ;
+  std::vector<float> JetJESDown_EC2 ;
+  std::vector<float> JetJESDown_EC2_year ;
+  std::vector<float> JetJESDown_FlavQCD ;
+  std::vector<float> JetJESDown_HF ;
+  std::vector<float> JetJESDown_HF_year ;
+  std::vector<float> JetJESDown_RelBal ;
+  std::vector<float> JetJESDown_RelSample_year ;
    
   std::vector<float> JetJERUp ;
   std::vector<float> JetJERDown ;
 
   Float_t DiJetMass  = -99;
-//   Float_t DiJetMassPlus  = -99;
-//   Float_t DiJetMassMinus  = -99;
   Float_t DiJetDEta  = -99;
-  Float_t DiJetFisher  = -99;
+
   Short_t nExtraLep  = 0;
   Short_t nExtraZ  = 0;
   std::vector<float> ExtraLepPt;
@@ -469,6 +565,12 @@ namespace {
   Float_t L1prefiringWeight = 0;
   Float_t L1prefiringWeightUp = 0;
   Float_t L1prefiringWeightDn = 0;
+  Float_t L1prefiringWeight_ECAL = 0;
+  Float_t L1prefiringWeightUp_ECAL = 0;
+  Float_t L1prefiringWeightDn_ECAL = 0;
+  Float_t L1prefiringWeight_Mu = 0;
+  Float_t L1prefiringWeightUp_Mu = 0;
+  Float_t L1prefiringWeightDn_Mu = 0;
   Float_t GenHMass  = 0;
   Float_t GenHPt  = 0;
   Float_t GenHRapidity  = 0;
@@ -543,6 +645,28 @@ namespace {
   Float_t GenAssocLep2Phi  = 0;
   Short_t GenAssocLep2Id  = 0;
 
+  Float_t GenLep1Iso  = 0; //AT
+  Float_t GenLep2Iso  = 0; //AT
+  Float_t GenLep3Iso  = 0; //AT
+  Float_t GenLep4Iso  = 0; //AT
+  Float_t Gencosthetastar  = 0; //AT
+  Float_t GenhelcosthetaZ1  = 0; //AT
+  Float_t GenhelcosthetaZ2  = 0; //AT
+  Float_t Genhelphi  = 0; //AT
+  Float_t GenphistarZ1 = 0; //AT
+  std::vector<float> GenJetPt; //ATjets
+  std::vector<float> GenJetMass; //ATjets
+  std::vector<float> GenJetEta; //ATjets
+  std::vector<float> GenJetPhi; //ATjets
+  std::vector<float> GenJetRapidity; //ATjets
+  Int_t nGenJet = 0; //ATjets
+  std::vector<float> GenCleanedJetPt; //ATjets
+  std::vector<float> GenCleanedJetMass; //ATjets
+  std::vector<float> GenCleanedJetEta; //ATjets
+  std::vector<float> GenCleanedJetPhi; //ATjets
+  std::vector<float> GenCleanedJetRapidity; //ATjets
+  std::vector<float> GenCleanedJetHadronFlavour; //ATjets
+  Int_t nCleanedGenJet = 0; //ATjets
 
   Int_t   htxsNJets = -1;
   Float_t htxsHPt = 0;
@@ -555,6 +679,39 @@ namespace {
   Float_t ggH_NNLOPS_weight = 0;
   Float_t ggH_NNLOPS_weight_unc = 0;
   std::vector<float> qcd_ggF_uncertSF;
+    
+  //ATbbf
+  //Event variables
+  // Short_t GENfinalState;
+  bool passedFiducialSelection_bbf;
+  // lepton variables
+  std::vector<float> GENlep_pt; std::vector<float> GENlep_eta; std::vector<float> GENlep_phi; std::vector<float> GENlep_mass;
+  std::vector<TLorentzVector> GENlep_tetra;
+  std::vector<short> GENlep_id; std::vector<short> GENlep_status;
+  std::vector<short> GENlep_MomId; std::vector<short> GENlep_MomMomId;
+  // Short_t GENlep_Hindex[4];//position of Higgs candidate leptons in lep_p4: 0 = Z1 lead, 1 = Z1 sub, 2 = Z2 lead, 3 = Z3 sub
+  std::vector<Short_t> GENlep_Hindex;
+  // std::vector<float> GENlep_isoCH; std::vector<float> GENlep_isoNH; std::vector<float> GENlep_isoPhot;
+  std::vector<float> GENlep_RelIso;
+  // Higgs candidate variables (calculated using selected gen leptons)
+  std::vector<float> GENH_pt; std::vector<float> GENH_eta; std::vector<float> GENH_phi; std::vector<float> GENH_mass;
+  float_t GENmass4l, GENpT4l, GENeta4l, GENphi4l, GENrapidity4l;
+  // GENmass4e, GENmass4mu, GENmass2e2mu, GENpT4l, GENeta4l, GENrapidity4l;
+  // float_t GENMH; //mass directly from gen particle with id==25
+  float_t GENcosTheta1, GENcosTheta2, GENcosThetaStar, GENPhi, GENPhi1;
+  // Z candidate variables
+  std::vector<float> GENZ_pt; std::vector<float> GENZ_eta; std::vector<float> GENZ_phi; std::vector<float> GENZ_mass;
+  std::vector<short> GENZ_DaughtersId; std::vector<short> GENZ_MomId;
+  float_t  GENmassZ1, GENmassZ2;
+  // GENpTZ1, GENpTZ2,
+  float_t GENdPhiZZ, GENmassZZ, GENpTZZ;
+  // Jets
+  // std::vector<float> GENjet_pt; std::vector<float> GENjet_eta; std::vector<float> GENjet_phi; std::vector<float> GENjet_mass;
+  std::vector<float> GENjetsPt_pt30_eta4p7; std::vector<float> GENjetsEta_pt30_eta4p7; std::vector<float> GENjetsPhi_pt30_eta4p7; std::vector<float> GENjetsMass_pt30_eta4p7;
+  std::vector<float> GENjetsPt_pt30_eta2p5; std::vector<float> GENjetsEta_pt30_eta2p5; std::vector<float> GENjetsPhi_pt30_eta2p5; std::vector<float> GENjetsMass_pt30_eta2p5;
+
+  Short_t GENnjets_pt30_eta4p7;
+  Short_t GENnjets_pt30_eta2p5;
 
 
 //FIXME: temporary fix to the mismatch of charge() and sign(pdgId()) for muons with BTT=4
@@ -597,6 +754,8 @@ private:
   virtual void FillJet(const pat::Jet& jet);
   virtual void FillPhoton(int year, const pat::Photon& photon);
   virtual void endJob() ;
+    
+  virtual void FillGENCandidate(const pat::CompositeCandidate& cand); //AT
 
   void FillHGenInfo(const math::XYZTLorentzVector Hp, float w);
   void FillZGenInfo(Short_t Z1Id, Short_t Z2Id,
@@ -608,7 +767,8 @@ private:
   void FillVisLepGenInfo(Short_t Lep1Id, Short_t Lep2Id, Short_t Lep3Id, Short_t Lep4Id,
     const math::XYZTLorentzVector Lep1, const math::XYZTLorentzVector Lep2, const math::XYZTLorentzVector Lep3, const math::XYZTLorentzVector Lep4);
   void FillAssocLepGenInfo(std::vector<const reco::Candidate *>& AssocLeps);
-
+  void FillLepGenIso(float_t Lep1Iso, float_t Lep2Iso, float_t Lep3Iso, float_t Lep4Iso); //AT
+  // void FillJetGen(float_t Lep1Iso, float_t Lep2Iso, float_t Lep3Iso, float_t Lep4Iso); //AT
   
   Float_t getAllWeight(const vector<const reco::Candidate*>& leptons);
   Float_t getHqTWeight(double mH, double genPt) const;
@@ -629,6 +789,7 @@ private:
   TH1F *hCounter;
 
   bool isMC;
+  bool preVFP=false;
   bool is_loose_ele_selection; // Collection includes candidates with loose electrons/TLEs
   bool applySkim;       //   "     "      "         skim (if skipEmptyEvents=true)
   bool skipEmptyEvents; // Skip events whith no selected candidate (otherwise, gen info is preserved for all events; candidates not passing trigger&&skim are flagged with negative ZZsel)
@@ -643,8 +804,6 @@ private:
   double sqrts;
   double Hmass;
 
-  //LHEHandler* lheHandler;
-  METCorrectionHandler* metCorrHandler;
   int apply_K_NNLOQCD_ZZGG; // 0: Do not; 1: NNLO/LO; 2: NNLO/NLO; 3: NLO/LO
   bool apply_K_NNLOQCD_ZZQQB;
   bool apply_K_NLOEW_ZZQQB;
@@ -652,6 +811,14 @@ private:
 
   edm::EDGetTokenT<edm::View<reco::Candidate> > genParticleToken;
   edm::Handle<edm::View<reco::Candidate> > genParticles;
+    
+  edm::EDGetTokenT<reco::GenParticleCollection> genParticleToken_bbf;//ATbbf
+  edm::Handle<reco::GenParticleCollection> genParticles_bbf;//ATbbf
+  edm::Handle<edm::View<pat::PackedGenParticle> > packedgenParticles; //ATbbf
+  edm::Handle<edm::View<reco::GenJet> > genJets; //ATjets
+  edm::EDGetTokenT<edm::View<reco::GenJet> > genJetsToken; //ATjets
+  edm::EDGetTokenT<edm::View<pat::PackedGenParticle> > packedgenParticlesToken; //ATbbf
+    
   edm::EDGetTokenT<GenEventInfoProduct> genInfoToken;
   edm::EDGetTokenT<edm::View<pat::CompositeCandidate> > candToken;
   edm::EDGetTokenT<edm::TriggerResults> triggerResultToken;
@@ -687,9 +854,20 @@ private:
   edm::EDGetTokenT<HTXS::HiggsClassification> htxsToken;
   edm::EDGetTokenT<edm::MergeableCounter> preSkimToken;
    
+  edm::EDGetTokenT<edm::View<pat::CompositeCandidate>> GENCandidatesToken; //ATMELA
+  edm::Handle<edm::View<pat::CompositeCandidate> > GENCandidates; //ATMELA
+    
   edm::EDGetTokenT< double > prefweight_token;
   edm::EDGetTokenT< double > prefweightup_token;
   edm::EDGetTokenT< double > prefweightdown_token;
+    
+  edm::EDGetTokenT< double > prefweightECAL_token;
+  edm::EDGetTokenT< double > prefweightupECAL_token;
+  edm::EDGetTokenT< double > prefweightdownECAL_token;
+
+  edm::EDGetTokenT< double > prefweightMuon_token;
+  edm::EDGetTokenT< double > prefweightupMuon_token;
+  edm::EDGetTokenT< double > prefweightdownMuon_token;
 
   PileUpWeight* pileUpReweight;
 
@@ -719,6 +897,8 @@ private:
   Float_t gen_sumWeights;
 
   string sampleName;
+    
+  string dataTag;
 
   std::vector<const reco::Candidate *> genFSR;
 
@@ -742,6 +922,8 @@ private:
   std::vector<std::string> VSmuDisc;
   std::vector<std::string> VSeDisc;
   std::vector<std::string> VSjetDisc;
+    
+  bool firstRun;
 
 };
 
@@ -769,7 +951,6 @@ HZZ4lNtupleMaker::HZZ4lNtupleMaker(const edm::ParameterSet& pset) :
   //recoMElist(pset.getParameter<std::vector<std::string>>("recoProbabilities")),
 
   //lheHandler(nullptr),
-  metCorrHandler(nullptr),
   apply_K_NNLOQCD_ZZGG(pset.getParameter<int>("Apply_K_NNLOQCD_ZZGG")),
   apply_K_NNLOQCD_ZZQQB(pset.getParameter<bool>("Apply_K_NNLOQCD_ZZQQB")),
   apply_K_NLOEW_ZZQQB(pset.getParameter<bool>("Apply_K_NLOEW_ZZQQB")),
@@ -777,13 +958,19 @@ HZZ4lNtupleMaker::HZZ4lNtupleMaker(const edm::ParameterSet& pset) :
 
   pileUpReweight(nullptr),
   sampleName(pset.getParameter<string>("sampleName")),
-  h_weight(0)
+  dataTag(pset.getParameter<string>("dataTag")),
+  h_weight(0),
 
+  firstRun(true)
 {
   //cout<< "Beginning Constructor\n\n\n" <<endl;
   consumesMany<std::vector< PileupSummaryInfo > >();
   genParticleToken = consumes<edm::View<reco::Candidate> >(edm::InputTag("prunedGenParticles"));
+  genParticleToken_bbf = consumes<reco::GenParticleCollection>(edm::InputTag("prunedGenParticles"));
+  packedgenParticlesToken = consumes<edm::View<pat::PackedGenParticle> > (edm::InputTag("packedGenParticles")); //ATbbf
   genInfoToken = consumes<GenEventInfoProduct>(edm::InputTag("generator"));
+  genJetsToken = consumes<edm::View<reco::GenJet> >(edm::InputTag("slimmedGenJets")); //ATjets
+  GENCandidatesToken = consumes<edm::View<pat::CompositeCandidate> >(edm::InputTag("GENLevel"));
   consumesMany<LHEEventProduct>();
   candToken = consumes<edm::View<pat::CompositeCandidate> >(edm::InputTag(theCandLabel));
 
@@ -838,11 +1025,21 @@ HZZ4lNtupleMaker::HZZ4lNtupleMaker(const edm::ParameterSet& pset) :
 
   isMC = myHelper.isMC();
    
-  if( isMC && (year == 2016 || year == 2017))
+  if( isMC )
   {
      prefweight_token = consumes< double >(edm::InputTag("prefiringweight:nonPrefiringProb"));
      prefweightup_token = consumes< double >(edm::InputTag("prefiringweight:nonPrefiringProbUp"));
      prefweightdown_token = consumes< double >(edm::InputTag("prefiringweight:nonPrefiringProbDown"));
+      
+     // CMSSW_10_6_26 stores ECAL and muon weights separately
+     // Access them here but not used in the analysis since prefiringweight = prefiringweightECAL*prefiringweightMuon
+     prefweightECAL_token = consumes< double >(edm::InputTag("prefiringweight:nonPrefiringProbECAL"));
+     prefweightupECAL_token = consumes< double >(edm::InputTag("prefiringweight:nonPrefiringProbECALUp"));
+     prefweightdownECAL_token = consumes< double >(edm::InputTag("prefiringweight:nonPrefiringProbECALDown"));
+
+     prefweightMuon_token = consumes< double >(edm::InputTag("prefiringweight:nonPrefiringProbMuon"));
+     prefweightupMuon_token = consumes< double >(edm::InputTag("prefiringweight:nonPrefiringProbMuonUp"));
+     prefweightdownMuon_token = consumes< double >(edm::InputTag("prefiringweight:nonPrefiringProbMuonDown"));
   }
    
    
@@ -851,9 +1048,8 @@ HZZ4lNtupleMaker::HZZ4lNtupleMaker(const edm::ParameterSet& pset) :
     //      ((MELAEvent::CandidateVVMode)(pset.getParameter<int>("VVMode")+1)), // FIXME: Need to pass strings and interpret them instead!
     //      pset.getParameter<int>("VVDecayMode"),
     //      (addLHEKinematics ? LHEHandler::doHiggsKinematics : LHEHandler::noKinematics),
-    //      year, LHEHandler::tryNNPDF30, LHEHandler::tryNLO
+    //      year, LHEHandler::tryNNPDF30, LHEHandler::tryNLO, LHEHandler::CMS_Run2_UL
     //    );
-    metCorrHandler = new METCorrectionHandler(Form("%i", year));
     htxsToken = consumes<HTXS::HiggsClassification>(edm::InputTag("rivetProducerHTXS","HiggsClassification"));
     pileUpReweight = new PileUpWeight(myHelper.sampleType(), myHelper.setup());
   }
@@ -913,9 +1109,13 @@ HZZ4lNtupleMaker::HZZ4lNtupleMaker(const edm::ParameterSet& pset) :
   gr_NNLOPSratio_pt_powheg_1jet = (TGraphErrors*)NNLOPS_weight_file->Get("gr_NNLOPSratio_pt_powheg_1jet");
   gr_NNLOPSratio_pt_powheg_2jet = (TGraphErrors*)NNLOPS_weight_file->Get("gr_NNLOPSratio_pt_powheg_2jet");
   gr_NNLOPSratio_pt_powheg_3jet = (TGraphErrors*)NNLOPS_weight_file->Get("gr_NNLOPSratio_pt_powheg_3jet");
+      
+  if(dataTag=="ULAPV"){
+    preVFP=true;
+  }
 
   //Scale factors for data/MC efficiency
-  if (!skipEleDataMCWeight && isMC) { lepSFHelper = new LeptonSFHelper(); }
+  if (!skipEleDataMCWeight && isMC) { lepSFHelper = new LeptonSFHelper(preVFP); }
 
   if (!skipHqTWeight) {
     //HqT weights
@@ -983,7 +1183,6 @@ HZZ4lNtupleMaker::~HZZ4lNtupleMaker()
   //clearMELABranches(); // Cleans LHE branches
   //delete lheHandler;
   delete pileUpReweight;
-  delete metCorrHandler;
 }
 
 
@@ -1004,6 +1203,10 @@ void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& e
   std::vector<const reco::Candidate *> genAssocLeps;
   std::vector<const reco::Candidate *> genVisZLeps;
   std::vector<const reco::Candidate *> genTauNus;
+    
+  std::vector<float> genIso; //AT
+  std::vector<const reco::GenJet *> genJet; //ATjets
+  std::vector<const reco::GenJet *> genCleanedJet; //ATjets
 
   edm::Handle<GenEventInfoProduct> genInfo;
 
@@ -1028,7 +1231,9 @@ void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& e
     PUWeight_Dn = pileUpReweight->weight(NTrueInt, PileUpWeight::PUvar::VARDOWN);
      
     // L1 prefiring weights
-    if( year == 2016 || year == 2017 )
+    // From CMSSW_10_6_26 available for all the years
+    // ECAL and muon weights accessible separately
+    if( year == 2016 || year == 2017 || year == 2018 )
     {
        edm::Handle< double > theprefweight;
        event.getByToken(prefweight_token, theprefweight ) ;
@@ -1041,21 +1246,45 @@ void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& e
        edm::Handle< double > theprefweightdown;
        event.getByToken(prefweightdown_token, theprefweightdown ) ;
        L1prefiringWeightDn =(*theprefweightdown);
-    }
-    else if ( year == 2018 )
-    {
-       L1prefiringWeight   = 1.;
-       L1prefiringWeightUp = 1.;
-       L1prefiringWeightDn = 1.;
+
+       // ECAL and Mu weights (access for redundancy but not used)
+       edm::Handle< double > theprefweightECAL;
+       event.getByToken(prefweightECAL_token, theprefweightECAL ) ;
+       L1prefiringWeight_ECAL =(*theprefweightECAL);
+
+       edm::Handle< double > theprefweightupECAL;
+       event.getByToken(prefweightupECAL_token, theprefweightupECAL ) ;
+       L1prefiringWeightUp_ECAL =(*theprefweightupECAL);
+
+       edm::Handle< double > theprefweightdownECAL;
+       event.getByToken(prefweightdownECAL_token, theprefweightdownECAL ) ;
+       L1prefiringWeightDn_ECAL =(*theprefweightdownECAL);
+
+       edm::Handle< double > theprefweightMuon;
+       event.getByToken(prefweightMuon_token, theprefweightMuon ) ;
+       L1prefiringWeight_Mu =(*theprefweightMuon);
+
+       edm::Handle< double > theprefweightupMuon;
+       event.getByToken(prefweightupMuon_token, theprefweightupMuon ) ;
+       L1prefiringWeightUp_Mu =(*theprefweightupMuon);
+
+       edm::Handle< double > theprefweightdownMuon;
+       event.getByToken(prefweightdownMuon_token, theprefweightdownMuon ) ;
+       L1prefiringWeightDn_Mu =(*theprefweightdownMuon);
     }
 
     event.getByToken(genParticleToken, genParticles);
     event.getByToken(genInfoToken, genInfo);
 
+    event.getByToken(genJetsToken, genJets); //ATjets
+    event.getByToken(packedgenParticlesToken, packedgenParticles); //ATbbf
+    event.getByToken(genParticleToken_bbf, genParticles_bbf); //ATbbf
+    event.getByToken(GENCandidatesToken, GENCandidates);//ATMELA      
+
     edm::Handle<HTXS::HiggsClassification> htxs;
     event.getByToken(htxsToken,htxs);
 
-    MCHistoryTools mch(event, sampleName, genParticles, genInfo);
+    MCHistoryTools mch(event, sampleName, genParticles, genInfo, genJets, packedgenParticles);
     genFinalState = mch.genFinalState();
     genProcessId = mch.getProcessID();
     genHEPMCweight_NNLO = genHEPMCweight = mch.gethepMCweight(); // Overridden by LHEHandler if genHEPMCweight==1.
@@ -1069,20 +1298,21 @@ void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& e
         throw e;
       }
       auto nominal = genweights[0];
-      PythiaWeight_isr_muRoneoversqrt2 = genweights[2] / nominal;
-      PythiaWeight_fsr_muRoneoversqrt2 = genweights[3] / nominal;
-      PythiaWeight_isr_muRsqrt2 = genweights[4] / nominal;
-      PythiaWeight_fsr_muRsqrt2 = genweights[5] / nominal;
+      // see twiki here with definitions and order : https://twiki.cern.ch/twiki/bin/view/CMS/HowToPDF#Parton_shower_weights
+      PythiaWeight_isr_muRoneoversqrt2 = genweights[24] / nominal;
+      PythiaWeight_fsr_muRoneoversqrt2 = genweights[2] / nominal;
+      PythiaWeight_isr_muRsqrt2 = genweights[25] / nominal;
+      PythiaWeight_fsr_muRsqrt2 = genweights[3] / nominal;
 
-      PythiaWeight_isr_muR0p5 = genweights[6] / nominal;
-      PythiaWeight_fsr_muR0p5 = genweights[7] / nominal;
-      PythiaWeight_isr_muR2 = genweights[8] / nominal;
-      PythiaWeight_fsr_muR2 = genweights[9] / nominal;
+      PythiaWeight_isr_muR0p5 = genweights[26] / nominal;
+      PythiaWeight_fsr_muR0p5 = genweights[4] / nominal;
+      PythiaWeight_isr_muR2 = genweights[27] / nominal;
+      PythiaWeight_fsr_muR2 = genweights[5] / nominal;
 
-      PythiaWeight_isr_muR0p25 = genweights[10] / nominal;
-      PythiaWeight_fsr_muR0p25 = genweights[11] / nominal;
-      PythiaWeight_isr_muR4 = genweights[12] / nominal;
-      PythiaWeight_fsr_muR4 = genweights[13] / nominal;
+      PythiaWeight_isr_muR0p25 = genweights[28] / nominal;
+      PythiaWeight_fsr_muR0p25 = genweights[6] / nominal;
+      PythiaWeight_isr_muR4 = genweights[29] / nominal;
+      PythiaWeight_fsr_muR4 = genweights[7] / nominal;
     } else {
       PythiaWeight_isr_muRsqrt2 = PythiaWeight_isr_muRoneoversqrt2 = PythiaWeight_isr_muR2 =
       PythiaWeight_isr_muR0p5 = PythiaWeight_isr_muR4 = PythiaWeight_isr_muR0p25 =
@@ -1108,7 +1338,10 @@ void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& e
    genFSR       = mch.genFSR();
    genVisZLeps	= mch.sortedVisGenZZLeps();
    genTauNus	= mch.genTauNus();
-
+      
+   genIso       = mch.genIso(); //AT
+   genJet      = mch.GenJets(); //ATjets
+   genCleanedJet = mch.GenCleanedJets(); //ATjets
 
 
     if(genH != 0){
@@ -1118,6 +1351,28 @@ void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& e
       FillHGenInfo((genZLeps.at(0)->p4()+genZLeps.at(1)->p4()+genZLeps.at(2)->p4()+genZLeps.at(3)->p4()),0);
     }
 
+    // ATjets
+    if (genJet.size() != 0) {
+      for (unsigned int i = 0; i<genJet.size(); ++i){
+        GenJetPt.push_back(genJet[i]->pt());
+        GenJetMass.push_back(genJet[i]->mass());
+        GenJetEta.push_back(genJet[i]->eta());
+        GenJetPhi.push_back(genJet[i]->phi());
+        GenJetRapidity.push_back(genJet[i]->rapidity());
+      }
+      nGenJet = genJet.size();
+
+      for (unsigned int i = 0; i<genCleanedJet.size(); ++i){
+        GenCleanedJetPt.push_back(genCleanedJet[i]->pt());
+        GenCleanedJetMass.push_back(genCleanedJet[i]->mass());
+        GenCleanedJetEta.push_back(genCleanedJet[i]->eta());
+        GenCleanedJetPhi.push_back(genCleanedJet[i]->phi());
+        GenCleanedJetRapidity.push_back(genCleanedJet[i]->rapidity());
+      }
+      nCleanedGenJet = genCleanedJet.size();
+
+    }
+      
     if (genFinalState!=BUGGY) {
 
       if (genZLeps.size()==4) {
@@ -1182,6 +1437,22 @@ void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& e
 
       if (genAssocLeps.size()==1 || genAssocLeps.size()==2) {
         FillAssocLepGenInfo(genAssocLeps);
+      }
+        
+      if(genIso.size()==4){
+        FillLepGenIso(genIso.at(0), genIso.at(1), genIso.at(2), genIso.at(3)); //AT
+      }
+      else if(genIso.size()==3){
+        FillLepGenIso(genIso.at(0), genIso.at(1), genIso.at(2), -1);
+      }
+      else if(genIso.size()==2){
+        FillLepGenIso(genIso.at(0), genIso.at(1), -1, -1);
+      }
+      else if(genIso.size()==1){
+        FillLepGenIso(genIso.at(0), -1, -1, -1);
+      }
+      else if(genIso.size()==0){
+        FillLepGenIso(-1, -1, -1, -1);
       }
 
       // keep track of sum of weights
@@ -1279,11 +1550,18 @@ void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& e
   genxsection=genxsec;
   genbranchingratio=genbr;
 
+  // General event information
+  RunNumber=event.id().run();
+  LumiNumber=event.luminosityBlock();
+  EventNumber=event.id().event();
+  xsection=xsec;
+  genxsection=genxsec;
+  genbranchingratio=genbr;
+
   // Primary vertices
   Handle<vector<reco::Vertex> > vertices;
   event.getByToken(vtxToken,vertices);
   Nvtx=vertices->size();
-
 
   // Jets (cleaned wrt all tight isolated leptons)
   Handle<edm::View<pat::Jet> > CleanedJets;
@@ -1485,10 +1763,46 @@ void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& e
 
     // count jes up/down njets pt30
     float jes_unc = cleanedJets[i]->userFloat("jes_unc");
-
+    float jes_unc_Total = cleanedJets[i]->userFloat("jes_unc_split_Total");
+    float jes_unc_Abs = cleanedJets[i]->userFloat("jes_unc_split_Abs");
+    float jes_unc_Abs_year = cleanedJets[i]->userFloat("jes_unc_split_Abs_year");
+    float jes_unc_BBEC1 = cleanedJets[i]->userFloat("jes_unc_split_BBEC1");
+    float jes_unc_BBEC1_year = cleanedJets[i]->userFloat("jes_unc_split_BBEC1_year");
+    float jes_unc_EC2 = cleanedJets[i]->userFloat("jes_unc_split_EC2");
+    float jes_unc_EC2_year = cleanedJets[i]->userFloat("jes_unc_split_EC2_year");
+    float jes_unc_FlavQCD = cleanedJets[i]->userFloat("jes_unc_split_FlavQCD");
+    float jes_unc_HF = cleanedJets[i]->userFloat("jes_unc_split_HF");
+    float jes_unc_HF_year = cleanedJets[i]->userFloat("jes_unc_split_HF_year");
+    float jes_unc_RelBal = cleanedJets[i]->userFloat("jes_unc_split_RelBal");
+    float jes_unc_RelSample_year = cleanedJets[i]->userFloat("jes_unc_split_RelSample_year");
+      
     float pt_nominal = cleanedJets[i]->pt();
     float pt_jes_up = pt_nominal * (1.0 + jes_unc);
+    float pt_jes_up_Total = pt_nominal * (1.0 + jes_unc_Total);
+    float pt_jes_up_Abs = pt_nominal * (1.0 + jes_unc_Abs);
+    float pt_jes_up_Abs_year = pt_nominal * (1.0 + jes_unc_Abs_year);
+    float pt_jes_up_BBEC1 = pt_nominal * (1.0 + jes_unc_BBEC1);
+    float pt_jes_up_BBEC1_year = pt_nominal * (1.0 + jes_unc_BBEC1_year);
+    float pt_jes_up_EC2 = pt_nominal * (1.0 + jes_unc_EC2);
+    float pt_jes_up_EC2_year = pt_nominal * (1.0 + jes_unc_EC2_year);
+    float pt_jes_up_FlavQCD = pt_nominal * (1.0 + jes_unc_FlavQCD);
+    float pt_jes_up_HF = pt_nominal * (1.0 + jes_unc_HF);
+    float pt_jes_up_HF_year = pt_nominal * (1.0 + jes_unc_HF_year);
+    float pt_jes_up_RelBal = pt_nominal * (1.0 + jes_unc_RelBal);
+    float pt_jes_up_RelSample_year = pt_nominal * (1.0 + jes_unc_RelSample_year);
     float pt_jes_dn = pt_nominal * (1.0 - jes_unc);
+    float pt_jes_dn_Total = pt_nominal * (1.0 - jes_unc_Total);
+    float pt_jes_dn_Abs = pt_nominal * (1.0 - jes_unc_Abs);
+    float pt_jes_dn_Abs_year = pt_nominal * (1.0 - jes_unc_Abs_year);
+    float pt_jes_dn_BBEC1 = pt_nominal * (1.0 - jes_unc_BBEC1);
+    float pt_jes_dn_BBEC1_year = pt_nominal * (1.0 - jes_unc_BBEC1_year);
+    float pt_jes_dn_EC2 = pt_nominal * (1.0 - jes_unc_EC2);
+    float pt_jes_dn_EC2_year = pt_nominal * (1.0 - jes_unc_EC2_year);
+    float pt_jes_dn_FlavQCD = pt_nominal * (1.0 - jes_unc_FlavQCD);
+    float pt_jes_dn_HF = pt_nominal * (1.0 - jes_unc_HF);
+    float pt_jes_dn_HF_year = pt_nominal * (1.0 - jes_unc_HF_year);
+    float pt_jes_dn_RelBal = pt_nominal * (1.0 - jes_unc_RelBal);
+    float pt_jes_dn_RelSample_year = pt_nominal * (1.0 - jes_unc_RelSample_year);
 
     if(pt_nominal>30){
       ++nCleanedJetsPt30;
@@ -1501,9 +1815,105 @@ void HZZ4lNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& e
       ++nCleanedJetsPt30_jesUp;
       if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesUp;
     }
+    if(pt_jes_up_Total>30){
+      ++nCleanedJetsPt30_jesUp_Total;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesUp_Total;
+    }
+    if(pt_jes_up_Abs>30){
+      ++nCleanedJetsPt30_jesUp_Abs;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesUp_Abs;
+    }
+    if(pt_jes_up_Abs_year>30){
+      ++nCleanedJetsPt30_jesUp_Abs_year;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesUp_Abs_year;
+    }
+    if(pt_jes_up_BBEC1>30){
+      ++nCleanedJetsPt30_jesUp_BBEC1;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesUp_BBEC1;
+    }
+    if(pt_jes_up_BBEC1_year>30){
+      ++nCleanedJetsPt30_jesUp_BBEC1_year;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesUp_BBEC1_year;
+    }
+    if(pt_jes_up_EC2>30){
+      ++nCleanedJetsPt30_jesUp_EC2;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesUp_EC2;
+    }
+    if(pt_jes_up_EC2_year>30){
+      ++nCleanedJetsPt30_jesUp_EC2_year;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesUp_EC2_year;
+    }
+    if(pt_jes_up_FlavQCD>30){
+      ++nCleanedJetsPt30_jesUp_FlavQCD;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesUp_FlavQCD;
+    }
+    if(pt_jes_up_HF>30){
+      ++nCleanedJetsPt30_jesUp_HF;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesUp_HF;
+    }
+    if(pt_jes_up_HF_year>30){
+      ++nCleanedJetsPt30_jesUp_HF_year;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesUp_HF_year;
+    }
+    if(pt_jes_up_RelBal>30){
+      ++nCleanedJetsPt30_jesUp_RelBal;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesUp_RelBal;
+    }
+    if(pt_jes_up_RelSample_year>30){
+      ++nCleanedJetsPt30_jesUp_RelSample_year;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesUp_RelSample_year;
+    }
     if(pt_jes_dn>30){
       ++nCleanedJetsPt30_jesDn;
       if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesDn;
+    }
+    if(pt_jes_dn_Total>30){
+      ++nCleanedJetsPt30_jesDn_Total;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesDn_Total;
+    }
+    if(pt_jes_dn_Abs>30){
+      ++nCleanedJetsPt30_jesDn_Abs;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesDn_Abs;
+    }
+    if(pt_jes_dn_Abs_year>30){
+      ++nCleanedJetsPt30_jesDn_Abs_year;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesDn_Abs_year;
+    }
+    if(pt_jes_dn_BBEC1>30){
+      ++nCleanedJetsPt30_jesDn_BBEC1;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesDn_BBEC1;
+    }
+    if(pt_jes_dn_BBEC1_year>30){
+      ++nCleanedJetsPt30_jesDn_BBEC1_year;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesDn_BBEC1_year;
+    }
+    if(pt_jes_dn_EC2>30){
+      ++nCleanedJetsPt30_jesDn_EC2;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesDn_EC2;
+    }
+    if(pt_jes_dn_EC2_year>30){
+      ++nCleanedJetsPt30_jesDn_EC2_year;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesDn_EC2_year;
+    }
+    if(pt_jes_dn_FlavQCD>30){
+      ++nCleanedJetsPt30_jesDn_FlavQCD;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesDn_FlavQCD;
+    }
+    if(pt_jes_dn_HF>30){
+      ++nCleanedJetsPt30_jesDn_HF;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesDn_HF;
+    }
+    if(pt_jes_dn_HF_year>30){
+      ++nCleanedJetsPt30_jesDn_HF_year;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesDn_HF_year;
+    }
+    if(pt_jes_dn_RelBal>30){
+      ++nCleanedJetsPt30_jesDn_RelBal;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesDn_RelBal;
+    }
+    if(pt_jes_dn_RelSample_year>30){
+      ++nCleanedJetsPt30_jesDn_RelSample_year;
+      if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jesDn_RelSample_year;
     }
 
     // count jer up/down njets pt30
@@ -1559,6 +1969,7 @@ void HZZ4lNtupleMaker::FillJet(const pat::Jet& jet)
    JetEta .push_back( jet.eta());
    JetPhi .push_back( jet.phi());
    JetMass .push_back( jet.p4().M());
+   JetEnergy .push_back( jet.p4().energy());
    JetBTagger .push_back( jet.userFloat("bTagger"));
    JetIsBtagged .push_back( jet.userFloat("isBtagged"));
    JetIsBtaggedWithSF .push_back( jet.userFloat("isBtaggedWithSF"));
@@ -1571,12 +1982,48 @@ void HZZ4lNtupleMaker::FillJet(const pat::Jet& jet)
      JetPtD .push_back( jet.userFloat("ptD"));
    }
    JetSigma .push_back(jet.userFloat("jes_unc"));
-   
+   JetSigma_Total .push_back(jet.userFloat("jes_unc_split_Total"));
+   JetSigma_Abs .push_back(jet.userFloat("jes_unc_split_Abs"));
+   JetSigma_Abs_year .push_back(jet.userFloat("jes_unc_split_Abs_year"));
+   JetSigma_BBEC1 .push_back(jet.userFloat("jes_unc_split_BBEC1"));
+   JetSigma_BBEC1_year .push_back(jet.userFloat("jes_unc_split_BBEC1_year"));
+   JetSigma_EC2 .push_back(jet.userFloat("jes_unc_split_EC2"));
+   JetSigma_EC2_year .push_back(jet.userFloat("jes_unc_split_EC2_year"));
+   JetSigma_FlavQCD .push_back(jet.userFloat("jes_unc_split_FlavQCD"));
+   JetSigma_HF .push_back(jet.userFloat("jes_unc_split_HF"));
+   JetSigma_HF_year .push_back(jet.userFloat("jes_unc_split_HF_year"));
+   JetSigma_RelBal .push_back(jet.userFloat("jes_unc_split_RelBal"));
+   JetSigma_RelSample_year .push_back(jet.userFloat("jes_unc_split_RelSample_year"));
+    
    JetRawPt  .push_back( jet.userFloat("RawPt"));
    JetPtJEC_noJER .push_back( jet.userFloat("pt_JEC_noJER"));
    
    JetJESUp .push_back(jet.userFloat("pt_jesup"));
+   JetJESUp_Total .push_back(jet.userFloat("pt_jesup_split_Total"));
+   JetJESUp_Abs .push_back(jet.userFloat("pt_jesup_split_Abs"));
+   JetJESUp_Abs_year .push_back(jet.userFloat("pt_jesup_split_Abs_year"));
+   JetJESUp_BBEC1 .push_back(jet.userFloat("pt_jesup_split_BBEC1"));
+   JetJESUp_BBEC1_year .push_back(jet.userFloat("pt_jesup_split_BBEC1_year"));
+   JetJESUp_EC2 .push_back(jet.userFloat("pt_jesup_split_EC2"));
+   JetJESUp_EC2_year .push_back(jet.userFloat("pt_jesup_split_EC2_year"));
+   JetJESUp_FlavQCD .push_back(jet.userFloat("pt_jesup_split_FlavQCD"));
+   JetJESUp_HF .push_back(jet.userFloat("pt_jesup_split_HF"));
+   JetJESUp_HF_year .push_back(jet.userFloat("pt_jesup_split_HF_year"));
+   JetJESUp_RelBal .push_back(jet.userFloat("pt_jesup_split_RelBal"));
+   JetJESUp_RelSample_year .push_back(jet.userFloat("pt_jesup_split_RelSample_year"));
    JetJESDown .push_back(jet.userFloat("pt_jesdn"));
+   JetJESDown_Total .push_back(jet.userFloat("pt_jesdn_split_Total"));
+   JetJESDown_Abs .push_back(jet.userFloat("pt_jesdn_split_Abs"));
+   JetJESDown_Abs_year .push_back(jet.userFloat("pt_jesdn_split_Abs_year"));
+   JetJESDown_BBEC1 .push_back(jet.userFloat("pt_jesdn_split_BBEC1"));
+   JetJESDown_BBEC1_year .push_back(jet.userFloat("pt_jesdn_split_BBEC1_year"));
+   JetJESDown_EC2 .push_back(jet.userFloat("pt_jesdn_split_EC2"));
+   JetJESDown_EC2_year .push_back(jet.userFloat("pt_jesdn_split_EC2_year"));
+   JetJESDown_FlavQCD .push_back(jet.userFloat("pt_jesdn_split_FlavQCD"));
+   JetJESDown_HF .push_back(jet.userFloat("pt_jesdn_split_HF"));
+   JetJESDown_HF_year .push_back(jet.userFloat("pt_jesdn_split_HF_year"));
+   JetJESDown_RelBal .push_back(jet.userFloat("pt_jesdn_split_RelBal"));
+   JetJESDown_RelSample_year .push_back(jet.userFloat("pt_jesdn_split_RelSample_year"));
 
    JetJERUp .push_back(jet.userFloat("pt_jerup"));
    JetJERDown .push_back(jet.userFloat("pt_jerdn"));
@@ -1821,33 +2268,13 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
     MET = cand.userFloat("MET");
     METPhi = cand.userFloat("METPhi");
 
-    if(addKinRefit){
-      if (cand.hasUserFloat("ZZMassRefit")) {
-  ZZMassRefit = cand.userFloat("ZZMassRefit");
-  ZZMassRefitErr = cand.userFloat("ZZMassRefitErr");
-  ZZMassUnrefitErr = cand.userFloat("ZZMassUnrefitErr");
-      }
-    }
     if(addVtxFit){
       ZZMassCFit = cand.userFloat("CFitM");
       ZZChi2CFit = cand.userFloat("CFitChi2");
     }
-//     if(addZZKinfit){
-//       ZZKMass  = cand.userFloat("ZZKMass");
-//       ZZKChi2  = cand.userFloat("ZZKChi2");
-//     }
-//     if(addSVfit){
-//       ZZSVMass	= cand.userFloat("SVfitMass");
-//       ZZSVPt	= cand.userFloat("SVpt");
-//       ZZSVEta 	= cand.userFloat("SVeta");
-//       ZZSVPhi 	= cand.userFloat("SVphi");
-//     }
 
     DiJetMass  = cand.userFloat("DiJetMass");
     DiJetDEta  = cand.userFloat("DiJetDEta");
-    DiJetFisher  = cand.userFloat("DiJetFisher");
-    //    DiJetMassPlus  = cand.userFloat("DiJetMassPlus");
-    //    DiJetMassMinus  = cand.userFloat("DiJetMassMinus");
 
     //Fill the angular variables
     helcosthetaZ1 = cand.userFloat("costheta1");
@@ -1878,7 +2305,6 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
     Z2   = cand.daughter(1); // This is actually the additional lepton!
     userdatahelpers::getSortedLeptons(cand, leptons, labels, fsrPhot, fsrIndex, false); // note: we get just 3 leptons in this case.
   }
-
   Z1Mass = Z1->mass();
   Z1Pt =   Z1->pt();
   Z1Eta =  Z1->eta();
@@ -1892,7 +2318,6 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
   Z1eleHLTMatch2 = userdatahelpers::getUserFloat(Z1,"eleHLTMatch2");
   Z1eleHLTMatch = userdatahelpers::getUserFloat(Z1,"eleHLTMatch");
 
- 
   Z2Mass = Z2->mass();
   Z2Pt =   Z2->pt();
   Z2Eta  = Z2->eta();
@@ -1911,13 +2336,21 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
     Z2eleHLTMatch2 = userdatahelpers::getUserFloat(Z2,"eleHLTMatch2");
     Z2eleHLTMatch = userdatahelpers::getUserFloat(Z2,"eleHLTMatch");
   }
-  Z2isGoodTau=userdatahelpers::hasUserFloat(Z2,"isGoodTau");
+  if (theChannel!=ZL) 
+    Z2isGoodTau=userdatahelpers::getUserFloat(Z2,"isGoodTau");
+  else if (abs(Z2Flav)==15) {
+    Z2isGoodTau_Ele=userdatahelpers::getUserFloat(Z2,"isGood_Ele");
+    Z2isGoodTau_Mu=userdatahelpers::getUserFloat(Z2,"isGood_Mu");
+    Z2isGoodTau_Tau=userdatahelpers::getUserFloat(Z2,"isGood_Tau");
+  }
 
+  if (theChannel!=ZL) {
 //-------------------------------------------------------------------------------------------------------
 //----------------------------------------SV FIT---------------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
+  
   bool doSVFit=false;
-  if (theChannel!=ZL && (abs(Z2Flav)==165 || abs(Z2Flav)==195 || abs(Z2Flav)==225)) doSVFit=true;
+  if (theChannel!=ZL && (abs(Z2Flav)==165 || abs(Z2Flav)==195 || abs(Z2Flav)==225 || abs(Z2Flav)==143)) doSVFit=true;
   bool swi;
   if (abs(leptons[2]->pdgId()) > abs(leptons[3]->pdgId())) swi=true;
   else if (abs(leptons[2]->pdgId()) < abs(leptons[3]->pdgId())) swi=false;
@@ -1938,7 +2371,8 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
   met.SetPxPyPzE(METx,METy,0,std::hypot(METx,METy));
   if (abs(Z2Flav)==195) pairType=0;
   else if (abs(Z2Flav)==165) pairType=1;
-  else pairType=2;
+  else if (abs(Z2Flav)==225) pairType=2;
+  else pairType=3;
   dm1=abs(leptons[idx1]->pdgId())==15?userdatahelpers::getUserFloat(leptons[idx1],"decayMode"):-1;
   dm2=abs(leptons[idx2]->pdgId())==15?userdatahelpers::getUserFloat(leptons[idx2],"decayMode"):-1;
   if (doSVFit) {
@@ -2209,7 +2643,8 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
 //-------------------------------------------------------------------------------------------------------
 //----------------------------------------END SV FIT-----------------------------------------------------
 //-------------------------------------------------------------------------------------------------------
-
+  }
+    
   const reco::Candidate* non_TLE_Z = nullptr;
   size_t TLE_index = 999;
   if(abs(Z1Flav) == 11*11 || abs(Z1Flav) == 13*13) non_TLE_Z = Z1;
@@ -2292,16 +2727,18 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
     LepBDT  .push_back( (lepFlav==13 || lepFlav==11) ? userdatahelpers::getUserFloat(leptons[i],"BDT") : -99. );
     LepisCrack.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"isCrack") : 0 );
     LepMissingHit.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"missingHit") : 0 );
-    LepScale_Total_Up.push_back( (lepFlav==13 || lepFlav==11) ? userdatahelpers::getUserFloat(leptons[i],"scale_total_up") : -99. );
-    LepScale_Total_Dn.push_back( (lepFlav==13 || lepFlav==11) ? userdatahelpers::getUserFloat(leptons[i],"scale_total_dn") : -99. );
+    if (userdatahelpers::hasUserFloat(leptons[i],"scale_total_up")) { // These are not set when APPLYMUCORR=false
+      LepScale_Total_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"scale_total_up") );
+      LepScale_Total_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"scale_total_dn") );
+      LepSigma_Total_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"sigma_total_up") );
+      LepSigma_Total_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"sigma_total_dn") );
+    }
     LepScale_Stat_Up.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"scale_stat_up") : -99. );
     LepScale_Stat_Dn.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"scale_stat_dn") : -99. );
     LepScale_Syst_Up.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"scale_syst_up") : -99. );
     LepScale_Syst_Dn.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"scale_syst_dn") : -99. );
     LepScale_Gain_Up.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"scale_gain_up") : -99. );
     LepScale_Gain_Dn.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"scale_gain_dn") : -99. );
-    LepSigma_Total_Up.push_back( (lepFlav==13 || lepFlav==11) ? userdatahelpers::getUserFloat(leptons[i],"sigma_total_up") : -99. );
-    LepSigma_Total_Dn.push_back( (lepFlav==13 || lepFlav==11) ? userdatahelpers::getUserFloat(leptons[i],"sigma_total_dn") : -99. );
     LepSigma_Rho_Up.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"sigma_rho_up") : -99. );
     LepSigma_Rho_Dn.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"sigma_rho_dn") : -99. );
     LepSigma_Phi_Up.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"sigma_phi_up") : -99. );
@@ -2475,6 +2912,14 @@ void HZZ4lNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool e
 }
 
 
+void HZZ4lNtupleMaker::FillGENCandidate(const pat::CompositeCandidate& cand){ //AT
+  passedFiducialSelection_bbf = cand.userData<bool>("passedFiducial");
+  if(cand.userFloat("event") == 91257) {
+    cout << passedFiducialSelection_bbf << endl;
+  }
+}
+
+
 void HZZ4lNtupleMaker::getCheckedUserFloat(const pat::CompositeCandidate& cand, const std::string& strval, Float_t& setval, Float_t defaultval){
   if (cand.hasUserFloat(strval)) setval = cand.userFloat(strval);
   else setval = defaultval;
@@ -2555,7 +3000,6 @@ void HZZ4lNtupleMaker::endJob()
 // ------------ method called when starting to processes a run  ------------
 void HZZ4lNtupleMaker::beginRun(edm::Run const& iRun, edm::EventSetup const&)
 {
-  static bool firstRun=true;
   if (firstRun){
     //if (lheHandler){
     //  edm::Handle<LHERunInfoProduct> lhe_runinfo;
@@ -2779,9 +3223,10 @@ void HZZ4lNtupleMaker::FillLepGenInfo(Short_t Lep1Id, Short_t Lep2Id, Short_t Le
   GenLep4M=Lep4.M();
   GenLep4Id=Lep4Id;
 
-  //can comment this back in if Gen angles are needed for any reason...
-  //TUtil::computeAngles(zzanalysis::tlv(Lep1), Lep1Id, zzanalysis::tlv(Lep2), Lep2Id, zzanalysis::tlv(Lep3), Lep3Id, zzanalysis::tlv(Lep4), Lep4Id, Gencosthetastar, GenhelcosthetaZ1, GenhelcosthetaZ2, Genhelphi, GenphistarZ1);
-
+//   if (addGenAngles) {
+//     TUtil::computeAngles(Gencosthetastar, GenhelcosthetaZ1, GenhelcosthetaZ2, Genhelphi, GenphistarZ1, zzanalysis::tlv(Lep1), Lep1Id, zzanalysis::tlv(Lep2), Lep2Id, zzanalysis::tlv(Lep3), Lep3Id, zzanalysis::tlv(Lep4), Lep4Id);
+//   }
+    
   return;
 }
 
@@ -2847,6 +3292,16 @@ void HZZ4lNtupleMaker::FillHGenInfo(const math::XYZTLorentzVector pH, float w)
 }
 
 
+void HZZ4lNtupleMaker::FillLepGenIso(float_t Lep1Iso, float_t Lep2Iso, float_t Lep3Iso, float_t Lep4Iso)
+{
+  GenLep1Iso = Lep1Iso;
+  GenLep2Iso = Lep2Iso;
+  GenLep3Iso = Lep3Iso;
+  GenLep4Iso = Lep4Iso;
+
+  return;
+}//AT
+
 void HZZ4lNtupleMaker::BookAllBranches(){
    //Event variables
   myTree->Book("RunNumber",RunNumber, failedTreeLevel >= minimalFailedTree);
@@ -2885,20 +3340,69 @@ void HZZ4lNtupleMaker::BookAllBranches(){
   myTree->Book("METxDOWNJER", METxDOWNJER, failedTreeLevel >= fullFailedTree);
   myTree->Book("METyDOWNJER", METyDOWNJER, failedTreeLevel >= fullFailedTree);
     
-  myTree->Book("nCleanedJets",nCleanedJets, failedTreeLevel >= fullFailedTree);
-  myTree->Book("nCleanedJetsPt30",nCleanedJetsPt30, failedTreeLevel >= fullFailedTree);
-  myTree->Book("nCleanedJetsPt30_jesUp",nCleanedJetsPt30_jesUp, failedTreeLevel >= fullFailedTree);
-  myTree->Book("nCleanedJetsPt30_jesDn",nCleanedJetsPt30_jesDn, failedTreeLevel >= fullFailedTree);
-  myTree->Book("nCleanedJetsPt30_jerUp",nCleanedJetsPt30_jerUp, failedTreeLevel >= fullFailedTree);
-  myTree->Book("nCleanedJetsPt30_jerDn",nCleanedJetsPt30_jerDn, failedTreeLevel >= fullFailedTree);
-  myTree->Book("nCleanedJetsPt30BTagged",nCleanedJetsPt30BTagged, failedTreeLevel >= fullFailedTree);
-  myTree->Book("nCleanedJetsPt30BTagged_bTagSF",nCleanedJetsPt30BTagged_bTagSF, failedTreeLevel >= fullFailedTree);
-  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesUp",nCleanedJetsPt30BTagged_bTagSF_jesUp, failedTreeLevel >= fullFailedTree);
-  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesDn",nCleanedJetsPt30BTagged_bTagSF_jesDn, failedTreeLevel >= fullFailedTree);
-  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jerUp",nCleanedJetsPt30BTagged_bTagSF_jerUp, failedTreeLevel >= fullFailedTree);
-  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jerDn",nCleanedJetsPt30BTagged_bTagSF_jerDn, failedTreeLevel >= fullFailedTree);
-  myTree->Book("nCleanedJetsPt30BTagged_bTagSFUp",nCleanedJetsPt30BTagged_bTagSFUp, failedTreeLevel >= fullFailedTree);
-  myTree->Book("nCleanedJetsPt30BTagged_bTagSFDn",nCleanedJetsPt30BTagged_bTagSFDn, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJets",nCleanedJets, failedTreeLevel >= minimalFailedTree);
+  myTree->Book("nCleanedJetsPt30",nCleanedJetsPt30, failedTreeLevel >= minimalFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesUp",nCleanedJetsPt30_jesUp, failedTreeLevel >= minimalFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesUp_Total",nCleanedJetsPt30_jesUp_Total, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesUp_Abs",nCleanedJetsPt30_jesUp_Abs, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesUp_Abs_year",nCleanedJetsPt30_jesUp_Abs_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesUp_BBEC1",nCleanedJetsPt30_jesUp_BBEC1, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesUp_BBEC1_year",nCleanedJetsPt30_jesUp_BBEC1_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesUp_EC2",nCleanedJetsPt30_jesUp_EC2, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesUp_EC2_year",nCleanedJetsPt30_jesUp_EC2_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesUp_FlavQCD",nCleanedJetsPt30_jesUp_FlavQCD, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesUp_HF",nCleanedJetsPt30_jesUp_HF, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesUp_HF_year",nCleanedJetsPt30_jesUp_HF_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesUp_RelBal",nCleanedJetsPt30_jesUp_RelBal, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesUp_RelSample_year",nCleanedJetsPt30_jesUp_RelSample_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesDn",nCleanedJetsPt30_jesDn, failedTreeLevel >= minimalFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesDn_Total",nCleanedJetsPt30_jesDn_Total, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesDn_Abs",nCleanedJetsPt30_jesDn_Abs, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesDn_Abs_year",nCleanedJetsPt30_jesDn_Abs_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesDn_BBEC1",nCleanedJetsPt30_jesDn_BBEC1, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesDn_BBEC1_year",nCleanedJetsPt30_jesDn_BBEC1_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesDn_EC2",nCleanedJetsPt30_jesDn_EC2, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesDn_EC2_year",nCleanedJetsPt30_jesDn_EC2_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesDn_FlavQCD",nCleanedJetsPt30_jesDn_FlavQCD, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesDn_HF",nCleanedJetsPt30_jesDn_HF, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesDn_HF_year",nCleanedJetsPt30_jesDn_HF_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesDn_RelBal",nCleanedJetsPt30_jesDn_RelBal, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jesDn_RelSample_year",nCleanedJetsPt30_jesDn_RelSample_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30_jerUp",nCleanedJetsPt30_jerUp, failedTreeLevel >= minimalFailedTree);
+  myTree->Book("nCleanedJetsPt30_jerDn",nCleanedJetsPt30_jerDn, failedTreeLevel >= minimalFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged",nCleanedJetsPt30BTagged, failedTreeLevel >= minimalFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF",nCleanedJetsPt30BTagged_bTagSF, failedTreeLevel >= minimalFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesUp",nCleanedJetsPt30BTagged_bTagSF_jesUp, failedTreeLevel >= minimalFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesUp_Total",nCleanedJetsPt30BTagged_bTagSF_jesUp_Total, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesUp_Abs",nCleanedJetsPt30BTagged_bTagSF_jesUp_Abs, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesUp_Abs_year",nCleanedJetsPt30BTagged_bTagSF_jesUp_Abs_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesUp_BBEC1",nCleanedJetsPt30BTagged_bTagSF_jesUp_BBEC1, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesUp_BBEC1_year",nCleanedJetsPt30BTagged_bTagSF_jesUp_BBEC1_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesUp_EC2",nCleanedJetsPt30BTagged_bTagSF_jesUp_EC2, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesUp_EC2_year",nCleanedJetsPt30BTagged_bTagSF_jesUp_EC2_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesUp_FlavQCD",nCleanedJetsPt30BTagged_bTagSF_jesUp_FlavQCD, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesUp_HF",nCleanedJetsPt30BTagged_bTagSF_jesUp_HF, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesUp_HF_year",nCleanedJetsPt30BTagged_bTagSF_jesUp_HF_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesUp_RelBal",nCleanedJetsPt30BTagged_bTagSF_jesUp_RelBal, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesUp_RelSample_year",nCleanedJetsPt30BTagged_bTagSF_jesUp_RelSample_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesDn",nCleanedJetsPt30BTagged_bTagSF_jesDn, failedTreeLevel >= minimalFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesDn_Total",nCleanedJetsPt30BTagged_bTagSF_jesDn_Total, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesDn_Abs",nCleanedJetsPt30BTagged_bTagSF_jesDn_Abs, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesDn_Abs_year",nCleanedJetsPt30BTagged_bTagSF_jesDn_Abs_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesDn_BBEC1",nCleanedJetsPt30BTagged_bTagSF_jesDn_BBEC1, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesDn_BBEC1_year",nCleanedJetsPt30BTagged_bTagSF_jesDn_BBEC1_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesDn_EC2",nCleanedJetsPt30BTagged_bTagSF_jesDn_EC2, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesDn_EC2_year",nCleanedJetsPt30BTagged_bTagSF_jesDn_EC2_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesDn_FlavQCD",nCleanedJetsPt30BTagged_bTagSF_jesDn_FlavQCD, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesDn_HF",nCleanedJetsPt30BTagged_bTagSF_jesDn_HF, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesDn_HF_year",nCleanedJetsPt30BTagged_bTagSF_jesDn_HF_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesDn_RelBal",nCleanedJetsPt30BTagged_bTagSF_jesDn_RelBal, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesDn_RelSample_year",nCleanedJetsPt30BTagged_bTagSF_jesDn_RelSample_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jerUp",nCleanedJetsPt30BTagged_bTagSF_jerUp, failedTreeLevel >= minimalFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jerDn",nCleanedJetsPt30BTagged_bTagSF_jerDn, failedTreeLevel >= minimalFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSFUp",nCleanedJetsPt30BTagged_bTagSFUp, failedTreeLevel >= minimalFailedTree);
+  myTree->Book("nCleanedJetsPt30BTagged_bTagSFDn",nCleanedJetsPt30BTagged_bTagSFDn, failedTreeLevel >= minimalFailedTree);
+    
   myTree->Book("trigWord",trigWord, failedTreeLevel >= minimalFailedTree);
   myTree->Book("evtPassMETFilter",evtPassMETTrigger, failedTreeLevel >= minimalFailedTree);
   myTree->Book("ZZMass",ZZMass, false);
@@ -2959,8 +3463,14 @@ void HZZ4lNtupleMaker::BookAllBranches(){
   myTree->Book("Z2Eta",Z2Eta, false);
   myTree->Book("Z2Phi",Z2Phi, false);
   myTree->Book("Z2Flav",Z2Flav, false);
-  myTree->Book("Z2isGoodTau",Z2isGoodTau, false);
-  if (addSVfit){
+  if (theChannel!=ZL)
+    myTree->Book("Z2isGoodTau",Z2isGoodTau, false);
+  else if (abs(Z2Flav)==15) {
+    myTree->Book("Z2isGoodTau_Ele",Z2isGoodTau_Ele, false);
+    myTree->Book("Z2isGoodTau_Mu",Z2isGoodTau_Mu, false);
+    myTree->Book("Z2isGoodTau_Tau",Z2isGoodTau_Tau, false);
+  }
+  if (theChannel!=ZL && addSVfit){
     myTree->Book("Z2SVMass",Z2SVMass, false);
     myTree->Book("Z2SVPt",Z2SVPt, false);
     myTree->Book("Z2SVEta",Z2SVEta, false);
@@ -3044,14 +3554,14 @@ void HZZ4lNtupleMaker::BookAllBranches(){
   myTree->Book("Z2eleHLTMatch2",Z2eleHLTMatch2, false);
   myTree->Book("Z2eleHLTMatch",Z2eleHLTMatch, false);
 
-  myTree->Book("costhetastar",costhetastar, false);
-  myTree->Book("helphi",helphi, false);
-  myTree->Book("helcosthetaZ1",helcosthetaZ1, false);
-  myTree->Book("helcosthetaZ2",helcosthetaZ2, false);
-  myTree->Book("phistarZ1",phistarZ1, false);
-  myTree->Book("phistarZ2",phistarZ2, false);
-  myTree->Book("xi",xi, false);
-  myTree->Book("xistar",xistar, false);
+//   myTree->Book("costhetastar",costhetastar, false);
+//   myTree->Book("helphi",helphi, false);
+//   myTree->Book("helcosthetaZ1",helcosthetaZ1, false);
+//   myTree->Book("helcosthetaZ2",helcosthetaZ2, false);
+//   myTree->Book("phistarZ1",phistarZ1, false);
+//   myTree->Book("phistarZ2",phistarZ2, false);
+//   myTree->Book("xi",xi, false);
+//   myTree->Book("xistar",xistar, false);
 
   if (is_loose_ele_selection) {
     myTree->Book("TLE_dR_Z",TLE_dR_Z, false);
@@ -3132,6 +3642,7 @@ void HZZ4lNtupleMaker::BookAllBranches(){
   myTree->Book("JetEta",JetEta, failedTreeLevel >= fullFailedTree);
   myTree->Book("JetPhi",JetPhi, failedTreeLevel >= fullFailedTree);
   myTree->Book("JetMass",JetMass, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetEnergy",JetEnergy, failedTreeLevel >= fullFailedTree);
   myTree->Book("JetBTagger",JetBTagger, failedTreeLevel >= fullFailedTree);
   myTree->Book("JetIsBtagged",JetIsBtagged, failedTreeLevel >= fullFailedTree);
   myTree->Book("JetIsBtaggedWithSF",JetIsBtaggedWithSF, failedTreeLevel >= fullFailedTree);
@@ -3144,14 +3655,51 @@ void HZZ4lNtupleMaker::BookAllBranches(){
     myTree->Book("JetPtD",JetPtD, failedTreeLevel >= fullFailedTree);
   }
   myTree->Book("JetSigma",JetSigma, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetSigma_Total",JetSigma_Total, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetSigma_Abs",JetSigma_Abs, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetSigma_Abs_year",JetSigma_Abs_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetSigma_BBEC1",JetSigma_BBEC1, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetSigma_BBEC1_year",JetSigma_BBEC1_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetSigma_EC2",JetSigma_EC2, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetSigma_EC2_year",JetSigma_EC2_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetSigma_FlavQCD",JetSigma_FlavQCD, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetSigma_HF",JetSigma_HF, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetSigma_HF_year",JetSigma_HF_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetSigma_RelBal",JetSigma_RelBal, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetSigma_RelSample_year",JetSigma_RelSample_year, failedTreeLevel >= fullFailedTree);
   myTree->Book("JetHadronFlavour",JetHadronFlavour, failedTreeLevel >= fullFailedTree);
   myTree->Book("JetPartonFlavour",JetPartonFlavour, failedTreeLevel >= fullFailedTree);
 
   myTree->Book("JetRawPt",JetRawPt, failedTreeLevel >= fullFailedTree);
   myTree->Book("JetPtJEC_noJER",JetPtJEC_noJER, failedTreeLevel >= fullFailedTree);
   
-  myTree->Book("JetPt_JESUp",JetJESUp, failedTreeLevel >= fullFailedTree);
-  myTree->Book("JetPt_JESDown",JetJESDown, failedTreeLevel >= fullFailedTree);
+
+  myTree->Book("JetPt_JESUp",JetJESUp, failedTreeLevel >= minimalFailedTree);
+  myTree->Book("JetPt_JESUp_Total",JetJESUp_Total, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetPt_JESUp_Abs",JetJESUp_Abs, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetPt_JESUp_Abs_year",JetJESUp_Abs_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetPt_JESUp_BBEC1",JetJESUp_BBEC1, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetPt_JESUp_BBEC1_year",JetJESUp_BBEC1_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetPt_JESUp_EC2",JetJESUp_EC2, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetPt_JESUp_EC2_year",JetJESUp_EC2_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetPt_JESUp_FlavQCD",JetJESUp_FlavQCD, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetPt_JESUp_HF",JetJESUp_HF, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetPt_JESUp_HF_year",JetJESUp_HF_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetPt_JESUp_RelBal",JetJESUp_RelBal, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetPt_JESUp_RelSample_year",JetJESUp_RelSample_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetPt_JESDown",JetJESDown, failedTreeLevel >= minimalFailedTree);
+  myTree->Book("JetPt_JESDown_Total",JetJESDown_Total, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetPt_JESDown_Abs",JetJESDown_Abs, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetPt_JESDown_Abs_year",JetJESDown_Abs_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetPt_JESDown_BBEC1",JetJESDown_BBEC1, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetPt_JESDown_BBEC1_year",JetJESDown_BBEC1_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetPt_JESDown_EC2",JetJESDown_EC2, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetPt_JESDown_EC2_year",JetJESDown_EC2_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetPt_JESDown_FlavQCD",JetJESDown_FlavQCD, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetPt_JESDown_HF",JetJESDown_HF, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetPt_JESDown_HF_year",JetJESDown_HF_year, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetPt_JESDown_RelBal",JetJESDown_RelBal, failedTreeLevel >= fullFailedTree);
+  myTree->Book("JetPt_JESDown_RelSample_year",JetJESDown_RelSample_year, failedTreeLevel >= fullFailedTree);
    
   myTree->Book("JetPt_JERUp",JetJERUp, failedTreeLevel >= fullFailedTree);
   myTree->Book("JetPt_JERDown",JetJERDown, failedTreeLevel >= fullFailedTree);
@@ -3162,10 +3710,7 @@ void HZZ4lNtupleMaker::BookAllBranches(){
   myTree->Book("JetPUValue", JetPUValue, failedTreeLevel >= fullFailedTree);
 
   myTree->Book("DiJetMass",DiJetMass, false);
-//   myTree->Book("DiJetMassPlus",DiJetMassPlus, false); // FIXME: add back once filled again
-//   myTree->Book("DiJetMassMinus",DiJetMassMinus, false);
   myTree->Book("DiJetDEta",DiJetDEta, false);
-  myTree->Book("DiJetFisher",DiJetFisher, false);
   
   //Photon variables
   myTree->Book("PhotonPt",PhotonPt, failedTreeLevel >= fullFailedTree);
@@ -3294,6 +3839,32 @@ void HZZ4lNtupleMaker::BookAllBranches(){
     myTree->Book("GenAssocLep2Eta", GenAssocLep2Eta, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenAssocLep2Phi", GenAssocLep2Phi, failedTreeLevel >= fullFailedTree);
     myTree->Book("GenAssocLep2Id", GenAssocLep2Id, failedTreeLevel >= fullFailedTree);
+
+    myTree->Book("GenLep1Iso", GenLep1Iso, failedTreeLevel >= minimalFailedTree); //AT
+    myTree->Book("GenLep2Iso", GenLep2Iso, failedTreeLevel >= minimalFailedTree); //AT
+    myTree->Book("GenLep3Iso", GenLep3Iso, failedTreeLevel >= minimalFailedTree); //AT
+    myTree->Book("GenLep4Iso", GenLep4Iso, failedTreeLevel >= minimalFailedTree); //AT
+//     if (addGenAngles) {
+//       myTree->Book("Gencosthetastar", Gencosthetastar, failedTreeLevel >= minimalFailedTree); //AT
+//       myTree->Book("GenhelcosthetaZ1", GenhelcosthetaZ1, failedTreeLevel >= minimalFailedTree); //AT
+//       myTree->Book("GenhelcosthetaZ2", GenhelcosthetaZ2, failedTreeLevel >= minimalFailedTree); //AT
+//       myTree->Book("Genhelphi", Genhelphi, failedTreeLevel >= minimalFailedTree); //AT
+//       myTree->Book("GenphistarZ1", Genhelphi, failedTreeLevel >= minimalFailedTree); //AT
+//     }
+    myTree->Book("GenJetPt", GenJetPt, failedTreeLevel >= minimalFailedTree); //ATjets
+    myTree->Book("GenJetMass", GenJetMass, failedTreeLevel >= minimalFailedTree); //ATjets
+    myTree->Book("GenJetEta", GenJetEta, failedTreeLevel >= minimalFailedTree); //ATjets
+    myTree->Book("GenJetPhi", GenJetPhi, failedTreeLevel >= minimalFailedTree); //ATjets
+    myTree->Book("GenJetRapidity", GenJetRapidity, failedTreeLevel >= minimalFailedTree); //ATjets
+    myTree->Book("nGenJet", nGenJet, failedTreeLevel >= minimalFailedTree); //ATjets
+    myTree->Book("GenCleanedJetPt", GenCleanedJetPt, failedTreeLevel >= minimalFailedTree); //ATjets
+    myTree->Book("GenCleanedJetMass", GenCleanedJetMass, failedTreeLevel >= minimalFailedTree); //ATjets
+    myTree->Book("GenCleanedJetEta", GenCleanedJetEta, failedTreeLevel >= minimalFailedTree); //ATjets
+    myTree->Book("GenCleanedJetPhi", GenCleanedJetPhi, failedTreeLevel >= minimalFailedTree); //ATjets
+    myTree->Book("GenCleanedJetRapidity", GenCleanedJetRapidity, failedTreeLevel >= minimalFailedTree); //ATjets
+    myTree->Book("GenCleanedJetHadronFlavour", GenCleanedJetHadronFlavour, failedTreeLevel >= minimalFailedTree); //ATjets
+    myTree->Book("nCleanedGenJet", nCleanedGenJet, failedTreeLevel >= minimalFailedTree); //ATjets
+      
     myTree->Book("htxs_errorCode", htxs_errorCode, failedTreeLevel >= minimalFailedTree);
     myTree->Book("htxs_prodMode", htxs_prodMode, failedTreeLevel >= minimalFailedTree);
     myTree->Book("htxsNJets", htxsNJets, failedTreeLevel >= minimalFailedTree);

@@ -41,16 +41,16 @@
 #include <HTauTauHMuMu/AnalysisStep/interface/LeptonIsoHelper.h>
 #include <HTauTauHMuMu/AnalysisStep/interface/JetCleaner.h>
 
-#include <KinZfitter/KinZfitter/interface/KinZfitter.h>
-
 #include "TH2F.h"
 #include "TFile.h"
 #include "TLorentzVector.h"
+#include "TMatrixD.h"
 
 #include <string>
 #include <vector>
 
 using namespace htautauhmumu;
+using namespace std;
 //using namespace BranchHelpers;
 
 typedef std::pair<int, TLorentzVector> SimpleParticle_t;
@@ -89,14 +89,12 @@ private:
   reco::CompositeCandidate::role_collection rolesZ1Z2;
   reco::CompositeCandidate::role_collection rolesZ2Z1;
   bool isMC;
-  bool doKinFit,doKinFitOld;
   bool debug;
 
   // float muon_iso_cut, electron_iso_cut;
   TH2F* corrSigmaMu;
   TH2F* corrSigmaEle;
   Comparators::ComparatorTypes bestCandType;
-  KinZfitter *kinZfitter;
   edm::EDGetTokenT<edm::View<pat::Jet> > jetToken;
 //  edm::EDGetTokenT<pat::METCollection> metToken;
   edm::EDGetTokenT<edm::View<reco::Candidate> > softLeptonToken;
@@ -115,11 +113,9 @@ ZZCandidateFiller::ZZCandidateFiller(const edm::ParameterSet& iConfig) :
   embedDaughterFloats(iConfig.getUntrackedParameter<bool>("embedDaughterFloats", true)),
   ZRolesByMass(iConfig.getParameter<bool>("ZRolesByMass")),
   isMC(iConfig.getParameter<bool>("isMC")),
-  doKinFitOld(iConfig.getParameter<bool>("doKinFitOld")),
   debug(iConfig.getParameter<bool>("debug")),
   corrSigmaMu(0),
-  corrSigmaEle(0),
-  kinZfitter(0)
+  corrSigmaEle(0)
 {
   produces<pat::CompositeCandidateCollection>();
 
@@ -159,15 +155,12 @@ ZZCandidateFiller::ZZCandidateFiller(const edm::ParameterSet& iConfig) :
   else if (cmp=="byMHWindow")    bestCandType=Comparators::byMHWindow;
   else abort();
   //cout<<iConfig.getParameter<edm::InputTag>("src").label()<<endl;
-  //-- kinematic refitter
-  kinZfitter = new KinZfitter(!isMC);
-  // No longer used, but keept for future needs
-//   muon_iso_cut = iConfig.getParameter<double>("muon_iso_cut");
+
+      //   muon_iso_cut = iConfig.getParameter<double>("muon_iso_cut");
 //   electron_iso_cut = iConfig.getParameter<double>("electron_iso_cut");
 }
 
 ZZCandidateFiller::~ZZCandidateFiller(){
-  delete kinZfitter;
 }
 
 
@@ -821,44 +814,6 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
 
 
     //----------------------------------------------------------------------
-    //--- kinematic refitting using Z mass constraint
-    if (debug) cout<<"Kinamtic refitting"<<endl;
-    float ZZMassRefit = 0.;
-    float ZZMassRefitErr = 0.;
-    float ZZMassUnrefitErr = 0.;
-
-    if(doKinFitOld){
-
-      vector<reco::Candidate *> selectedLeptons;
-      std::map<unsigned int, TLorentzVector> selectedFsrMap;
-
-      for(unsigned ilep=0; ilep<4; ilep++){
-
-    selectedLeptons.push_back((reco::Candidate*)(ZZLeps[ilep]->masterClone().get()));
-
-    if(FSRMap.find(ZZLeps[ilep])!=FSRMap.end()){
-      pat::PFParticle fsr = *(FSRMap[ZZLeps[ilep]]);
-      TLorentzVector p4;
-      p4.SetPxPyPzE(fsr.px(),fsr.py(),fsr.pz(),fsr.energy());
-      selectedFsrMap[ilep] = p4;
-    }
-
-      }
-
-      kinZfitter->Setup(selectedLeptons, selectedFsrMap);
-      kinZfitter->KinRefitZ();
-
-      ZZMassRefit = kinZfitter->GetRefitM4l();
-      ZZMassRefitErr = kinZfitter->GetRefitM4lErrFullCov();
-      ZZMassUnrefitErr = kinZfitter->GetM4lErr();
-
-      // four 4-vectors after refitting order by Z1_1,Z1_2,Z2_1,Z2_2
-      //vector<TLorentzVector> p4 = kinZfitter->GetRefitP4s();
-
-    }
-
-
-    //----------------------------------------------------------------------
     //--- 4l vertex fits (experimental)
 
     //CandConstraintFit::fit(&myCand, iSetup);
@@ -984,11 +939,6 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     myCand.addUserFloat("xi",             xi);      //azimuthal angle of higgs in lab frame
 
     myCand.addUserFloat("m4l",            (Z1Lm->p4()+Z1Lp->p4()+Z2Lm->p4()+Z2Lp->p4()).mass()); // mass without FSR
-    if(doKinFit) {
-      myCand.addUserFloat("ZZMassRefit"   , ZZMassRefit);
-      myCand.addUserFloat("ZZMassRefitErr", ZZMassRefitErr);
-      myCand.addUserFloat("ZZMassUnrefitErr", ZZMassUnrefitErr);
-    }
 
     myCand.addUserFloat("goodTaus", goodTaus);
     myCand.addUserFloat("muHLTMatch", muHLTMatch);
@@ -1046,7 +996,7 @@ void ZZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetu
     //cout<<preSelCands[iCRname].size()<<" bestCandAmong"<<endl;
     if (preSelCands[iCRname].size() > 0) {
       bestCandIdx[iCRname] = *std::min_element( preSelCands[iCRname].begin(), preSelCands[iCRname].end(), myComp);
-      cout<<"iCRname "<<iCRname<<", bestCandIdx "<<bestCandIdx[iCRname]<<endl;
+//       cout<<"iCRname "<<iCRname<<", bestCandIdx "<<bestCandIdx[iCRname]<<endl;
     }
   }
 
