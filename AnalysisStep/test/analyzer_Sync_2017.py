@@ -1,27 +1,27 @@
-
-#DATA_TAG = "ReReco" # Change to PromptReco for Run2016 period H
-LEPTON_SETUP = 2017  # current default = 2017 = Moriond2017
+### Uncomment options to replace default values
+LEPTON_SETUP = 2017
 #ELECORRTYPE = "None" # "None" to switch off
 #ELEREGRESSION = "None" # "None" to switch off
-APPLYMUCORR = True  # Switch off muon scale corrections
-APPLYJEC = True     #
-APPLYJER = True     #
-RECORRECTMET = True #
+#APPLYMUCORR = False  # Switch off muon scale corrections
+#APPLYJEC = False     # Switch off JEC
+#APPLYJER = False     # Switch off JER
+#RECORRECTMET = False # Switch off MET corr
 #KINREFIT = True    # control KinZFitter (very slow)
-PROCESS_CR = True   # Uncomment to run CR paths and trees
+PROCESS_CR = True   # False = Skip CR paths and trees
 #ADDLOOSEELE = True  # Run paths for loose electrons
-#APPLYTRIG = False    # hack for samples missing correct triggers - use with caution
+#APPLYTRIG = False    # Skip events failing required triggers. They are stored with sel<0 if set to False
 #KEEPLOOSECOMB = True # Do not skip loose lepton ZZ combinations (for debugging)
-ADDZTREE = True      # Add tree for Z analysis
-#SAMPLENAME = "THW" # For running locally, some samples needs this to be specified (TTZ, THW, WWZ,...) See MCHistoryTools for all samples
+ADDZTREE = False # Add tree for Z analysis
+ADDLHEKINEMATICS = False  #
+FAILED_TREE_LEVEL = False # To print candTree_failed, if you don't want to save it comment this line
 
 PD = ""
 MCFILTER = ""
-IsMC = True
 
-#For DATA: 
+### For DATA:
 #IsMC = False
 #PD = "DoubleMu"
+#DATA_TAG = "ReReco" # Change to "PromptReco" for Run2018 period D
 
 # Get absolute path
 import os
@@ -32,7 +32,7 @@ PyFilePath = os.environ['CMSSW_BASE'] + "/src/HTauTauHMuMu/AnalysisStep/test/"
 ### ----------------------------------------------------------------------
 
 execfile(PyFilePath + "analyzer.py")
-#execfile(PyFilePath + "prod/pyFragments/RecoProbabilities.py")
+# execfile(PyFilePath + "prod/pyFragments/RecoProbabilities.py")
 
 if not IsMC:
 	process.source.inputCommands = cms.untracked.vstring("keep *", "drop LHERunInfoProduct_*_*_*", "drop LHEEventProduct_*_*_*") ###FIXME In 9X this removes all collections for MC
@@ -42,35 +42,35 @@ if not IsMC:
 ### ----------------------------------------------------------------------
 
 process.source.fileNames = cms.untracked.vstring(
-### LEGACY PAPER - 2017 sync files
-'/store/mc/RunIIFall17MiniAODv2/GluGluHToZZTo4L_M125_13TeV_powheg2_JHUGenV7011_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v1/10000/F0ABD15B-AF42-E811-B204-00144F45BD0E.root'#,
-#'/store/mc/RunIIFall17MiniAODv2/ttH_HToZZ_4LFilter_M125_13TeV_powheg2_JHUGenV7011_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/110000/E852BBDD-1EB4-E811-81D5-FA163EE7A24E.root',
-#'/store/mc/RunIIFall17MiniAODv2/VBF_HToZZTo4L_M125_13TeV_powheg2_JHUGenV7011_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14_ext2-v2/260000/1E7BEDB3-5859-E911-8751-FA163E5522F8.root'
+### UL - 2017 sync files
+#'/store/mc/RunIISummer20UL17MiniAOD/GluGluHToZZTo4L_M125_TuneCP5_13TeV_powheg2_JHUGenV7011_pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v2/270000/794448BF-6D5B-7149-90C7-2F7D0F3E1DA6.root',
+#'/store/mc/RunIISummer20UL17MiniAODv2/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v1/00000/0004BE39-823E-4A4B-9727-C2544050C4C0.root'
+#'/store/mc/RunIISummer20UL17MiniAODv2/GluGluHToZZTo4L_M125_TuneCP5_13TeV_powheg2_JHUGenV7011_pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/130000/3E4E8D55-3993-2B43-AF3B-7AB45BBE0BDA.root'
+'/store/mc/RunIISummer20UL17MiniAODv2/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/110000/0028BDBE-04FC-D847-9D7B-989C4262FBA4.root'
 )
 
-#process.calibratedPatElectrons.isSynchronization = cms.bool(True) #process.calibratedPatElectrons.isSynchronization = cms.bool(True) # Not needed anymore since new EGamma smearing is event deterministic
-#process.calibratedMuons.isSynchronization = cms.bool(True)
+process.calibratedMuons.isSynchronization = cms.bool(True)
 
-process.maxEvents.input = 2000
+### Events to be processed/picked/skipped
+process.maxEvents.input = -1
 #process.source.skipEvents = cms.untracked.uint32(5750)
+#process.source.eventsToProcess = cms.untracked.VEventRange("1:1711:848227")
+
 
 # Silence output
 process.load("FWCore.MessageService.MessageLogger_cfi")
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 
 ### ----------------------------------------------------------------------
-### Analyzer for Plots
+### Debug options
 ### ----------------------------------------------------------------------
 
-
-#process.source.eventsToProcess = cms.untracked.VEventRange("1:8670")
-
-# Debug
 process.dumpUserData =  cms.EDAnalyzer("dumpUserData",
      dumpTrigger = cms.untracked.bool(True),
      muonSrcs = cms.PSet(
 #       slimmedMuons = cms.InputTag("slimmedMuons"),
+#	calibratedMuons = cms.InputTag("calibratedMuons"),
         muons = cms.InputTag("appendPhotons:muons"),
      ),
      electronSrcs = cms.PSet(
@@ -89,31 +89,28 @@ process.dumpUserData =  cms.EDAnalyzer("dumpUserData",
 #        ZLL  = cms.InputTag("ZLLCand"),
 #        ZL  = cms.InputTag("ZlCand"),
      ),
-     jetSrc = cms.InputTag("cleanJets"),
+     jetSrc = cms.InputTag("dressedJets"),
 )
 
-#process.source.eventsToProcess = cms.untracked.VEventRange("1:6991:641744")
-
-# Create lepton sync file
-#process.PlotsZZ.dumpForSync = True;
-#process.p = cms.EndPath( process.PlotsZZ)
-
-# Keep all events in the tree, even if no candidate is selected
-#process.ZZTree.skipEmptyEvents = False
-
-# replace the paths in analyzer.py
-#process.trees = cms.EndPath(process.ZZTree)
-
-#Dump reconstructed variables
+### Dump reconstructed variables
 #process.appendPhotons.debug = cms.untracked.bool(True)
 #process.fsrPhotons.debug = cms.untracked.bool(True)
 #process.dump = cms.Path(process.dumpUserData)
 
-#Print MC history
+### Print MC history
 #process.mch = cms.EndPath(process.printTree)
 
+### Create lepton sync file
+#process.PlotsZZ.dumpForSync = True;
+#process.p = cms.EndPath( process.PlotsZZ)
 
-#Monitor memory usage
+### Keep all events in the tree, even if no candidate is selected
+#process.ZZTree.skipEmptyEvents = False
+
+### Replace the paths in analyzer.py
+#process.trees = cms.EndPath(process.ZZTree)
+
+### Monitor memory usage
 #process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck",
 #    ignoreTotal = cms.untracked.int32(1)
 #)

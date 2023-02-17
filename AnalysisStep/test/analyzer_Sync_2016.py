@@ -1,25 +1,28 @@
-
-#DATA_TAG = "ReReco" # Change to PromptReco for Run2016 period H
-LEPTON_SETUP = 2016  # current default = 2017 = Moriond2017
-APPLYMUCORR = True  # Switch off muon scale corrections
-APPLYJEC = True     #
-APPLYJER = True     #
-RECORRECTMET = True #
+### Uncomment options to replace default values
+LEPTON_SETUP = 2016
+#ELECORRTYPE = "None" # "None" to switch off
+#ELEREGRESSION = "None" # "None" to switch off
+#APPLYMUCORR = False  # Switch off muon scale corrections
+#APPLYJEC = False     # Switch off JEC
+#APPLYJER = False     # Switch off JER
+#RECORRECTMET = False # Switch off MET corr
 #KINREFIT = True    # control KinZFitter (very slow)
-PROCESS_CR = False   # Uncomment to run CR paths and trees
+PROCESS_CR = True   # False = Skip CR paths and trees
 #ADDLOOSEELE = True  # Run paths for loose electrons
-#APPLYTRIG = False    # hack for samples missing correct triggers - use with caution
+#APPLYTRIG = False    # Skip events failing required triggers. They are stored with sel<0 if set to False
 #KEEPLOOSECOMB = True # Do not skip loose lepton ZZ combinations (for debugging)
-ADDZTREE = False      # Add tree for Z analysis
-APPLY_QCD_GGF_UNCERT = True
-#For MC:
-PD = ""
-MCFILTER = ""
-IsMC = True
-OLDPATTRIGGER = False#True
-#For DATA: 
-#IsMC = False
-#PD = "DoubleMu"
+ADDZTREE = False # Add tree for Z analysis
+ADDLHEKINEMATICS = False  #
+FAILED_TREE_LEVEL = False # To print candTree_failed, if you don't want to save it comment this line
+
+### For MC:
+#PD = ""
+#MCFILTER = ""
+
+### For DATA:
+IsMC = False
+PD = "DoubleMu"
+DATA_TAG = "ULAPV" # Change to "PromptReco" for Run2018 period D
 
 # Get absolute path
 import os
@@ -30,7 +33,7 @@ PyFilePath = os.environ['CMSSW_BASE'] + "/src/HTauTauHMuMu/AnalysisStep/test/"
 ### ----------------------------------------------------------------------
 
 execfile(PyFilePath + "analyzer.py")
-#execfile(PyFilePath + "prod/pyFragments/RecoProbabilities.py")
+# execfile(PyFilePath + "prod/pyFragments/RecoProbabilities.py")
 
 if not IsMC:
 	process.source.inputCommands = cms.untracked.vstring("keep *", "drop LHERunInfoProduct_*_*_*", "drop LHEEventProduct_*_*_*") ###FIXME In 9X this removes all collections for MC
@@ -40,46 +43,37 @@ if not IsMC:
 ### ----------------------------------------------------------------------
 
 process.source.fileNames = cms.untracked.vstring(
-### LEGACY PAPER - 2016 sync files
-#'/store/mc/RunIISummer16MiniAODv3/GluGluToHHTo2B2Tau_node_10_13TeV-madgraph/MINIAODSIM/PUMoriond17_94X_mcRun2_asymptotic_v3-v2/00000/3A546715-316A-E911-8FC5-002590FD5A48.root'
-#'/store/mc/RunIISummer16MiniAODv2/ZZTo4L_13TeV_powheg_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/221CC46F-2FC6-E611-8FFC-0CC47A1E0488.root'#,
-#'/store/test/xrootd/T2_UA_KIPT/store/data/Run2016B/DoubleMuon/MINIAOD/17Jul2018_ver2-v1/00000/085049B8-D18A-E811-A362-0CC47A4C8E34.root'
-#'root://cmsxrootd.fnal.gov///store/data/Run2016B/DoubleMuon/MINIAOD/17Jul2018_ver2-v1/00000/085049B8-D18A-E811-A362-0CC47A4C8E34.root'
-#'/store/data/Run2016C/DoubleMuon/MINIAOD/17Jul2018-v1/40000/6EFE06FB-B18B-E811-924D-A0369FD0B3A0.root'
-#'/store/data/Run2016B/DoubleMuon/MINIAOD/17Jul2018_ver2-v1/00000/04F38EB5-D18A-E811-815D-0CC47A4C8F2C.root'
-#'/store/mc/RunIISummer16MiniAODv2/GluGluToContinToZZTo2e2mu_13TeV_MCFM701_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/7C9CA3F7-95BE-E611-B653-0025905B858A.root'
-'/store/mc/RunIISummer16MiniAODv3/ZZTo4L_13TeV_powheg_pythia8/MINIAODSIM/PUMoriond17_94X_mcRun2_asymptotic_v3-v1/100000/0A064D6A-F0C6-E811-B803-001A649D4815.root'
-#'/store/mc/RunIISummer16MiniAODv3/GluGluHToZZTo4L_M125_13TeV_powheg2_JHUgenV6_pythia8/MINIAODSIM/PUMoriond17_94X_mcRun2_asymptotic_v3-v1/40000/90B61523-A720-E911-A35B-1866DA890B10.root'
-#'/store/mc/RunIISummer16MiniAODv2/GluGluHToZZTo4L_M125_13TeV_powheg2_JHUGenV709_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/20000/8A6DC1B7-D1D3-E711-8D88-002590DE6E32.root'#,
-#'/store/mc/RunIISummer16MiniAODv2/ttH_HToZZ_4LFilter_M125_13TeV_powheg2_JHUGenV709_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/30000/CCDA7461-FDD7-E711-AFA4-008CFAF2224C.root',                                                                                                                                                                                                        
-#'/store/mc/RunIISummer16MiniAODv2/ZH_HToZZ_4LFilter_M125_13TeV_powheg2-minlo-HZJ_JHUGenV709_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/20000/622DA168-2DD2-E711-AE8A-E0071B7A5650.root'
+#'/store/data/Run2016B/DoubleMuon/MINIAOD/ver1_HIPM_UL2016_MiniAODv2-v1/270000/02054DEA-9FE1-4F4F-AF38-4E41A8830C6E.root'
+#'/store/test/xrootd/T1_US_FNAL/store/data/Run2016F/SingleElectron/MINIAOD/UL2016_MiniAODv2-v2/70000/567465AB-4672-C948-82B4-D0792E165D6C.root'
+#'/store/data/Run2016F/SingleElectron/MINIAOD/UL2016_MiniAODv2-v2/70000/36A4F83A-E3CE-5248-9166-F9FAD1F167E6.root'
+#'/store/test/xrootd/T1_US_FNAL/store/data/Run2016F/SingleElectron/MINIAOD/UL2016_MiniAODv2-v2/70000/85823D4D-33D1-4141-BBBB-774B21D063C4.root'
+'/store/test/xrootd/T1_US_FNAL/store/data/Run2016G/DoubleEG/MINIAOD/UL2016_MiniAODv2-v1/280000/258DD9CC-B2AE-2A4E-A6CC-12E779D6266D.root'
 )
 
-#process.calibratedPatElectrons.isSynchronization = cms.bool(True) #process.calibratedPatElectrons.isSynchronization = cms.bool(True) # Not needed anymore since new EGamma smearing is event deterministic
-#process.calibratedMuons.isSynchronization = cms.bool(True)
 
-process.maxEvents.input = 2000
+process.calibratedMuons.isSynchronization = cms.bool(True)
+
+### Events to be processed/picked/skipped
+process.maxEvents.input = -1
 #process.source.skipEvents = cms.untracked.uint32(5750)
+#process.source.eventsToProcess = cms.untracked.VEventRange("1:1711:848227")
+
 
 # Silence output
 process.load("FWCore.MessageService.MessageLogger_cfi")
-process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 
 ### ----------------------------------------------------------------------
-### Analyzer for Plots
+### Debug options
 ### ----------------------------------------------------------------------
 
-
-#process.source.eventsToProcess = cms.untracked.VEventRange("1:8670")
-
-# Debug
 process.dumpUserData =  cms.EDAnalyzer("dumpUserData",
      dumpTrigger = cms.untracked.bool(True),
      muonSrcs = cms.PSet(
-        muons = cms.InputTag("slimmedMuons"),
 #       slimmedMuons = cms.InputTag("slimmedMuons"),
-#        muons = cms.InputTag("appendPhotons:muons"),
+#	calibratedMuons = cms.InputTag("calibratedMuons"),
+        muons = cms.InputTag("appendPhotons:muons"),
      ),
      electronSrcs = cms.PSet(
 #       slimmedElectron = cms.InputTag("slimmedElectrons"),
@@ -97,29 +91,28 @@ process.dumpUserData =  cms.EDAnalyzer("dumpUserData",
 #        ZLL  = cms.InputTag("ZLLCand"),
 #        ZL  = cms.InputTag("ZlCand"),
      ),
-     jetSrc = cms.InputTag("cleanJets"),
+     jetSrc = cms.InputTag("dressedJets"),
 )
 
-# Create lepton sync file
-#process.PlotsZZ.dumpForSync = True;
-#process.p = cms.EndPath( process.PlotsZZ)
-
-# Keep all events in the tree, even if no candidate is selected
-#process.ZZTree.skipEmptyEvents = False
-
-# replace the paths in analyzer.py
-#process.trees = cms.EndPath(process.ZZTree)
-
-#Dump reconstructed variables
+### Dump reconstructed variables
 #process.appendPhotons.debug = cms.untracked.bool(True)
 #process.fsrPhotons.debug = cms.untracked.bool(True)
 #process.dump = cms.Path(process.dumpUserData)
 
-#Print MC history
+### Print MC history
 #process.mch = cms.EndPath(process.printTree)
 
+### Create lepton sync file
+#process.PlotsZZ.dumpForSync = True;
+#process.p = cms.EndPath( process.PlotsZZ)
 
-#Monitor memory usage
+### Keep all events in the tree, even if no candidate is selected
+#process.ZZTree.skipEmptyEvents = False
+
+### Replace the paths in analyzer.py
+#process.trees = cms.EndPath(process.ZZTree)
+
+### Monitor memory usage
 #process.SimpleMemoryCheck = cms.Service("SimpleMemoryCheck",
 #    ignoreTotal = cms.untracked.int32(1)
 #)
