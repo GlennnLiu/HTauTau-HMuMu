@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 from HTauTauHMuMu.AnalysisStep.defaults import *
 import os, sys
 
-process = cms.Process("ZZ")
+process = cms.Process("HttHmm")
 
 ### ----------------------------------------------------------------------
 ### Flags that need to be set
@@ -38,14 +38,11 @@ declareDefault("APPLYJER", True, globals())
 #Recorrect MET
 declareDefault("RECORRECTMET", True, globals())
 
-#FSR mode
+#FSR mode 
 declareDefault("FSRMODE", "RunII", globals())
 
 #Bunch spacing (can be 25 or 50)
 declareDefault("BUNCH_SPACING", 25, globals())
-
-#Selection flow strategy
-declareDefault("SELSETUP", "allCutsAtOncePlusSmart", globals())
 
 #Best candidate comparator (see interface/Comparators.h)
 declareDefault("BESTCANDCOMPARATOR", "byBestZ1bestZ2", globals())
@@ -66,9 +63,9 @@ UseMuonCleanerBySegments = False
 CMSSW_VERSION = os.environ['CMSSW_VERSION']
 CMSSWVERSION = int(CMSSW_VERSION.split("_")[1])
 
-if SELSETUP=="Legacy" and not BESTCANDCOMPARATOR=="byBestZ1bestZ2":
-    print "WARNING: In ZZ4lAnalysis.py the SELSETUP=\"Legacy\" flag is meant to reproduce the Legacy results, ignoring the setting of the BESTCANDCOMPARATOR: ",BESTCANDCOMPARATOR
-    BESTCANDCOMPARATOR = "byBestZ1bestZ2"
+# if SELSETUP=="Legacy" and not BESTCANDCOMPARATOR=="byBestZ1bestZ2":
+#     print "WARNING: In ZZ4lAnalysis.py the SELSETUP=\"Legacy\" flag is meant to reproduce the Legacy results, ignoring the setting of the BESTCANDCOMPARATOR: ",BESTCANDCOMPARATOR
+#     BESTCANDCOMPARATOR = "byBestZ1bestZ2"
 
 # The isolation cuts for electrons and muons. FIXME: there is an hardcoded instance of these values in src/LeptonIsoHelper.cc !!
 ELEISOCUT = 99999. # [FIXME] Remove isolation cuts from the code completely
@@ -140,105 +137,101 @@ process.maxEvents = cms.untracked.PSet(
 ### ----------------------------------------------------------------------
 import HLTrigger.HLTfilters.hltHighLevel_cfi
 
-process.hltFilterDiMu  = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
-process.hltFilterDiEle = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
-#process.hltFilterMuEle = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
-#process.hltFilterMuEle2 = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
-#process.hltFilterMuEle3 = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
-#process.hltFilterTriEle = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
-#process.hltFilterTriMu  = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
-process.hltFilterSingleEle = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
 process.hltFilterSingleMu  = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
+process.hltFilterSingleEle = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
+process.hltFilterDiMu  = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
+process.hltFilterDiTau = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
+process.hltFilterMuTau = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
+process.hltFilterEleTau = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
+process.hltFilterMuEle = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
 
-process.hltFilterDiMu.TriggerResultsTag  = cms.InputTag("TriggerResults","","HLT")
-process.hltFilterDiEle.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
-#process.hltFilterMuEle.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
-#process.hltFilterMuEle2.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
-#process.hltFilterMuEle3.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
-#process.hltFilterTriEle.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
-#process.hltFilterTriMu.TriggerResultsTag  = cms.InputTag("TriggerResults","","HLT")
-process.hltFilterSingleEle.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
 process.hltFilterSingleMu.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
+process.hltFilterSingleEle.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
+process.hltFilterDiMu.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
+process.hltFilterDiTau.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
+process.hltFilterMuTau.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
+process.hltFilterEleTau.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
+process.hltFilterMuEle.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
 
-process.hltFilterDiMu.throw  = cms.bool(False) #FIXME: beware of this!
-process.hltFilterDiEle.throw = cms.bool(False) #FIXME: beware of this!
-#process.hltFilterMuEle.throw = cms.bool(False) #FIXME: beware of this!
-#process.hltFilterMuEle2.throw = cms.bool(False) #FIXME: beware of this!
-#process.hltFilterMuEle3.throw = cms.bool(False) #FIXME: beware of this!
-#process.hltFilterTriEle.throw = cms.bool(False) #FIXME: beware of this!
-#process.hltFilterTriMu.throw  = cms.bool(False) #FIXME: beware of this!
+process.hltFilterSingleMu.throw = cms.bool(False) #FIXME: beware of this!
 process.hltFilterSingleEle.throw = cms.bool(False) #FIXME: beware of this!
-process.hltFilterSingleMu.throw  = cms.bool(False) #FIXME: beware of this!
+process.hltFilterDiMu.throw = cms.bool(False) #FIXME: beware of this!
+process.hltFilterDiTau.throw = cms.bool(False) #FIXME: beware of this!
+process.hltFilterMuTau.throw = cms.bool(False) #FIXME: beware of this!
+process.hltFilterEleTau.throw = cms.bool(False) #FIXME: beware of this!
+process.hltFilterMuEle.throw = cms.bool(False) #FIXME: beware of this!
 
 ### 2016 triggers - final
 if (LEPTON_SETUP == 2016):
-   process.hltFilterDiEle.HLTPaths = ["HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*","HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*","HLT_DoubleEle33_CaloIdL_GsfTrkIdVL_v*"]
-   process.hltFilterDiMu.HLTPaths = ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*","HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*"]
-   #process.hltFilterMuEle.HLTPaths = ["HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v*","HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v*","HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v*","HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v*","HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v*","HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*","HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_v*","HLT_Mu8_DiEle12_CaloIdL_TrackIdL_v*","HLT_DiMu9_Ele9_CaloIdL_TrackIdL_v*"]
-   #process.hltFilterTriEle.HLTPaths = ["HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL_v*"]
-   #process.hltFilterTriMu.HLTPaths = ["HLT_TripleMu_12_10_5_v*"]
-   process.hltFilterSingleEle.HLTPaths = ["HLT_Ele25_eta2p1_WPTight_Gsf_v*","HLT_Ele27_WPTight_Gsf_v*","HLT_Ele27_eta2p1_WPLoose_Gsf_v*", "HLT_Ele32_eta2p1_WPTight_Gsf_v*"]
-   process.hltFilterSingleMu.HLTPaths = ["HLT_IsoMu20_v*","HLT_IsoTkMu20_v*","HLT_IsoMu22_v*","HLT_IsoTkMu22_v*","HLT_IsoMu24_v*","HLT_IsoTkMu24_v*"]
-
-   #process.triggerTriEle = cms.Path(process.hltFilterTriEle)
-   #process.triggerTriMu  = cms.Path(process.hltFilterTriMu )
-   process.triggerSingleEle = cms.Path(process.hltFilterSingleEle)
-   process.triggerSingleMu  = cms.Path(process.hltFilterSingleMu )
+    process.hltFilterSingleMu.HLTPaths = ["HLT_IsoMu22_v*","HLT_IsoMu22_eta2p1_v*","HLT_IsoTkMu22_v*","HLT_IsoTkMu22_eta2p1_v*","HLT_IsoMu24_v*","HLT_IsoTkMu24_v*"]
+    process.hltFilterSingleEle.HLTPaths = ["HLT_Ele25_eta2p1_WPTight_Gsf_v*","HLT_Ele27_WPTight_Gsf_v*","HLT_Ele27_eta2p1_WPLoose_Gsf_v*", "HLT_Ele32_eta2p1_WPTight_Gsf_v*"]
+    process.hltFilterDiMu.HLTPaths = ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*","HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*"]
+    process.hltFilterDiTau.HLTPaths = ["HLT_DoubleMediumIsoPFTau32_Trk1_eta2p1_Reg_v*","HLT_DoubleMediumIsoPFTau35_Trk1_eta2p1_Reg_v*","HLT_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v*","HLT_DoubleMediumCombinedIsoPFTau35_Trk1_eta2p1_Reg_v*","HLT_DoubleMediumCombinedIsoPFTau40_Trk1_eta2p1_Reg_v*","HLT_DoubleMediumCombinedIsoPFTau40_Trk1_eta2p1_v*"]
+    process.hltFilterMuTau.HLTPaths = ["HLT_IsoMu19_eta2p1_LooseIsoPFTau20_v*","HLT_IsoMu19_eta2p1_LooseIsoPFTau20_SingleL1_v*"]
+    process.hltFilterEleTau.HLTPaths = []
+    process.hltFilterMuEle.HLTPaths = ["HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v*","HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v*","HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v*","HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*"]
+    
+    process.triggerSingleMu  = cms.Path(process.hltFilterSingleMu)
+    process.triggerSingleEle = cms.Path(process.hltFilterSingleEle)
+    process.triggerDiMu = cms.Path(process.hltFilterDiMu)
+    process.triggerDiTau = cms.Path(process.hltFilterDiTau)
+    process.triggerMuTau = cms.Path(process.hltFilterMuTau)
+    process.triggerEleTau = cms.Path(process.hltFilterEleTau)
+    process.triggerMuEle = cms.Path(process.hltFilterMuEle)
 
 ### 2017 triggers - final
 elif (LEPTON_SETUP == 2017):
-   process.hltFilterDiEle.HLTPaths = ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*","HLT_DoubleEle33_CaloIdL_MW_v*"]
-   process.hltFilterDiMu.HLTPaths = ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v*","HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v*"]
-   #process.hltFilterMuEle.HLTPaths = ["HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v*","HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v*","HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v*","HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*","HLT_DiMu9_Ele9_CaloIdL_TrackIdL_DZ_v*","HLT_Mu8_DiEle12_CaloIdL_TrackIdL_v*","HLT_Mu8_DiEle12_CaloIdL_TrackIdL_DZ_v*"]
-   #process.hltFilterTriEle.HLTPaths = ["HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL_v*"]
-   #process.hltFilterTriMu.HLTPaths = ["HLT_TripleMu_10_5_5_DZ_v*","HLT_TripleMu_12_10_5_v*"]
-   process.hltFilterSingleEle.HLTPaths = ["HLT_Ele35_WPTight_Gsf_v*","HLT_Ele38_WPTight_Gsf_v*","HLT_Ele40_WPTight_Gsf_v*"]
-   process.hltFilterSingleMu.HLTPaths = ["HLT_IsoMu27_v*"]
-
-   #process.triggerTriEle = cms.Path(process.hltFilterTriEle)
-   #process.triggerTriMu  = cms.Path(process.hltFilterTriMu )
-   process.triggerSingleEle = cms.Path(process.hltFilterSingleEle)
-   process.triggerSingleMu  = cms.Path(process.hltFilterSingleMu )
+    process.hltFilterSingleMu.HLTPaths = ["HLT_IsoMu24_v*","HLT_IsoMu27_v*"]
+    process.hltFilterSingleEle.HLTPaths = ["HLT_Ele32_WPTight_Gsf_v*","HLT_Ele35_WPTight_Gsf_v*"]
+    process.hltFilterDiMu.HLTPaths = ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v*","HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v*"]
+    process.hltFilterDiTau.HLTPaths = ["HLT_DoubleMediumChargedIsoPFTau40_Trk1_TightID_eta2p1_Reg_v*","HLT_DoubleTightChargedIsoPFTau40_Trk1_eta2p1_Reg_v*","HLT_DoubleTightChargedIsoPFTau35_Trk1_TightID_eta2p1_Reg_v*"]
+    process.hltFilterMuTau.HLTPaths = ["HLT_IsoMu20_eta2p1_LooseChargedIsoPFTau27_eta2p1_CrossL1_v*"]
+    process.hltFilterEleTau.HLTPaths = ["HLT_Ele24_eta2p1_WPTight_Gsf_LooseChargedIsoPFTau30_eta2p1_CrossL1_v*"]
+    process.hltFilterMuEle.HLTPaths = ["HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v*","HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*"]
+   
+    process.triggerSingleMu  = cms.Path(process.hltFilterSingleMu)
+    process.triggerSingleEle = cms.Path(process.hltFilterSingleEle)
+    process.triggerDiMu = cms.Path(process.hltFilterDiMu)
+    process.triggerDiTau = cms.Path(process.hltFilterDiTau)
+    process.triggerMuTau = cms.Path(process.hltFilterMuTau)
+    process.triggerEleTau = cms.Path(process.hltFilterEleTau)
+    process.triggerMuEle = cms.Path(process.hltFilterMuEle)
 
 ### 2018 triggers - FIXME: to be updated (26/6/18)
 elif (LEPTON_SETUP == 2018):
-   process.hltFilterDiEle.HLTPaths = ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*","HLT_DoubleEle25_CaloIdL_MW_v*"]
-   process.hltFilterDiMu.HLTPaths = ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v*"]
-   #process.hltFilterMuEle.HLTPaths = ["HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v*","HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v*","HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v*","HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*","HLT_DiMu9_Ele9_CaloIdL_TrackIdL_DZ_v*","HLT_Mu8_DiEle12_CaloIdL_TrackIdL_DZ_v*"]
-   #process.hltFilterTriEle.HLTPaths = [""]
-   #process.hltFilterTriMu.HLTPaths = ["HLT_TripleMu_10_5_5_DZ_v*","HLT_TripleMu_12_10_5_v*"]
-   process.hltFilterSingleEle.HLTPaths = ["HLT_Ele32_WPTight_Gsf_v*"]
-   process.hltFilterSingleMu.HLTPaths = ["HLT_IsoMu24_v*"]
-
-   #process.triggerTriEle = cms.Path(process.hltFilterTriEle)
-   #process.triggerTriMu  = cms.Path(process.hltFilterTriMu )
-   process.triggerSingleEle = cms.Path(process.hltFilterSingleEle)
-   process.triggerSingleMu  = cms.Path(process.hltFilterSingleMu )
-
-
-
-process.triggerDiMu   = cms.Path(process.hltFilterDiMu)
-process.triggerDiEle  = cms.Path(process.hltFilterDiEle)
-#process.triggerMuEle  = cms.Path(process.hltFilterMuEle)
-
+    process.hltFilterSingleMu.HLTPaths = ["HLT_IsoMu24_v*","HLT_IsoMu27_v*"]
+    process.hltFilterSingleEle.HLTPaths = ["HLT_Ele32_WPTight_Gsf_v*","HLT_Ele35_WPTight_Gsf_v*"]
+    process.hltFilterDiMu.HLTPaths = ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v*"]
+    process.hltFilterDiTau.HLTPaths = ["HLT_DoubleMediumChargedIsoPFTau40_Trk1_TightID_eta2p1_Reg_v*","HLT_DoubleTightChargedIsoPFTau40_Trk1_eta2p1_Reg_v*","HLT_DoubleTightChargedIsoPFTau35_Trk1_TightID_eta2p1_Reg_v*","HLT_DoubleTightChargedIsoPFTauHPS40_Trk1_eta2p1_Reg_v*"]
+    process.hltFilterMuTau.HLTPaths = ["HLT_IsoMu20_eta2p1_LooseChargedIsoPFTauHPS27_eta2p1_CrossL1_v*","HLT_IsoMu20_eta2p1_LooseChargedIsoPFTauHPS27_eta2p1_TightID_CrossL1_v*"]
+    process.hltFilterEleTau.HLTPaths = ["HLT_Ele24_eta2p1_WPTight_Gsf_LooseChargedIsoPFTauHPS30_eta2p1_CrossL1_v*","HLT_Ele24_eta2p1_WPTight_Gsf_LooseChargedIsoPFTauHPS30_eta2p1_TightID_CrossL1_v*"]
+    process.hltFilterMuEle.HLTPaths = ["HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*","HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v*"]
+   
+    process.triggerSingleMu  = cms.Path(process.hltFilterSingleMu)
+    process.triggerSingleEle = cms.Path(process.hltFilterSingleEle)
+    process.triggerDiMu = cms.Path(process.hltFilterDiMu)
+    process.triggerDiTau = cms.Path(process.hltFilterDiTau)
+    process.triggerMuTau = cms.Path(process.hltFilterMuTau)
+    process.triggerEleTau = cms.Path(process.hltFilterEleTau)
+    process.triggerMuEle = cms.Path(process.hltFilterMuEle)
 
 TRIGGERSET="slimmedPatTrigger"
 
 ### ----------------------------------------------------------------------
 ### MET FILTERS
 ### ----------------------------------------------------------------------
-#process.METFilters  = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
-#process.METFilters.TriggerResultsTag  = cms.InputTag("TriggerResults","","RECO")
-#if (IsMC):
+# process.METFilters  = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
+# process.METFilters.TriggerResultsTag  = cms.InputTag("TriggerResults","","RECO")
+# if (IsMC):
 #   process.METFilters.TriggerResultsTag  = cms.InputTag("TriggerResults","","PAT")
-#
-#if (LEPTON_SETUP == 2017):#MET Filters available in miniAOD as described here https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2
+
+# if (LEPTON_SETUP == 2017):#MET Filters available in miniAOD as described here https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2
 #   if (IsMC):
 #      process.METFilters.HLTPaths = ["Flag_goodVertices","Flag_globalSuperTightHalo2016Filter","Flag_HBHENoiseFilter","Flag_HBHENoiseIsoFilter","Flag_EcalDeadCellTriggerPrimitiveFilter","Flag_BadPFMuonFilter","Flag_BadChargedCandidateFilter"]
 #   else:
 #      process.METFilters.HLTPaths = ["Flag_goodVertices","Flag_globalSuperTightHalo2016Filter","Flag_HBHENoiseFilter","Flag_HBHENoiseIsoFilter","Flag_EcalDeadCellTriggerPrimitiveFilter","Flag_BadPFMuonFilter","Flag_BadChargedCandidateFilter","Flag_eeBadScFilter"]
-#
-#process.triggerMETFilters = cms.Path(process.METFilters)
+
+# process.triggerMETFilters = cms.Path(process.METFilters)
 
 ### ----------------------------------------------------------------------
 ### MC Filters and tools
@@ -287,27 +280,26 @@ process.goodPrimaryVertices = cms.EDFilter("VertexSelector",
   filter = cms.bool(True),
 )
 
-
 ### ----------------------------------------------------------------------
 ### HTXS categorisation
 ### ----------------------------------------------------------------------
 if(IsMC):
-   process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
-   process.mergedGenParticles = cms.EDProducer("MergedGenParticleProducer",
-															  inputPruned = cms.InputTag("prunedGenParticles"),
-															  inputPacked = cms.InputTag("packedGenParticles"),
-															  )
-   process.myGenerator = cms.EDProducer("GenParticles2HepMCConverter",
-													 genParticles = cms.InputTag("mergedGenParticles"),
-													 genEventInfo = cms.InputTag("generator"),
-													 signalParticlePdgIds = cms.vint32(25), ## for the Higgs analysis
-													 )
-   process.rivetProducerHTXS = cms.EDProducer('HTXSRivetProducer',
-															 HepMCCollection = cms.InputTag('myGenerator','unsmeared'),
-															 LHERunInfo = cms.InputTag('externalLHEProducer'),
-															 ProductionMode = cms.string('AUTO'),
-															 )
-   process.htxs = cms.Path(process.mergedGenParticles*process.myGenerator*process.rivetProducerHTXS)
+    process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
+    process.mergedGenParticles = cms.EDProducer("MergedGenParticleProducer",
+                                               inputPruned = cms.InputTag("prunedGenParticles"),
+                                               inputPacked = cms.InputTag("packedGenParticles"),
+                                              )
+    process.myGenerator = cms.EDProducer("GenParticles2HepMCConverter",
+                                        genParticles = cms.InputTag("mergedGenParticles"),
+                                        genEventInfo = cms.InputTag("generator"),
+                                        signalParticlePdgIds = cms.vint32(25), ## for the Higgs analysis
+                                       )
+    process.rivetProducerHTXS = cms.EDProducer('HTXSRivetProducer',
+                                              HepMCCollection = cms.InputTag('myGenerator','unsmeared'),
+                                              LHERunInfo = cms.InputTag('externalLHEProducer'),
+                                              ProductionMode = cms.string('AUTO'),
+                                             )
+    process.htxs = cms.Path(process.mergedGenParticles*process.myGenerator*process.rivetProducerHTXS)
 
 ### ----------------------------------------------------------------------
 ### ----------------------------------------------------------------------
@@ -320,7 +312,6 @@ SIP =  "abs(dB('PV3D')/edB('PV3D')) < 4"
 GOODELECTRON = "userFloat('ID') && " + SIP
 GOODMUON     = "userFloat('ID') && " + SIP
 TIGHTMUON    = "isPFMuon || (passed('CutBasedIdTrkHighPt') && pt>200)"
-
 
 APPLYTESCORRECTION = True
 
@@ -367,7 +358,7 @@ else:
 
 process.bareSoftMuons = cms.EDFilter("PATMuonRefSelector",
     src = cms.InputTag("calibratedMuons"),
-    cut = cms.string("pt>5 && abs(eta)<2.4 && (isGlobalMuon || (isTrackerMuon && numberOfMatchedStations>0))")
+    cut = cms.string("pt>15 && abs(eta)<2.4 && (isGlobalMuon || (isTrackerMuon && numberOfMatchedStations>0))")
 #    Lowering pT cuts
 #    cut = cms.string("(isGlobalMuon || (isTrackerMuon && numberOfMatchedStations>0)) && pt>3 && p>3.5 && abs(eta)<2.4")
 )
@@ -391,14 +382,13 @@ process.softMuons = cms.EDProducer("MuFiller",
     sampleType = cms.int32(SAMPLE_TYPE),
     setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
     cut = cms.string(DXY_DZ), #dxy, dz cuts
-    TriggerResults = cms.InputTag('TriggerResults','','HLT'),
+    TriggerResultsLabel = cms.InputTag('TriggerResults','','HLT'),
     TriggerSet = cms.InputTag(TRIGGERSET),
     flags = cms.PSet(
         ID = cms.string(TIGHTMUON), #"userFloat('isBDT')"), # muonMVA ID
         isSIP = cms.string(SIP),
         isGood = cms.string(GOODMUON),
         isIsoFSRUncorr  = cms.string("userFloat('combRelIsoPF')<" + str(MUISOCUT)),
-#       Note: passCombRelIsoPFFSRCorr is currently set in LeptonPhotonMatcher for new FSR strategy; in ZZCandidateFiller for the old one
     )
 )
 
@@ -429,31 +419,31 @@ if UseMuonCleanerBySegments:
 
 process.selectedSlimmedElectrons = cms.EDFilter("PATElectronSelector",
     src = cms.InputTag("slimmedElectrons"),
-    cut = cms.string("pt>5 && abs(eta)<2.5")
+    cut = cms.string("pt>15 && abs(eta)<2.5")
 )
 
 #--- Photon ID modules seem to be OK also for UL cf: 
 #--- https://github.com/cms-egamma/EgammaPostRecoTools/blob/master/python/EgammaPostRecoTools.py#L63
 
 if (LEPTON_SETUP == 2016):
-   from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
-   if ( DATA_TAG == 'ULAPV'):
-       setupEgammaPostRecoSeq(process,
+    from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
+    if ( DATA_TAG == 'ULAPV'):
+        setupEgammaPostRecoSeq(process,
                               runEnergyCorrections=True,
                               runVID=True,
                               eleIDModules=['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Summer16UL_ID_ISO_cff','RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV70_cff'],
                               phoIDModules=['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Fall17_94X_V2_cff'],
                               era='2016preVFP-UL')
-   else:
-       setupEgammaPostRecoSeq(process,
+    else:
+        setupEgammaPostRecoSeq(process,
                               runEnergyCorrections=True,
                               runVID=True,
                               eleIDModules=['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Summer16UL_ID_ISO_cff','RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV70_cff'],
                               phoIDModules=['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Fall17_94X_V2_cff'],
                               era='2016postVFP-UL')
 if (LEPTON_SETUP == 2017):
-   from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
-   setupEgammaPostRecoSeq(process,
+    from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
+    setupEgammaPostRecoSeq(process,
                           runEnergyCorrections=True,
                           runVID=True,
                           eleIDModules=['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Summer17UL_ID_ISO_cff', 'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV70_cff'],
@@ -461,8 +451,8 @@ if (LEPTON_SETUP == 2017):
                           era='2017-UL')
 
 if (LEPTON_SETUP == 2018):
-   from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
-   setupEgammaPostRecoSeq(process,
+    from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
+    setupEgammaPostRecoSeq(process,
                           runEnergyCorrections=True,
                           runVID=True,
                           eleIDModules=['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Summer18UL_ID_ISO_cff','RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV70_cff','RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Fall17_iso_V2_cff'],
@@ -476,11 +466,11 @@ process.bareSoftElectrons = cms.EDFilter("PATElectronRefSelector",
 
 process.softElectrons = cms.EDProducer("EleFiller",
    src    = cms.InputTag("bareSoftElectrons"),
-   TriggerResults = cms.InputTag('TriggerResults','','HLT'),
+   TriggerResultsLabel = cms.InputTag('TriggerResults','','HLT'),
    TriggerSet = cms.InputTag(TRIGGERSET),
    sampleType = cms.int32(SAMPLE_TYPE),
    setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
-   cut = cms.string("pt>7 && abs(eta) < 2.5 &&"+ DXY_DZ),
+   cut = cms.string("pt>15 && abs(eta) < 2.5 &&"+ DXY_DZ),
    flags = cms.PSet(
         ID = cms.string("userFloat('isBDT')"),
         isSIP = cms.string(SIP),
@@ -561,13 +551,13 @@ process.cleanSoftElectrons = cms.EDProducer("PATElectronCleaner",
 TAUCUT       = "pt>20 & abs(eta)<2.3"#"tauID('byCombinedIsolationDeltaBetaCorrRaw3Hits') < 1000.0 && pt>18"
 SOSOTAU      = "decayMode()!=5 && decayMode()!=6 && tauID('decayModeFindingNewDMs') == 1 && userFloat('dz') < 1"
 GOODTAU      = SOSOTAU# + " && tauID('byVVVLooseDeepTau2017v2p1VSjet') == 1 && tauID('byVVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byVLooseDeepTau2017v2p1VSmu') == 1"
-#GOODTAU_MU   = SOSOTAU# + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
-#GOODTAU_ELE  = SOSOTAU# + " && tauID('byVLooseDeepTau2017v2p1VSmu') == 1 && tauID('byTightDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
-#GOODTAU_TAU  = SOSOTAU# + " && tauID('byVLooseDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
+GOODTAU_MU   = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
+GOODTAU_ELE  = SOSOTAU + " && tauID('byVLooseDeepTau2017v2p1VSmu') == 1 && tauID('byTightDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
+GOODTAU_TAU  = SOSOTAU + " && tauID('byVLooseDeepTau2017v2p1VSmu') == 1 && tauID('byVVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
 
-GOODTAU_MU   = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byTightDeepTau2017v2p1VSjet') == 1"
-GOODTAU_ELE  = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byMediumDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
-GOODTAU_TAU  = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byTightDeepTau2017v2p1VSjet') == 1"
+# GOODTAU_MU   = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byTightDeepTau2017v2p1VSjet') == 1"
+# GOODTAU_ELE  = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byMediumDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
+# GOODTAU_TAU  = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byTightDeepTau2017v2p1VSjet') == 1"
 
 
 process.bareTaus = cms.EDFilter("PATTauRefSelector",
@@ -661,16 +651,16 @@ process.taus=cms.Sequence(process.bareTaus + process.softTaus)
 # Recipe taken from https://twiki.cern.ch/twiki/bin/viewauth/CMS/L1PrefiringWeightRecipe
 
 if(IsMC and LEPTON_SETUP == 2016):
-   from PhysicsTools.PatUtils.l1PrefiringWeightProducer_cfi import l1PrefiringWeightProducer
-   if( DATA_TAG == 'ULAPV' ):
-       process.prefiringweight = l1PrefiringWeightProducer.clone(
+    from PhysicsTools.PatUtils.l1PrefiringWeightProducer_cfi import l1PrefiringWeightProducer
+    if( DATA_TAG == 'ULAPV' ):
+        process.prefiringweight = l1PrefiringWeightProducer.clone(
                                                                 DataEraECAL = cms.string("UL2016preVFP"),
                                                                 DataEraMuon = cms.string("2016preVFP"),
                                                                 UseJetEMPt = cms.bool(False),
                                                                 PrefiringRateSystematicUnctyECAL = cms.double(0.2),
                                                                 PrefiringRateSystematicUnctyMuon = cms.double(0.2))
-   else:
-       process.prefiringweight = l1PrefiringWeightProducer.clone(
+    else:
+        process.prefiringweight = l1PrefiringWeightProducer.clone(
                                                                 DataEraECAL = cms.string("UL2016postVFP"),
                                                                 DataEraMuon = cms.string("2016postVFP"),
                                                                 UseJetEMPt = cms.bool(False),
@@ -678,8 +668,8 @@ if(IsMC and LEPTON_SETUP == 2016):
                                                                 PrefiringRateSystematicUnctyMuon = cms.double(0.2))
 
 if(IsMC and LEPTON_SETUP == 2017):
-   from PhysicsTools.PatUtils.l1PrefiringWeightProducer_cfi import l1PrefiringWeightProducer
-   process.prefiringweight = l1PrefiringWeightProducer.clone(
+    from PhysicsTools.PatUtils.l1PrefiringWeightProducer_cfi import l1PrefiringWeightProducer
+    process.prefiringweight = l1PrefiringWeightProducer.clone(
                                                             TheJets = cms.InputTag("patJetsReapplyJEC"),
                                                             DataEraECAL = cms.string("UL2017BtoF"),
                                                             DataEraMuon = cms.string("20172018"),
@@ -688,8 +678,8 @@ if(IsMC and LEPTON_SETUP == 2017):
                                                             PrefiringRateSystematicUnctyMuon = cms.double(0.2))
     
 if(IsMC and LEPTON_SETUP == 2018):
-   from PhysicsTools.PatUtils.l1PrefiringWeightProducer_cfi import l1PrefiringWeightProducer
-   process.prefiringweight = l1PrefiringWeightProducer.clone(
+    from PhysicsTools.PatUtils.l1PrefiringWeightProducer_cfi import l1PrefiringWeightProducer
+    process.prefiringweight = l1PrefiringWeightProducer.clone(
                                                              TheJets = cms.InputTag("patJetsReapplyJEC"),
                                                              DataEraECAL = cms.string("None"),
                                                              DataEraMuon = cms.string("20172018"),
@@ -698,7 +688,7 @@ if(IsMC and LEPTON_SETUP == 2018):
                                                              PrefiringRateSystematicUnctyMuon = cms.double(0.2))
 
 if(IsMC):
-   process.Prefiring = cms.Path(process.prefiringweight)
+    process.Prefiring = cms.Path(process.prefiringweight)
 
 
 
@@ -862,14 +852,14 @@ process.ecalBadCalibReducedMINIAODFilter = cms.EDFilter(
 ### Dileptons: combine/merge leptons into intermediate (bare) collections;
 ###            Embed additional user variables into final collections
 ### ----------------------------------------------------------------------
-TWOGOODLEPTONS = "( userFloat('d0.isGood') && userFloat('d1.isGood'))"# && userFloat('isGoodTau') )" # Z made of 2 good leptons (ISO not yet applied)
+TWOGOODLEPTONS = "( userFloat('d0.isGood') && userFloat('d1.isGood') && userFloat('isGoodTau') )" # Z made of 2 good leptons (ISO not yet applied)
 TWOISOLEPTONS = "( userFloat('d0.passCombRelIsoPFFSRCorr') && userFloat('d1.passCombRelIsoPFFSRCorr') )"
-TWOSFLEPTONS = "( abs(daughter(0).pdgId())==abs(daughter(1).pdgId()) || abs(daughter(0).pdgId())==15 || abs(daughter(1).pdgId())==15 || abs(daughter(0).pdgId()*daughter(1).pdgId())==143 )"
+TWOSFLEPTONS = "(abs(daughter(0).pdgId())==15 || abs(daughter(1).pdgId())==15 || abs(daughter(0).pdgId()*daughter(1).pdgId())==143 || abs(daughter(0).pdgId()*daughter(1).pdgId())==169)"
 ### NOTE: Isolation cut has been moved to ZZ candidates as we now correct for FSR of all four photons.
 ### Because if this, isBestZ flags are no longer correct; BESTZ_AMONG is set to "" for safety
 
 ### ----------------------------------------------------------------------
-### Dileptons (Z->ee, Z->mm, Z->etau, Z->mutau, Z->tautau)
+### Dileptons (Z->mm, Z->etau, Z->mutau, Z->tautau, Z->emu)
 ### ----------------------------------------------------------------------
 
 # l+l- (SFOS, e and mu and tau)
@@ -888,14 +878,9 @@ else:
         process.bareZCand.cut = cms.string("mass > 0 && "+TWOSFLEPTONS+" && daughter(0).masterClone.userFloat('isGood') && daughter(1).masterClone.userFloat('isGood')")
         
 
+#FLAVOUR     = "((daughter(0).pdgId()*daughter(1).pdgId()==-121 && userFloat('eleHLTMatch')) ||  (daughter(0).pdgId()*daughter(1).pdgId()==-169 && userFloat('muHLTMatch')))"
 
-ZLEPTONSEL     = TWOGOODLEPTONS # Note: this is without ISO
-
-Z1PRESEL    = (ZLEPTONSEL + " && mass >= 81.1876 && mass <= 101.1876") # Note: this is without ISO
-
-FLAVOUR	    = "((daughter(0).pdgId()*daughter(1).pdgId()==-121 && userFloat('eleHLTMatch')) ||  (daughter(0).pdgId()*daughter(1).pdgId()==-169 && userFloat('muHLTMatch')))"
-
-BESTZ_AMONG = ( Z1PRESEL + "&&" + TWOISOLEPTONS + "&&" + FLAVOUR)
+BESTZ_AMONG = ( TWOGOODLEPTONS + "&&" + TWOISOLEPTONS + "&& userFloat('DR')>0.5" )
 
 TWOGOODISOLEPTONS = ( TWOGOODLEPTONS + "&&" + TWOISOLEPTONS )
 
@@ -903,7 +888,7 @@ TWOGOODISOLEPTONS = ( TWOGOODLEPTONS + "&&" + TWOISOLEPTONS )
 process.ZCand = cms.EDProducer("ZCandidateFiller",
     src	       = cms.InputTag("bareZCand"),
                                
-    TriggerResults = cms.InputTag('TriggerResults','','HLT'),
+    TriggerResultsLabel = cms.InputTag('TriggerResults','','HLT'),
     TriggerSet = cms.InputTag(TRIGGERSET),
                                
     sampleType = cms.int32(SAMPLE_TYPE),
@@ -911,353 +896,58 @@ process.ZCand = cms.EDProducer("ZCandidateFiller",
     bestZAmong = cms.string(BESTZ_AMONG),
     FSRMode = cms.string(FSRMODE), # "skip", "RunII"
     flags = cms.PSet(
-        GoodLeptons = cms.string(ZLEPTONSEL),
+        GoodLeptons = cms.string(TWOGOODLEPTONS),
         GoodIsoLeptons = cms.string(TWOGOODISOLEPTONS),
-        Z1Presel = cms.string(Z1PRESEL),
+        # Z1Presel = cms.string(Z1PRESEL),
     )
 )
 
 
 # ll, same flavour/any charge, for control regions only
-process.bareLLCand = cms.EDProducer("CandViewShallowCloneCombiner",
-    decay = cms.string('softLeptons softLeptons'),
-    #cut = cms.string('deltaR(daughter(0).eta, daughter(0).phi, daughter(1).eta, daughter(1).phi)>0.02'), # protect against ghosts
-    cut = cms.string("deltaR(daughter(0).eta, daughter(0).phi, daughter(1).eta, daughter(1).phi)>0.02 && " + TWOSFLEPTONS), # protect against ghosts && same flavour
-    checkCharge = cms.bool(False)
-)
+# process.bareLLCand = cms.EDProducer("CandViewShallowCloneCombiner",
+#     decay = cms.string('softLeptons softLeptons'),
+#     #cut = cms.string('deltaR(daughter(0).eta, daughter(0).phi, daughter(1).eta, daughter(1).phi)>0.02'), # protect against ghosts
+#     cut = cms.string("deltaR(daughter(0).eta, daughter(0).phi, daughter(1).eta, daughter(1).phi)>0.02 && " + TWOSFLEPTONS), # protect against ghosts && same flavour
+#     checkCharge = cms.bool(False)
+# )
 
 
-process.LLCand = cms.EDProducer("ZCandidateFiller",
-    src = cms.InputTag("bareLLCand"),
-    sampleType = cms.int32(SAMPLE_TYPE),
-    setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
-    bestZAmong = cms.string(BESTZ_AMONG),
-    FSRMode = cms.string(FSRMODE), # "skip", "RunII"
+# process.LLCand = cms.EDProducer("ZCandidateFiller",
+#     src = cms.InputTag("bareLLCand"),
+#     sampleType = cms.int32(SAMPLE_TYPE),
+#     setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
+#     bestZAmong = cms.string(BESTZ_AMONG),
+#     FSRMode = cms.string(FSRMODE), # "skip", "RunII"
 
-    TriggerResults = cms.InputTag('TriggerResults','','HLT'),
-    TriggerSet = cms.InputTag(TRIGGERSET),
+#     TriggerResults = cms.InputTag('TriggerResults','','HLT'),
+#     TriggerSet = cms.InputTag(TRIGGERSET),
 
-    flags = cms.PSet(
-        GoodLeptons = cms.string(ZLEPTONSEL),
-        Z1Presel = cms.string(Z1PRESEL),
-    )
-)
+#     flags = cms.PSet(
+#         GoodLeptons = cms.string(ZLEPTONSEL),
+#         Z1Presel = cms.string(Z1PRESEL),
+#     )
+# )
 
 
 ### ----------------------------------------------------------------------
 ### TriLeptons (for fake rate)
 ### ----------------------------------------------------------------------
-Z_PLUS_LEP_MIJ=("sqrt(pow(daughter(0).daughter({0}).energy+daughter(1).energy, 2) - " +
-                "     pow(daughter(0).daughter({0}).px    +daughter(1).px, 2) -" +
-                "     pow(daughter(0).daughter({0}).py    +daughter(1).py, 2) -" +
-                "     pow(daughter(0).daughter({0}).pz    +daughter(1).pz, 2))")
+# Z_PLUS_LEP_MIJ=("sqrt(pow(daughter(0).daughter({0}).energy+daughter(1).energy, 2) - " +
+#                 "     pow(daughter(0).daughter({0}).px    +daughter(1).px, 2) -" +
+#                 "     pow(daughter(0).daughter({0}).py    +daughter(1).py, 2) -" +
+#                 "     pow(daughter(0).daughter({0}).pz    +daughter(1).pz, 2))")
 
-process.ZlCand = cms.EDProducer("PATCandViewShallowCloneCombiner",
-    decay = cms.string('ZCand softLeptons'),
-    cut = cms.string("deltaR(daughter(0).daughter(0).eta, daughter(0).daughter(0).phi, daughter(1).eta, daughter(1).phi)>0.02 &&" + # Ghost suppression
-                     "deltaR(daughter(0).daughter(1).eta, daughter(0).daughter(1).phi, daughter(1).eta, daughter(1).phi)>0.02 &&" +
-                     ("(daughter(0).daughter(0).charge == daughter(1).charge || %s > 4) && " % ( Z_PLUS_LEP_MIJ.format(0))) +       # mLL>4 for the OS pair (Giovanni's impl)
-                     ("(daughter(0).daughter(1).charge == daughter(1).charge || %s > 4) && " % ( Z_PLUS_LEP_MIJ.format(1))) +
-                     "daughter(0).masterClone.userFloat('isBestZ') &&" + # This includes the Z1 isolation requirement
-                     "daughter(0).masterClone.userFloat('Z1Presel')"
-                     ),
-    checkCharge = cms.bool(False)
-)
-
-
-### ----------------------------------------------------------------------
-### Quadrileptons: combine/merge leptons into intermediate (bare) collections;
-###                Embed additional user variables into final collections
-### ----------------------------------------------------------------------
-
-FOURGOODLEPTONS    =  ("( userFloat('d0.GoodLeptons') && userFloat('d1.GoodLeptons')" +
-		       "&& userFloat('d0.isGoodTau') && userFloat('d1.isGoodTau')" +
-                       "&& userFloat('d0.worstEleIso') <" + str(ELEISOCUT) +
-                       "&& userFloat('d1.worstEleIso') <" + str(ELEISOCUT) +
-                       "&& userFloat('d0.worstMuIso') <" + str(MUISOCUT) +
-                       "&& userFloat('d1.worstMuIso') <" + str(MUISOCUT) + ")"
-                       ) #ZZ made of 4 tight leptons passing SIP and ISO 
-
-Z1MASS            = "( daughter('Z1').mass()>4 && daughter('Z1').mass()<200 )"
-Z2MASS            = "( daughter('Z2').mass()>4 && daughter('Z2').mass()<140 )" # (was > 4 in Synch) to deal with m12 cut at gen level
-#MLL3On4_12        = "userFloat('mZa')>12" # mll>12 on 3/4 pairs;
-#MLLALLCOMB        = "userFloat('mLL6')>4" # mll>4 on 6/6 AF/AS pairs;
-MLLALLCOMB        = "userFloat('mLL4')>4" # mll>4 on 4/4 AF/OS pairs;
-SMARTMALLCOMB     = "userFloat('passSmartMLL')" # Require swapped-lepton Z2' to be >12 IF Z1' is SF/OS and closer to 91.1876 than mZ1
-PT20_10           = "( userFloat('pt1')>20 && userFloat('pt2')>10 )" #20/10 on any of the 4 leptons
-M4l100            = "mass>100"
-OSSF		  = "( daughter('Z1').masterClone.userFloat('OSSF') && daughter('Z2').masterClone.userFloat('OSSF') )"
-HLTMATCH	  = "( (daughter('Z1').daughter(0).pdgId()*daughter('Z1').daughter(1).pdgId()==-169 && daughter('Z1').masterClone().userFloat('muHLTMatch')) || (daughter('Z1').daughter(0).pdgId()*daughter('Z1').daughter(1).pdgId()==-121 && daughter('Z1').masterClone().userFloat('eleHLTMatch')) )"
-BESTZ1		  = "daughter('Z1').masterClone().userFloat('isBestZ')"
-
-
-if SELSETUP=="Legacy": # Default Configuration (Legacy paper): cut on selected best candidate
-    print "SELSETUP=Legacy no longer supported after 8fb591a because we now set combRelIsoPFFSRCorr at the level of ZZ; will need to re-introduce it at  the Z level so that ZZCand.bestZAmong (ie isBestZ flag) works again as before"
-    sys.exit()
-    HASBESTZ          = "daughter('Z1').masterClone.userFloat('isBestZ')"
-    BESTCAND_AMONG = (FOURGOODLEPTONS + "&&" +
-                      HASBESTZ        + "&&" +
-                      Z1MASS
-                      )
-
-    SR           = (FOURGOODLEPTONS + "&&" +
-                           HASBESTZ        + "&&" +
-                           Z1MASS          + "&&" +
-                           Z2MASS          + "&&" +
-                           MLLALLCOMB      + "&&" +
-                           PT20_10         + "&&" +
-                           "mass>70"        + "&&" +
-                           "daughter('Z2').mass>12")
-
-
-elif SELSETUP=="allCutsAtOnce": # Select best candidate among those passing all cuts
-
-    BESTCAND_AMONG = (FOURGOODLEPTONS + "&&" +
-                      Z1MASS          + "&&" +
-                      Z2MASS          + "&&" +
-                      MLLALLCOMB      + "&&" +
-                      PT20_10         + "&&" +
-                      "mass>70"       + "&&" +
-                      "daughter('Z2').mass>12"
-                      )
-
-    SR = BESTCAND_AMONG
-
-
-
-elif SELSETUP=="allCutsAtOnceButMZ2": # Select best candidate among those passing all cuts except mZ2, leave only mZ2 cut at the end
-
-    BESTCAND_AMONG = (FOURGOODLEPTONS + "&&" +
-                      Z1MASS          + "&&" +
-                      Z2MASS          + "&&" +
-                      MLLALLCOMB      + "&&" +
-                      PT20_10         + "&&" +
-                      "mass>70"
-                      )
-
-    SR           = (BESTCAND_AMONG + "&&" +
-                           "daughter('Z2').mass>12")
-
-
-
-elif SELSETUP=="allCutsAtOncePlusMZb": # Apply also cut on mZb, -> expected to reduce the background but also signal efficiency
-
-    BESTCAND_AMONG = (FOURGOODLEPTONS + "&&" +
-                      Z1MASS          + "&&" +
-                      Z2MASS          + "&&" +
-                      MLLALLCOMB      + "&&" +
-                      PT20_10         + "&&" +
-                      "mass>70"       + "&&" +
-                      "userFloat('mZb')>12" + "&&" +
-                      "daughter('Z2').mass>12"
-                      )
-
-    SR = BESTCAND_AMONG
-
-elif SELSETUP=="allCutsAtOncePlusSmart": # Apply smarter mZb cut
-
-    BESTCAND_AMONG = (FOURGOODLEPTONS + "&&" +
-                      Z1MASS          + "&&" +
-                      Z2MASS          + "&&" +
-                      MLLALLCOMB      + "&&" +
-                      PT20_10         + "&&" +
-                      HLTMATCH	      + "&&" +
-                      BESTZ1	      + "&&" +
-                      #OSSF	      + "&&" +
-                      "mass>70"       + "&&" +
-                      SMARTMALLCOMB#   + "&&" +
-              #        "daughter('Z2').masterClone.userFloat('goodMass')>12"
-                      )
-
-    SR = BESTCAND_AMONG
-
-
-else:
-    print "Please choose one of the following string for SELSETUP: 'Legacy', 'allCutsAtOnceButMZ2', 'allCutsAtOnce', 'allCutsAtOncePlusMZb', 'allCutsAtOncePlusSmart'"
-    sys.exit()
-
-
-FULLSEL            = (SR      + "&&" +
-                      M4l100)
-
-
-# Ghost Suppression cut
-NOGHOST4l = ("deltaR(daughter(0).daughter(0).eta, daughter(0).daughter(0).phi, daughter(1).daughter(0).eta, daughter(1).daughter(0).phi)>0.02 &&"+
-             "deltaR(daughter(0).daughter(0).eta, daughter(0).daughter(0).phi, daughter(1).daughter(1).eta, daughter(1).daughter(1).phi)>0.02 &&"+
-             "deltaR(daughter(0).daughter(1).eta, daughter(0).daughter(1).phi, daughter(1).daughter(0).eta, daughter(1).daughter(0).phi)>0.02 &&"+
-             "deltaR(daughter(0).daughter(1).eta, daughter(0).daughter(1).phi, daughter(1).daughter(1).eta, daughter(1).daughter(1).phi)>0.02") # protect against ghosts
-
-
-# Preselection of 4l candidates
-LLLLPRESEL = NOGHOST4l # Just suppress candidates with overlapping leptons
-
-#LLLLPRESEL = (NOGHOST4l + "&&" +
-#              FOURGOODLEPTONS) # Only retain candidates with 4 tight leptons (ID, iso, SIP)
-
-
-# ZZ Candidates
-
-process.bareZZCand= cms.EDProducer("CandViewShallowCloneCombiner",
-    decay = cms.string('ZCand ZCand'),
-    cut = cms.string(LLLLPRESEL),
-    #checkOverlap = cms.bool(False),
-    checkCharge = cms.bool(True)
-)
-process.ZZCand = cms.EDProducer("ZZCandidateFiller",
-    src = cms.InputTag("bareZZCand"),
-    srcMET     = srcMETTag,
-    srcCov     = cms.InputTag("METSignificance", "METCovariance"),
-    sampleType = cms.int32(SAMPLE_TYPE),
-    setup = cms.int32(LEPTON_SETUP),
-    #superMelaMass = cms.double(SUPERMELA_MASS),
-    isMC = cms.bool(IsMC),
-    bestCandAmong = cms.PSet(isBestCand = cms.string(BESTCAND_AMONG)),
-    bestCandComparator = cms.string(BESTCANDCOMPARATOR),
-    ZRolesByMass = cms.bool(True),
-    debug = cms.bool(False),
-    flags = cms.PSet(
-        GoodLeptons =  cms.string(FOURGOODLEPTONS),
-        Z2Mass  = cms.string(Z2MASS),
-        MAllComb = cms.string(MLLALLCOMB),
-        SR = cms.string(SR),
-        FullSel70 = cms.string(SR), #Obsolete, use "SR"
-        FullSel = cms.string(FULLSEL),
-    ),
-    recoProbabilities = cms.vstring(),
-    #These are actually no longer needed after we dropped the Legacy FSR algorithm
-    muon_iso_cut = cms.double(MUISOCUT),
-    electron_iso_cut = cms.double(ELEISOCUT),
-)
-
-
-
-### ----------------------------------------------------------------------
-### Z+LL Control regions.
-### By constryction, daughter(0) is the Z, daughter(1) the LL pair.
-### By setting ZRolesByMass = False, daugther('Z1') is set as daughter(0),
-### so we can use the same cuts as for the SR.
-### ----------------------------------------------------------------------
-
-Z2MM = "abs(daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId())==169" 		#Z2 = mumu
-Z2EE = "abs(daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId())==121" 		#Z2 = ee
-Z2TT = "(abs(daughter(1).daughter(0).pdgId())==15 || abs(daughter(1).daughter(1).pdgId())==15 || abs(daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId())==143 )" #Z2 = tautau->etau, mutau, tautau, emu
-Z2LL = "(" + Z2MM + "||" + Z2EE + "||" + Z2TT + ")"						#Z2 = mumu, ee, tautau
-Z2LL_SS = Z2LL + " && daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()>0"	#Z2 = same-sign
-Z2LL_OS = Z2LL + " && daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()<0"   	#Z2 = l+l-
-Z2MM_OS = "daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()==-169" 		#Z2 = mu+mu-
-Z2MM_SS = "daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()== 169" 		#Z2 = mu-mu-/mu+mu+
-Z2EE_OS = "daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()==-121" 		#Z2 = e+e-
-Z2EE_SS = "daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()== 121" 		#Z2 = e-e-/e+e+
-Z2TT_OS = Z2TT + "&& daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()<0"		#Z2 = etau, mutau, tautau, emu, OS
-Z2TT_SS = Z2TT + "&& daughter(1).daughter(0).pdgId()*daughter(1).daughter(1).pdgId()>0"		#Z2 = etau, mutau, tautau, emu, SS
-Z2ID    = "userFloat('d1.d0.ID')     && userFloat('d1.d1.ID')"                    		#ID on LL leptons
-Z2SIP   = "userFloat('d1.d0.isSIP') && userFloat('d1.d1.isSIP')"                  		#SIP on LL leptons, probably need to be modified because taus don't have SIP.
-CR_Z2MASS = "daughter(1).mass()>4  && daughter(1).mass()<140"	#Mass on LL; cut at 4
-
-
-# Define cuts for selection of the candidates among which the best one is chosen.
-CR_BESTCANDBASE = ("userFloat('d0.Z1Presel') && userFloat('d0.worstEleIso') <" + str(ELEISOCUT) +
-                   "&& userFloat('d0.worstMuIso') <" + str(MUISOCUT) ) # To be revised
-
-CR_BESTCANDBASE_AA   = ("userFloat('d0.Z1Presel') && userFloat('d0.worstEleIso') <" + str(ELEISOCUT) +
-                        "&& userFloat('d0.worstMuIso') <" + str(MUISOCUT) + "&&" +
-                        Z2SIP) # base for AA CR: # Z1 with tight leptons passing SIP and ISO, mass cuts; SIP on Z2
-
-
-CR_BESTZLLss = ""
-if SELSETUP == "Legacy":
-    # No longer supported; cf comment for "Legacy" in the SR.
-    CR_BESTZLLss = CR_BESTCANDBASE_AA + "&&" + "userFloat('d0.isBestZ') &&"+ Z2LL_SS
-elif SELSETUP == "allCutsAtOnceButMZ2":
-    CR_BESTZLLss = CR_BESTCANDBASE_AA + "&&" + Z2LL_SS + "&&" +CR_Z2MASS + "&&" + MLLALLCOMB + "&&" + PT20_10 + "&& mass>70"
-elif SELSETUP == "allCutsAtOnce":
-    CR_BESTZLLss = CR_BESTCANDBASE_AA + "&&" + Z2LL_SS + "&&" +CR_Z2MASS + "&&" + MLLALLCOMB + "&&" + PT20_10 + "&&" + "mass>70" + "&&" + "daughter(1).mass>12"
-elif SELSETUP == "allCutsAtOncePlusMZb":
-    CR_BESTZLLss = CR_BESTCANDBASE_AA + "&&" + Z2LL_SS + "&&" +CR_Z2MASS + "&&" + MLLALLCOMB + "&&" + PT20_10 + "&&" + "mass>70" + "&&" + "daughter(1).mass>12" + "&&" + "userFloat('mZb')>12"
-elif SELSETUP == "allCutsAtOncePlusSmart":
-    CR_BESTZLLss = CR_BESTCANDBASE_AA + "&& (" + Z2LL_SS + ") && (" +CR_Z2MASS + ") && (" + MLLALLCOMB + ") && (" + PT20_10 + ") &&" + "mass()>70" + "&&" + "daughter(1).mass()>0" + "&&" + SMARTMALLCOMB + "&&" + HLTMATCH + "&&" + BESTZ1
-
-
-# Base for the selection cut applied on the best candidate. This almost fully (except for M4l100) overlaps with the cuts defined above, except for startegies where the best candidate is chosen at the beginning (Legacy, allCutsAtOnceButMZ2).
-CR_BASESEL = (CR_Z2MASS + "&&" +              # mass cuts on LL
-              MLLALLCOMB + "&&" +             # mass cut on all lepton pairs
-              PT20_10    + "&&" +             # pT> 20/10 over all 4 l
-#              "daughter(1).mass()>12 &&" +      # mZ2 >12
-              "mass()>70" )                     # m4l cut
-
-##### CR based on Z+2 opposite sign leptons that pass the loose selection #####
-
-# check weather the 2 leptons from Z2 pass the tight selection
-PASSD0 = "(userFloat('d1.d0.isGood') && userFloat('d1.d0.isGoodTau') && userFloat('d1.d0.passCombRelIsoPFFSRCorr'))" # FIXME, passCombRelIsoPFFSRCorr result is hard coded
-PASSD1 = "(userFloat('d1.d1.isGood') && userFloat('d1.d1.isGoodTau') && userFloat('d1.d1.passCombRelIsoPFFSRCorr'))" # FIXME, passCombRelIsoPFFSRCorr result is hard coded
-# ... and fill some useful variable needed for the CR logic
-FAILD0 = "!" + PASSD0
-FAILD1 = "!" + PASSD1
-BOTHFAIL = FAILD0 + "&&" + FAILD1
-BOTHPASS = PASSD0 + "&&" + PASSD1
-PASSD0_XOR_PASSD1 = "((" + PASSD0 + "&&" + FAILD1 + ") || (" + PASSD1 + "&&" + FAILD0 + "))"
-PASSD0_OR_PASSD1  = "(" + PASSD0 + "||" + PASSD1 + ")"
-
-
-CR_BESTZLLos = (CR_BESTCANDBASE_AA    + "&&" +
-                CR_BASESEL            + "&&" +
-                Z2LL_OS               + "&&" +
-                SMARTMALLCOMB	      + "&&" +
-		HLTMATCH	      + "&&" +
-		BESTZ1         )
-
-# CR 3P1F
-CR_BESTZLLos_3P1F = (CR_BESTZLLos + "&&" + PASSD0_OR_PASSD1)
-CR_ZLLosSEL_3P1F  = (CR_BESTZLLos + "&&" + PASSD0_XOR_PASSD1) # Is the CR_BESTZLLos request redundant?
-
-
-# CR 2P2F
-CR_BESTZLLos_2P2F   = (CR_BESTZLLos)
-CR_ZLLosSEL_2P2F    = (CR_BESTZLLos + "&&" + BOTHFAIL)  # Is the CR_BESTZLLos request redundant?
-
-################################################################################
-
-#Prefix for Z2 daughters, to be used in the "cut" string
-#D1D0 = "daughter(1).daughter(0).masterClone"
-#D1D1 = "daughter(1).daughter(1).masterClone"
-
-
-# Z (OSSF,both e/mu) + LL (any F/C, with no ID/iso); this is the starting point for control regions
-process.bareZLLCand= cms.EDProducer("CandViewShallowCloneCombiner",
-    decay = cms.string('ZCand LLCand'),
-    cut = cms.string(NOGHOST4l),
-#                     "&& !(" + Z2LL_OS + "&&" + D1D0+".userFloat('isGood')&&"+D1D1+".userFloat('isGood')&&"+D1D0+".userFloat('passCombRelIsoPFFSRCorr')&&"+D1D1+".userFloat('passCombRelIsoPFFSRCorr'))"), # Reject OS tight combinations. Note that BOTHFAIL cannot be used here ("d0.d1.xxx" is available only in and after ZZCandidateFiller.
-    checkCharge = cms.bool(False)
-)
-process.ZLLCand = cms.EDProducer("ZZCandidateFiller",
-    src = cms.InputTag("bareZLLCand"),
-    srcMET     = srcMETTag,
-    srcCov     = cms.InputTag("METSignificance", "METCovariance"),
-    sampleType = cms.int32(SAMPLE_TYPE),
-    setup = cms.int32(LEPTON_SETUP),
-    #superMelaMass = cms.double(SUPERMELA_MASS),
-    isMC = cms.bool(IsMC),
-    bestCandComparator = cms.string(BESTCANDCOMPARATOR),
-    bestCandAmong = cms.PSet(
-      isBestCand    = cms.string("0"), #do not set SR best cand flag
-      isBestCRZLLss = cms.string(CR_BESTZLLss),
-      isBestCRZLLos_2P2F = cms.string(CR_BESTZLLos_2P2F),
-      isBestCRZLLos_3P1F = cms.string(CR_BESTZLLos_3P1F)
-
-    ),
-    ZRolesByMass = cms.bool(False),  # daughter('Z1') = daughter(0)
-    debug = cms.bool(False),
-    flags = cms.PSet(
-      SR = cms.string(SR),
-      CRZLLss = cms.string(CR_BASESEL),             #combine with proper isBestCRZLLss for AA ss/os CRss
-      CRZLLos_2P2F = cms.string(CR_ZLLosSEL_2P2F),
-      CRZLLos_3P1F = cms.string(CR_ZLLosSEL_3P1F),
-    ),
-    recoProbabilities = cms.vstring(),
-    #These are actually no longer needed after we dropped the Legacy FSR algorithm
-    muon_iso_cut = cms.double(MUISOCUT),
-    electron_iso_cut = cms.double(ELEISOCUT),
-)
+# process.ZlCand = cms.EDProducer("PATCandViewShallowCloneCombiner",
+#     decay = cms.string('ZCand softLeptons'),
+#     cut = cms.string("deltaR(daughter(0).daughter(0).eta, daughter(0).daughter(0).phi, daughter(1).eta, daughter(1).phi)>0.02 &&" + # Ghost suppression
+#                      "deltaR(daughter(0).daughter(1).eta, daughter(0).daughter(1).phi, daughter(1).eta, daughter(1).phi)>0.02 &&" +
+#                      ("(daughter(0).daughter(0).charge == daughter(1).charge || %s > 4) && " % ( Z_PLUS_LEP_MIJ.format(0))) +       # mLL>4 for the OS pair (Giovanni's impl)
+#                      ("(daughter(0).daughter(1).charge == daughter(1).charge || %s > 4) && " % ( Z_PLUS_LEP_MIJ.format(1))) +
+#                      "daughter(0).masterClone.userFloat('isBestZ') &&" + # This includes the Z1 isolation requirement
+#                      "daughter(0).masterClone.userFloat('Z1Presel')"
+#                      ),
+#     checkCharge = cms.bool(False)
+# )
 
 
 ### ----------------------------------------------------------------------
@@ -1326,28 +1016,28 @@ theBTaggerThr=0
 theBTagSFFile=""
 theBTagMCEffFile=""
 if (LEPTON_SETUP == 2016):
-   if( DATA_TAG == 'ULAPV'):
-       theBTagger="pfDeepCSVJetTags:probb"
-       theBTaggerThr=0.6001
-       theBTagSFFile="HTauTauHMuMu/AnalysisStep/data/BTagging/DeepCSV_106XUL16preVFPSF_v1_hzz.csv"
-       theBTagMCEffFile="HTauTauHMuMu/AnalysisStep/data/BTagging/bTagEfficiencies_2016_LegacyPaper.root"
-   else:
-       theBTagger="pfDeepCSVJetTags:probb"
-       theBTaggerThr=0.5847
-       theBTagSFFile="HTauTauHMuMu/AnalysisStep/data/BTagging/DeepCSV_106XUL16postVFPSF_v2_hzz.csv"
-       theBTagMCEffFile="HTauTauHMuMu/AnalysisStep/data/BTagging/bTagEfficiencies_2016_LegacyPaper.root"
+    if( DATA_TAG == 'ULAPV'):
+        theBTagger="pfDeepCSVJetTags:probb"
+        theBTaggerThr=0.6001
+        theBTagSFFile="HTauTauHMuMu/AnalysisStep/data/BTagging/DeepCSV_106XUL16preVFPSF_v1_hzz.csv"
+        theBTagMCEffFile="HTauTauHMuMu/AnalysisStep/data/BTagging/bTagEfficiencies_2016_LegacyPaper.root"
+    else:
+        theBTagger="pfDeepCSVJetTags:probb"
+        theBTaggerThr=0.5847
+        theBTagSFFile="HTauTauHMuMu/AnalysisStep/data/BTagging/DeepCSV_106XUL16postVFPSF_v2_hzz.csv"
+        theBTagMCEffFile="HTauTauHMuMu/AnalysisStep/data/BTagging/bTagEfficiencies_2016_LegacyPaper.root"
 elif (LEPTON_SETUP == 2017):
-   theBTagger="pfDeepCSVJetTags:probb"
-   theBTaggerThr=0.4506
-   theBTagSFFile="HTauTauHMuMu/AnalysisStep/data/BTagging/wp_deepCSV_106XUL17_v3_hzz.csv"
-   theBTagMCEffFile="HTauTauHMuMu/AnalysisStep/data/BTagging/bTagEfficiencies_2017_LegacyPaper.root"
+    theBTagger="pfDeepCSVJetTags:probb"
+    theBTaggerThr=0.4506
+    theBTagSFFile="HTauTauHMuMu/AnalysisStep/data/BTagging/wp_deepCSV_106XUL17_v3_hzz.csv"
+    theBTagMCEffFile="HTauTauHMuMu/AnalysisStep/data/BTagging/bTagEfficiencies_2017_LegacyPaper.root"
 elif (LEPTON_SETUP == 2018):
-   theBTagger="pfDeepCSVJetTags:probb"
-   theBTaggerThr=0.4168
-   theBTagSFFile="HTauTauHMuMu/AnalysisStep/data/BTagging/wp_deepCSV_106XUL18_v2_hzz.csv"
-   theBTagMCEffFile="HTauTauHMuMu/AnalysisStep/data/BTagging/bTagEfficiencies_2018_LegacyPaper.root"
+    theBTagger="pfDeepCSVJetTags:probb"
+    theBTaggerThr=0.4168
+    theBTagSFFile="HTauTauHMuMu/AnalysisStep/data/BTagging/wp_deepCSV_106XUL18_v2_hzz.csv"
+    theBTagMCEffFile="HTauTauHMuMu/AnalysisStep/data/BTagging/bTagEfficiencies_2018_LegacyPaper.root"
 else:
-   sys.exit("HTauTauHMuMu.py: Need to define the btagging for the new setup!")
+    sys.exit("HTauTauHMuMu.py: Need to define the btagging for the new setup!")
 
 ### q/g likelihood
 qgDatabaseVersion = 'cmssw8020_v2'
@@ -1587,11 +1277,11 @@ if (APPLYJEC and SAMPLE_TYPE == 2018):
 # JER from https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution#Smearing_procedures
 # Updated for UL (all three years)
 if (APPLYJER and SAMPLE_TYPE == 2016):
-   process.load('Configuration.StandardSequences.Services_cff')
-   process.load("JetMETCorrections.Modules.JetResolutionESProducer_cfi")
-   from CondCore.DBCommon.CondDBSetup_cfi import *
-   if ( DATA_TAG == 'ULAPV'):
-       process.jer = cms.ESSource("PoolDBESSource",
+    process.load('Configuration.StandardSequences.Services_cff')
+    process.load("JetMETCorrections.Modules.JetResolutionESProducer_cfi")
+    from CondCore.DBCommon.CondDBSetup_cfi import *
+    if ( DATA_TAG == 'ULAPV'):
+        process.jer = cms.ESSource("PoolDBESSource",
                                      CondDBSetup,
                                      connect = cms.string('sqlite_fip:HTauTauHMuMu/AnalysisStep/data/JER/Summer20UL16APV_JRV3_MC.db'),
                                      toGet = cms.VPSet(
@@ -1612,9 +1302,9 @@ if (APPLYJER and SAMPLE_TYPE == 2016):
                                                                 )
                                                        )
                                      )
-       process.es_prefer_jer = cms.ESPrefer('PoolDBESSource', 'jer')
-   else:
-       process.jer = cms.ESSource("PoolDBESSource",
+        process.es_prefer_jer = cms.ESPrefer('PoolDBESSource', 'jer')
+    else:
+        process.jer = cms.ESSource("PoolDBESSource",
                                      CondDBSetup,
                                      connect = cms.string('sqlite_fip:HTauTauHMuMu/AnalysisStep/data/JER/Summer20UL16_JRV3_MC.db'),
                                      toGet = cms.VPSet(
@@ -1635,13 +1325,13 @@ if (APPLYJER and SAMPLE_TYPE == 2016):
                                                                 )
                                                        )
                                      )
-       process.es_prefer_jer = cms.ESPrefer('PoolDBESSource', 'jer')
+        process.es_prefer_jer = cms.ESPrefer('PoolDBESSource', 'jer')
 
 if (APPLYJER and SAMPLE_TYPE == 2017):
-   process.load('Configuration.StandardSequences.Services_cff')
-   process.load("JetMETCorrections.Modules.JetResolutionESProducer_cfi")
-   from CondCore.DBCommon.CondDBSetup_cfi import *
-   process.jer = cms.ESSource("PoolDBESSource",
+    process.load('Configuration.StandardSequences.Services_cff')
+    process.load("JetMETCorrections.Modules.JetResolutionESProducer_cfi")
+    from CondCore.DBCommon.CondDBSetup_cfi import *
+    process.jer = cms.ESSource("PoolDBESSource",
                                  CondDBSetup,
                                  connect = cms.string('sqlite_fip:HTauTauHMuMu/AnalysisStep/data/JER/Summer19UL17_JRV3_MC.db'),
                                  toGet = cms.VPSet(
@@ -1662,7 +1352,7 @@ if (APPLYJER and SAMPLE_TYPE == 2017):
                                                             )
                                                    )
                                  )
-   process.es_prefer_jer = cms.ESPrefer('PoolDBESSource', 'jer')
+    process.es_prefer_jer = cms.ESPrefer('PoolDBESSource', 'jer')
 
 
 if (APPLYJER and SAMPLE_TYPE == 2018):
@@ -1694,22 +1384,20 @@ if (APPLYJER and SAMPLE_TYPE == 2018):
     process.es_prefer_jer = cms.ESPrefer('PoolDBESSource', 'jer')
 
 ### Clean jets wrt. good (preFSR-)isolated leptons
-# process.cleanJets = cms.EDProducer("JetsWithLeptonsRemover",
-#                                    Jets      = cms.InputTag("dressedJets"),
-#                                    Muons     = cms.InputTag("appendPhotons:muons"),
-#                                    Electrons = cms.InputTag("appendPhotons:electrons"),
-#                                    Taus	     = cms.InputTag("softTaus"),
-#                                    Diboson   = cms.InputTag(""),
-#                                    JetPreselection      = cms.string(""),
-#                                    MuonPreselection = cms.string("userFloat('isGood') && userFloat('passCombRelIsoPFFSRCorr')"),
-#                                    ElectronPreselection = cms.string("userFloat('isGood')"),
-#                                    TauPreselection = cms.string("userFloat('isGood')"),
-#                                    DiBosonPreselection  = cms.string(""),
-#                                    MatchingType = cms.string("byDeltaR"),
-#                                    cleanFSRFromLeptons = cms.bool(True),
-#                                    DebugPlots = cms.untracked.bool(False),
-#                                    DebugPrintOuts = cms.untracked.bool(False)
-#                                    )
+process.cleanJets = cms.EDProducer("JetsWithLeptonsRemover",
+                                   Jets      = cms.InputTag("dressedJets"),
+                                   Muons     = cms.InputTag("appendPhotons:muons"),
+                                   Electrons = cms.InputTag("appendPhotons:electrons"),
+                                   Diboson   = cms.InputTag(""),
+                                   JetPreselection      = cms.string("pt>20 && abs(eta)<4.7 && userFloat('JetID') && (userFloat('PUjetID') || pt>50)"),
+                                   MuonPreselection = cms.string("userFloat('isGood') && userFloat('passCombRelIsoPFFSRCorr')"),
+                                   ElectronPreselection = cms.string("userFloat('isGood')"),
+                                   DiBosonPreselection  = cms.string(""),
+                                   MatchingType = cms.string("byDeltaR"),
+                                   cleanFSRFromLeptons = cms.bool(True),
+                                   DebugPlots = cms.untracked.bool(False),
+                                   DebugPrintOuts = cms.untracked.bool(False)
+                                   )
 
 
 ### ----------------------------------------------------------------------
@@ -1775,7 +1463,7 @@ process.PVfilter =  cms.Path(process.preSkimCounter+process.goodPrimaryVertices)
 if APPLYJEC:
     process.Jets = cms.Path(process.pileupJetIdUpdated + process.patJetCorrFactorsReapplyJEC + process.patJetsReapplyJEC + process.QGTagger + process.dressedJets )
 else:
-    process.Jets = cms.Path( process.QGTagger + process.dressedJets )
+    process.Jets = cms.Path( process.QGTagger + process.dressedJets + process.cleanJets)
 
 
 # if (RECORRECTMET and SAMPLE_TYPE == 2016):
@@ -1809,30 +1497,18 @@ else:
 ### Filters
 ### ----------------------------------------------------------------------
 ### Create filter for events with one candidate in the SR
-process.ZZCandSR = cms.EDFilter("PATCompositeCandidateRefSelector",
-    src = cms.InputTag("ZZCand"),
-    cut = cms.string(SR) # That is, all candidates with m4l>70
- )
-
-process.ZZCandFilter = cms.EDFilter("CandViewCountFilter",
-                                src = cms.InputTag("ZZCandSR"),
-                                minNumber = cms.uint32(1)
-                            )
 
 # Prepare lepton collections
 process.Candidates = cms.Path(
        process.muons             +
        process.electrons         + process.cleanSoftElectrons +
-       process.taus		 +
+       process.taus              +
        process.fsrPhotons        + process.boostedFsrPhotons +
        process.appendPhotons     +
        process.softLeptons       +
-       process.dressedJets       +#cleanJets         +
-       process.METSequence	 +
-# Build 4-lepton candidates
-       process.bareZCand	 + process.ZCand	+
-       #process.bareZCand         + process.SVZCand	 + process.ZCand     +
-       process.bareZZCand        + process.ZZCand
+       process.dressedJets       + process.cleanJets         +
+       process.METSequence       +
+       process.bareZCand         + process.ZCand
     )
 
 # Optional sequence to build control regions. To get it, add
@@ -1840,20 +1516,12 @@ process.Candidates = cms.Path(
 #OR
 #process.CRPath = cms.Path(process.CR)   # trilep+4lep CRs
 
-process.CRZl = cms.Sequence(
-       process.bareZCand	 + process.ZCand	+
-       #process.bareZCand         + process.SVZCand       + process.ZCand     +
-       process.ZlCand
-   )
+# process.CRZl = cms.Sequence(
+#        process.bareZCand	 + process.ZCand	+
+#        #process.bareZCand         + process.SVZCand       + process.ZCand     +
+#        process.ZlCand
+#    )
 
-process.CR = cms.Sequence(
-       process.bareZCand	 + process.ZCand	+
-       #process.bareZCand         + process.SVZCand       + process.ZCand     +
-       process.bareLLCand	 + process.LLCand	+
-       #process.bareLLCand        + process.SVLLCand	 + process.LLCand    +
-       process.bareZLLCand       + process.ZLLCand   +
-       process.ZlCand
-   )
 
 
 ### Skim, triggers and MC filters (Only store filter result, no filter is applied)

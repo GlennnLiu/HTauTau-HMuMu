@@ -61,14 +61,6 @@ class MuFiller : public edm::EDProducer {
    
    // MVA Reader
    MuonGBRForestReader *r;
-   
-   //Trigger matching
-   vector<string> muHLTPaths1_;//single mu
-//   vector<string> muHLTPaths2_;//double mu
-   vector<string> muHLTFilters1_;
-//   vector<string> muHLTFilters2_;
-   //vector<string> muHLTFilters2_leg1;
-   //vector<string> muHLTFilters2_leg2;
 };
 
 
@@ -79,7 +71,7 @@ sampleType(iConfig.getParameter<int>("sampleType")),
 setup(iConfig.getParameter<int>("setup")),
 cut(iConfig.getParameter<std::string>("cut")),
 triggerObjects_(consumes<pat::TriggerObjectStandAloneCollection> (iConfig.getParameter<edm::InputTag>("TriggerSet"))),
-triggerResultsToken_( consumes< edm::TriggerResults >( iConfig.getParameter< edm::InputTag >( "TriggerResults" ) ) ),
+triggerResultsToken_( consumes< edm::TriggerResults >( iConfig.getParameter< edm::InputTag >( "TriggerResultsLabel" ) ) ),
 flags(iConfig.getParameter<edm::ParameterSet>("flags"))
 {
    rhoToken = consumes<double>(LeptonIsoHelper::getMuRhoTag(sampleType, setup));
@@ -88,85 +80,6 @@ flags(iConfig.getParameter<edm::ParameterSet>("flags"))
    
    // MVA Reader
    r = new MuonGBRForestReader(setup, 2);
-   
-   // Trigger matching
-   if (sampleType == 2016)
-   {
-//	muHLTPaths2_ = 
-//	{
-//	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*",//DiMu
-//	"HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*",
-//	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*",
-//	"HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*",
-//	};
-	muHLTPaths1_ =
-	{
-	"HLT_IsoMu20_v*",//SingleMu
-	"HLT_IsoTkMu20_v*",
-	"HLT_IsoMu22_v*",
-	"HLT_IsoTkMu22_v*",
-	"HLT_IsoMu24_v*",
-	"HLT_IsoTkMu24_v*",
-	};
-//	muHLTFilters2_ =
-//	{
-//	"hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4DzFiltered0p2",
-//	"hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4DzFiltered0p2",
-//	"hltDiMuonGlb17Glb8RelTrkIsoFiltered0p4",
-//	"hltDiMuonGlb17Trk8RelTrkIsoFiltered0p4",
-//	};
-	muHLTFilters1_ =
-	{
-	"hltL3crIsoL1sMu18L1f0L2f10QL3f20QL3trkIsoFiltered0p09",
-	"hltL3fL1sMu18L1f0Tkf20QL3trkIsoFiltered0p09",
-	"hltL3crIsoL1sMu20L1f0L2f10QL3f22QL3trkIsoFiltered0p09",
-	"hltL3fL1sMu20L1f0Tkf22QL3trkIsoFiltered0p09",
-	"hltL3crIsoL1sMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p09",
-	"hltL3fL1sMu22L1f0Tkf24QL3trkIsoFiltered0p09",
-	};
-   }
-   else if (sampleType == 2017)
-   {
-//        muHLTPaths2_ =
-//	{
-//	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v*",
-//	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8_v*",
-//	};
-	muHLTPaths1_ =
-	{
-	"HLT_IsoMu27_v*",
-	};
-//	muHLTFilters2_ =
-//        {
-//	"hltDiMuon178Mass3p8Filtered",
-//	"hltDiMuon178Mass8Filtered",
-//	};
-	muHLTFilters1_ =
-	{
-	"hltL3crIsoL1sMu22Or25L1f0L2f10QL3f27QL3trkIsoFiltered0p07",
-	//"hltL3crIsoL1sMu22Or25L1f0L2f10QL3f27QL3trkIsoFiltered0p09",
-        };
-   }
-   else if (sampleType == 2018)
-   {
-//	muHLTPaths2_ = 
-//	{
-//	"HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8_v*",
-//	};
-	muHLTPaths1_ =
-	{
-	"HLT_IsoMu24_v*",
-	};
-//	muHLTFilters2_ =
-//        {
-//	"hltDiMuon178Mass3p8Filtered",
-//	};
-	muHLTFilters1_ =
-	{
-	"hltL3crIsoL1sSingleMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p07",
-	//"hltL3crIsoL1sMu22L1f0L2f10QL3f24QL3trkIsoFiltered0p09",
-        };
-   }
 	
 }
 
@@ -223,7 +136,7 @@ MuFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       float IPError = l.edB(pat::Muon::PV3D);
       float SIP     = IP/IPError;
       float dxy = std::abs(l.dB(pat::Muon::PV2D));
-      float dz  = std::abs(l.dB(pat::Muon::PVDZ));;
+      float dz  = std::abs(l.dB(pat::Muon::PVDZ));
       
 
 //=================
@@ -312,55 +225,7 @@ MuFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 // End MVA reader
 //================= 
 
-      
-      //--- Trigger matching
-      bool HLTMatch1 = false;
-//      bool HLTMatch2 = false;
-      vector<bool> eachPath1;
-//      vector<bool> eachPath2;
-      for ( size_t j = 0; j < muHLTPaths1_.size(); ++j) 
-	 eachPath1.push_back(false);
-//      for ( size_t j = 0; j < muHLTPaths2_.size(); ++j)
-//         eachPath2.push_back(false);
-
-      for (size_t idxto = 0; idxto < triggerObjects->size(); ++idxto) {
-
-         pat::TriggerObjectStandAlone obj = triggerObjects->at(idxto);
-         obj.unpackFilterLabels(iEvent,*triggerResults );
-      
-         if (deltaR(obj,l)>0.1) continue;
-	 if (!obj.hasTriggerObjectType(trigger::TriggerMuon)) continue;
-      //pat::TriggerObjectStandAloneCollection obj= l.triggerObjectMatches();
-      //cout<<obj.size()<<endl;
-      //for ( size_t iTrigObj = 0; iTrigObj < obj.size(); ++iTrigObj ) {
-         //obj.at( iTrigObj ).unpackFilterLabels(iEvent,*triggerResults );
-	 //for (size_t test=0;test<obj.at( iTrigObj ).filterLabels().size();test++) {
-	 //    cout<<obj.at( iTrigObj ).filterLabels()[test].c_str()<<", ";
-	 //}
-	 //cout<<endl;
-      //}
-      //for ( size_t i = 0; i < obj.size(); ++i ) {
-         l.addUserInt("TrgObj"+std::to_string(idxto),idxto);
-	 for (size_t j = 0; j < muHLTPaths1_.size(); j++) {
-	    if (obj.hasFilterLabel( muHLTFilters1_[j] )) {
-		HLTMatch1=true;
-		eachPath1[j]=true;
-	    }
-	 }
-//	 for (size_t j = 0; j < muHLTPaths2_.size(); j++) {
-//	    if (obj.hasFilterLabel( muHLTFilters2_[j] )) {
-//                HLTMatch2=true;
-//		eachPath2[j]=true;
-//            }
-//         }
-      }
-      
-      for ( size_t j = 0; j < muHLTPaths1_.size(); ++j)
-         l.addUserFloat(muHLTPaths1_[j], eachPath1[j]);
-//      for ( size_t j = 0; j < muHLTPaths2_.size(); ++j)
-//         l.addUserFloat(muHLTPaths2_[j], eachPath2[j]);
-
-      
+            
       //--- Muon Timing
       float muontime = 0;
       if (l.time().nDof>4) muontime= l.time().timeAtIpInOut;
@@ -378,8 +243,6 @@ MuFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       l.addUserFloat("dz",dz);
       l.addUserFloat("BDT",BDT);
       l.addUserFloat("isBDT",isBDT);
-      l.addUserFloat("HLTMatch1", HLTMatch1);
-//      l.addUserFloat("HLTMatch2", HLTMatch2);
       // l.addUserCand("MCMatch",genMatch); // FIXME
       l.addUserFloat("time",muontime);
       

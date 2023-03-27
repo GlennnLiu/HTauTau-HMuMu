@@ -64,6 +64,9 @@ class TauFiller : public edm::EDProducer {
 
   vector<string> tauIntDiscrims_; // tau discrims to be added as userInt
   vector<string> tauFloatDiscrims_; // tau discrims to be added as userFloats
+  std::vector<std::string> VSmu;
+  std::vector<std::string> VSe;
+  std::vector<std::string> VSjet;
 };
 
 
@@ -149,6 +152,34 @@ TauFiller::TauFiller(const edm::ParameterSet& iConfig) :
     "byDeepTau2017v2p1VSeraw",  
     "byDeepTau2017v2p1VSmuraw",
    };
+      
+  VSmu = {
+    "byVLooseDeepTau2017v2p1VSmu",
+    "byLooseDeepTau2017v2p1VSmu", 
+    "byMediumDeepTau2017v2p1VSmu",
+    "byTightDeepTau2017v2p1VSmu"
+  };
+  VSe = {
+    "byVVVLooseDeepTau2017v2p1VSe",  
+    "byVVLooseDeepTau2017v2p1VSe", 
+    "byVLooseDeepTau2017v2p1VSe",   
+    "byLooseDeepTau2017v2p1VSe",   
+    "byMediumDeepTau2017v2p1VSe",   
+    "byTightDeepTau2017v2p1VSe",   
+    "byVTightDeepTau2017v2p1VSe",   
+    "byVVTightDeepTau2017v2p1VSe"
+  };
+  VSjet = {
+    "byVVVLooseDeepTau2017v2p1VSjet",
+    "byVVLooseDeepTau2017v2p1VSjet", 
+    "byVLooseDeepTau2017v2p1VSjet",  
+    "byLooseDeepTau2017v2p1VSjet",   
+    "byMediumDeepTau2017v2p1VSjet",  
+    "byTightDeepTau2017v2p1VSjet",   
+    "byVTightDeepTau2017v2p1VSjet",  
+    "byVVTightDeepTau2017v2p1VSjet"
+  };
+
 
   // TES input files
   edm::FileInPath TESFileName ("TauPOG/TauIDSFs/data/TauES_dm_DeepTau2017v2p1VSjet_"+theTESYear+".root");
@@ -696,6 +727,16 @@ TauFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
       l.addUserInt (ID.c_str(), ui);
     }
+    short tauVSmu=0,tauVSe=0,tauVSjet=0;
+	for (size_t iDisc = 0; iDisc<VSmu.size(); ++iDisc) 
+	    if (l.userInt(VSmu[iDisc])==1) tauVSmu=iDisc+1;
+	for (size_t iDisc = 0; iDisc<VSe.size(); ++iDisc)
+	    if (l.userInt(VSe[iDisc])==1) tauVSe=iDisc+1;
+	for (size_t iDisc = 0; iDisc<VSjet.size(); ++iDisc)
+            if (l.userInt(VSjet[iDisc])==1) tauVSjet=iDisc+1;
+    l.addUserInt("tauVSmu",tauVSmu);
+    l.addUserInt("tauVSe",tauVSe);
+    l.addUserInt("tauVSjet",tauVSjet);
 
 
     //--- MC parent code 

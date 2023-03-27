@@ -13,8 +13,8 @@ declareDefault("MCFILTER", "", globals())
 declareDefault("XSEC", 1, globals())
 declareDefault("GENXSEC", 1, globals())
 declareDefault("GENBR", 1, globals())
-declareDefault("PROCESS_CR", False, globals())
-declareDefault("ADDZTREE", False, globals())
+#declareDefault("PROCESS_CR", False, globals())
+#declareDefault("ADDZTREE", False, globals())
 
 # LHE info
 #  VVDECAYMODE\VVMODE  / ZZ==1 / WW==0  / Yukawa==2 / Zgam=3 / gamgam=4 / Z+nj=5
@@ -75,7 +75,7 @@ process.maxEvents.input = -1
 ### Output root file (monitoring histograms)
 ### ----------------------------------------------------------------------
 process.TFileService=cms.Service('TFileService',
-                                fileName=cms.string('HTauTauHMuMu.root')
+                                fileName=cms.string('HTauTauHMuMu_DYv2.root')
                                 )
 
 ### ----------------------------------------------------------------------
@@ -83,18 +83,18 @@ process.TFileService=cms.Service('TFileService',
 ### ----------------------------------------------------------------------
 
 # All events together
-process.PlotsZZ    = cms.EDAnalyzer("ZZ4lAnalyzer",
-                                    channel = cms.untracked.string('ZZ'),
-                                    candCollection = cms.untracked.string('ZZCand'),
-                                    isMC = cms.untracked.bool(IsMC),
-                                    sampleType = cms.int32(SAMPLE_TYPE),
-                                    setup = cms.int32(LEPTON_SETUP),
-                                    skimPaths = cms.vstring(SkimPaths),
-                                    PD = cms.string(PD),
-                                    MCFilterPath = cms.string(MCFILTER),
-                                    sampleName = cms.string(SAMPLENAME),
-                                    dumpForSync = cms.untracked.bool(False),
-                                    )
+# process.PlotsZZ    = cms.EDAnalyzer("ZZ4lAnalyzer",
+#                                     channel = cms.untracked.string('ZZ'),
+#                                     candCollection = cms.untracked.string('ZZCand'),
+#                                     isMC = cms.untracked.bool(IsMC),
+#                                     sampleType = cms.int32(SAMPLE_TYPE),
+#                                     setup = cms.int32(LEPTON_SETUP),
+#                                     skimPaths = cms.vstring(SkimPaths),
+#                                     PD = cms.string(PD),
+#                                     MCFilterPath = cms.string(MCFILTER),
+#                                     sampleName = cms.string(SAMPLENAME),
+#                                     dumpForSync = cms.untracked.bool(False),
+#                                     )
 
 ### Control Region Plots
 
@@ -142,9 +142,9 @@ process.PlotsZZ    = cms.EDAnalyzer("ZZ4lAnalyzer",
 ### Analyzer for Trees
 ### ----------------------------------------------------------------------
 
-TreeSetup = cms.EDAnalyzer("HZZ4lNtupleMaker",
+TreeSetup = cms.EDAnalyzer("LLNtupleMaker",
                            channel = cms.untracked.string('aChannel'),
-                           CandCollection = cms.untracked.string('ZZCand'),
+                           CandCollection = cms.untracked.string('ZCand'),
                            fileName = cms.untracked.string('candTree'),
                            isMC = cms.untracked.bool(IsMC),
                            sampleType = cms.int32(SAMPLE_TYPE),
@@ -158,26 +158,26 @@ TreeSetup = cms.EDAnalyzer("HZZ4lNtupleMaker",
                            #for MET and SV fit
                            metSrc = cms.InputTag("ShiftMETcentral"),#srcMETTag,#metTag,
                            covSrc = cms.InputTag("METSignificance", "METCovariance"),
-                           METdxUPTES = cms.InputTag("ShiftMETforTES", "METdxUP"),
-                           METdyUPTES = cms.InputTag("ShiftMETforTES", "METdyUP"),
-                           METdxDOWNTES = cms.InputTag("ShiftMETforTES", "METdxDOWN"),
-                           METdyDOWNTES = cms.InputTag("ShiftMETforTES", "METdyDOWN"),
-                           METdxUPEES = cms.InputTag("ShiftMETforEES", "METdxUPEES"),
-                           METdyUPEES = cms.InputTag("ShiftMETforEES", "METdyUPEES"),
-                           METdxDOWNEES = cms.InputTag("ShiftMETforEES", "METdxDOWNEES"),
-                           METdyDOWNEES = cms.InputTag("ShiftMETforEES", "METdyDOWNEES"),
-                           METdxUPMES = cms.InputTag("ShiftMETforMES", "METdxUPMES"),
-                           METdyUPMES = cms.InputTag("ShiftMETforMES", "METdyUPMES"),
-                           METdxDOWNMES = cms.InputTag("ShiftMETforMES", "METdxDOWNMES"),
-                           METdyDOWNMES = cms.InputTag("ShiftMETforMES", "METdyDOWNMES"),
-                           METdxUPJES = cms.InputTag("ShiftMETforJES", "METdxUPJES"),
-                           METdyUPJES = cms.InputTag("ShiftMETforJES", "METdyUPJES"),
-                           METdxDOWNJES = cms.InputTag("ShiftMETforJES", "METdxDOWNJES"),
-                           METdyDOWNJES = cms.InputTag("ShiftMETforJES", "METdyDOWNJES"),
-                           METdxUPJER = cms.InputTag("ShiftMETforJER", "METdxUPJER"),
-                           METdyUPJER = cms.InputTag("ShiftMETforJER", "METdyUPJER"),
-                           METdxDOWNJER = cms.InputTag("ShiftMETforJER", "METdxDOWNJER"),
-                           METdyDOWNJER = cms.InputTag("ShiftMETforJER", "METdyDOWNJER"),
+#                            METdxUPTES = cms.InputTag("ShiftMETforTES", "METdxUP"),
+#                            METdyUPTES = cms.InputTag("ShiftMETforTES", "METdyUP"),
+#                            METdxDOWNTES = cms.InputTag("ShiftMETforTES", "METdxDOWN"),
+#                            METdyDOWNTES = cms.InputTag("ShiftMETforTES", "METdyDOWN"),
+#                            METdxUPEES = cms.InputTag("ShiftMETforEES", "METdxUPEES"),
+#                            METdyUPEES = cms.InputTag("ShiftMETforEES", "METdyUPEES"),
+#                            METdxDOWNEES = cms.InputTag("ShiftMETforEES", "METdxDOWNEES"),
+#                            METdyDOWNEES = cms.InputTag("ShiftMETforEES", "METdyDOWNEES"),
+#                            METdxUPMES = cms.InputTag("ShiftMETforMES", "METdxUPMES"),
+#                            METdyUPMES = cms.InputTag("ShiftMETforMES", "METdyUPMES"),
+#                            METdxDOWNMES = cms.InputTag("ShiftMETforMES", "METdxDOWNMES"),
+#                            METdyDOWNMES = cms.InputTag("ShiftMETforMES", "METdyDOWNMES"),
+#                            METdxUPJES = cms.InputTag("ShiftMETforJES", "METdxUPJES"),
+#                            METdyUPJES = cms.InputTag("ShiftMETforJES", "METdyUPJES"),
+#                            METdxDOWNJES = cms.InputTag("ShiftMETforJES", "METdxDOWNJES"),
+#                            METdyDOWNJES = cms.InputTag("ShiftMETforJES", "METdyDOWNJES"),
+#                            METdxUPJER = cms.InputTag("ShiftMETforJER", "METdxUPJER"),
+#                            METdyUPJER = cms.InputTag("ShiftMETforJER", "METdyUPJER"),
+#                            METdxDOWNJER = cms.InputTag("ShiftMETforJER", "METdxDOWNJER"),
+#                            METdyDOWNJER = cms.InputTag("ShiftMETforJER", "METdyDOWNJER"),
                            
                            applyTrigger = cms.bool(APPLYTRIG), #Skip events failing required triggers. They are stored with sel<0 if set to false
                            applyTrigEff = cms.bool(False), #Add trigger efficiency as a weight, for samples where the trigger cannot be applied (obsoltete)
@@ -203,83 +203,83 @@ TreeSetup = cms.EDAnalyzer("HZZ4lNtupleMaker",
                            )
 
 ### Signal region
-process.ZZTree = TreeSetup.clone()
-process.ZZTree.channel = 'ZZ'
+process.LLTree = TreeSetup.clone()
+process.LLTree.channel = 'SR'
 
-### Trees for control regions
-process.CRZLLTree = TreeSetup.clone()
-process.CRZLLTree.channel = 'ZLL'
-process.CRZLLTree.CandCollection = 'ZLLCand'
+# ### Trees for control regions
+# process.CRZLLTree = TreeSetup.clone()
+# process.CRZLLTree.channel = 'ZLL'
+# process.CRZLLTree.CandCollection = 'ZLLCand'
 
-### Trilepton CR, for fake rate
-process.CRZLTree = TreeSetup.clone()
-process.CRZLTree.channel = 'ZL'
-process.CRZLTree.CandCollection = 'ZlCand'
+# ### Trilepton CR, for fake rate
+# process.CRZLTree = TreeSetup.clone()
+# process.CRZLTree.channel = 'ZL'
+# process.CRZLTree.CandCollection = 'ZlCand'
 
-### Loose electron candidates, signal region
-process.ZZTreelooseEle = TreeSetup.clone()
-process.ZZTreelooseEle.channel = 'ZZ'
-process.ZZTreelooseEle.is_loose_ele_selection = cms.bool(True)
-process.ZZTreelooseEle.CandCollection = 'ZZCandlooseEle'
+# ### Loose electron candidates, signal region
+# process.ZZTreelooseEle = TreeSetup.clone()
+# process.ZZTreelooseEle.channel = 'ZZ'
+# process.ZZTreelooseEle.is_loose_ele_selection = cms.bool(True)
+# process.ZZTreelooseEle.CandCollection = 'ZZCandlooseEle'
 
-#### Loose electron control regions
-process.CRZLLTreelooseEle = TreeSetup.clone()
-process.CRZLLTreelooseEle.channel = 'ZLL'
-process.CRZLLTreelooseEle.CandCollection = 'ZLLCandlooseEle'
+# #### Loose electron control regions
+# process.CRZLLTreelooseEle = TreeSetup.clone()
+# process.CRZLLTreelooseEle.channel = 'ZLL'
+# process.CRZLLTreelooseEle.CandCollection = 'ZLLCandlooseEle'
 
-#### Loose electron control region where Z1 is from tight real RSE and the regular leptons are fake
-process.CRZLLTreeZ1RSE = TreeSetup.clone()
-process.CRZLLTreeZ1RSE.channel = 'ZLL'
-process.CRZLLTreeZ1RSE.CandCollection = 'ZLLCandZ1RSE'
-
-
-
-#### Loose electron Trilepton CR, for fake rate
-process.CRZLTreelooseEle = TreeSetup.clone()
-process.CRZLTreelooseEle.channel = 'ZL'
-process.CRZLTreelooseEle.CandCollection = 'ZlCandlooseEle'
+# #### Loose electron control region where Z1 is from tight real RSE and the regular leptons are fake
+# process.CRZLLTreeZ1RSE = TreeSetup.clone()
+# process.CRZLLTreeZ1RSE.channel = 'ZLL'
+# process.CRZLLTreeZ1RSE.CandCollection = 'ZLLCandZ1RSE'
 
 
-#### TLE Signal region
-#process.ZZTreetle = TreeSetup.clone()
-#process.ZZTreetle.channel = 'ZZ'
-#process.ZZTreetle.is_loose_ele_selection = cms.bool(True)
-#process.ZZTreetle.CandCollection = 'ZZCandtle'
-#
-#### TLE Trees for control regions only
-#process.CRZLLTreetle = TreeSetup.clone()
-#process.CRZLLTreetle.channel = 'ZLL'
-#process.CRZLLTreetle.CandCollection = 'ZLLCandtle'
-##process.CRZLLTreetle.is_loose_ele_selection = cms.bool(True)
-##process.CRZLLTreetle.CandCollection_regular = cms.untracked.string('ZLLCand')
-#
-#### TLE Trilepton CR, for fake rate
-#process.CRZLTreetle = TreeSetup.clone()
-#process.CRZLTreetle.channel = 'ZL'
-#process.CRZLTreetle.CandCollection = 'ZlCandtle'
-##process.CRZLTreetle.is_loose_ele_selection = cms.bool(True)
-##process.CRZLTreetle.CandCollection_regular = cms.untracked.string('ZlCand')
+
+# #### Loose electron Trilepton CR, for fake rate
+# process.CRZLTreelooseEle = TreeSetup.clone()
+# process.CRZLTreelooseEle.channel = 'ZL'
+# process.CRZLTreelooseEle.CandCollection = 'ZlCandlooseEle'
 
 
-### ----------------------------------------------------------------------
-### Z tree
-### ----------------------------------------------------------------------
-process.ZTree = cms.EDAnalyzer("ZNtupleMaker",
-                               channel = cms.untracked.string('ZZ'),
-                               CandCollection = cms.untracked.string('ZCand'),
-                               fileName = cms.untracked.string('candTree'),
-                               isMC = cms.untracked.bool(IsMC),
-                               sampleType = cms.int32(SAMPLE_TYPE),
-                               setup = cms.int32(LEPTON_SETUP),
-                               skimPaths = cms.vstring(SkimPaths),
-                               PD = cms.string(PD),
-                               MCFilterPath = cms.string(MCFILTER),
-                               metSrc = srcMETTag,#metTag,
-                               skipEmptyEvents = cms.bool(True),
-                               sampleName = cms.string(SAMPLENAME),
-                               xsec = cms.double(XSEC),
-                               dataTag = cms.string(DATA_TAG)
-                               )
+# #### TLE Signal region
+# #process.ZZTreetle = TreeSetup.clone()
+# #process.ZZTreetle.channel = 'ZZ'
+# #process.ZZTreetle.is_loose_ele_selection = cms.bool(True)
+# #process.ZZTreetle.CandCollection = 'ZZCandtle'
+# #
+# #### TLE Trees for control regions only
+# #process.CRZLLTreetle = TreeSetup.clone()
+# #process.CRZLLTreetle.channel = 'ZLL'
+# #process.CRZLLTreetle.CandCollection = 'ZLLCandtle'
+# ##process.CRZLLTreetle.is_loose_ele_selection = cms.bool(True)
+# ##process.CRZLLTreetle.CandCollection_regular = cms.untracked.string('ZLLCand')
+# #
+# #### TLE Trilepton CR, for fake rate
+# #process.CRZLTreetle = TreeSetup.clone()
+# #process.CRZLTreetle.channel = 'ZL'
+# #process.CRZLTreetle.CandCollection = 'ZlCandtle'
+# ##process.CRZLTreetle.is_loose_ele_selection = cms.bool(True)
+# ##process.CRZLTreetle.CandCollection_regular = cms.untracked.string('ZlCand')
+
+
+# ### ----------------------------------------------------------------------
+# ### Z tree
+# ### ----------------------------------------------------------------------
+# process.ZTree = cms.EDAnalyzer("ZNtupleMaker",
+#                                channel = cms.untracked.string('ZZ'),
+#                                CandCollection = cms.untracked.string('ZCand'),
+#                                fileName = cms.untracked.string('candTree'),
+#                                isMC = cms.untracked.bool(IsMC),
+#                                sampleType = cms.int32(SAMPLE_TYPE),
+#                                setup = cms.int32(LEPTON_SETUP),
+#                                skimPaths = cms.vstring(SkimPaths),
+#                                PD = cms.string(PD),
+#                                MCFilterPath = cms.string(MCFILTER),
+#                                metSrc = srcMETTag,#metTag,
+#                                skipEmptyEvents = cms.bool(True),
+#                                sampleName = cms.string(SAMPLENAME),
+#                                xsec = cms.double(XSEC),
+#                                dataTag = cms.string(DATA_TAG)
+#                                )
 
 
 
@@ -295,16 +295,16 @@ process.ZZSelection= cms.EDFilter("CandViewCountFilter",
                                   minNumber = cms.uint32(1)
                                   )
 
-### Select CR events
-process.CRFiltered = cms.EDFilter("PATCompositeCandidateRefSelector",
-                                  src = cms.InputTag("ZLLCand"),
-                                  cut = cms.string("((userFloat('isBestCRZLLss')&&userFloat('CRZLLss')))||(userFloat('isBestCRZLLos_2P2F')&&userFloat('CRZLLos_2P2F'))||(userFloat('isBestCRZLLos_3P1F')&&userFloat('CRZLLos_3P1F'))")
-                                  )
-### Select only events with one such candidate
-process.CRSelection= cms.EDFilter("CandViewCountFilter",
-                                  src = cms.InputTag("CRFiltered"),
-                                  minNumber = cms.uint32(1)
-                                  )
+# ### Select CR events
+# process.CRFiltered = cms.EDFilter("PATCompositeCandidateRefSelector",
+#                                   src = cms.InputTag("ZLLCand"),
+#                                   cut = cms.string("((userFloat('isBestCRZLLss')&&userFloat('CRZLLss')))||(userFloat('isBestCRZLLos_2P2F')&&userFloat('CRZLLos_2P2F'))||(userFloat('isBestCRZLLos_3P1F')&&userFloat('CRZLLos_3P1F'))")
+#                                   )
+# ### Select only events with one such candidate
+# process.CRSelection= cms.EDFilter("CandViewCountFilter",
+#                                   src = cms.InputTag("CRFiltered"),
+#                                   minNumber = cms.uint32(1)
+#                                   )
 
 
 process.dumpUserData =  cms.EDAnalyzer("dumpUserData",
@@ -317,34 +317,36 @@ process.dumpUserData =  cms.EDAnalyzer("dumpUserData",
      ),
      candidateSrcs = cms.PSet(
         Z     = cms.InputTag("ZCand"),
-        ZZ  = cms.InputTag("ZZCand"),
-        ZLL   =cms.InputTag("ZLLCand"),    # Starting point for all CRs
+        # ZZ  = cms.InputTag("ZZCand"),
+        # ZLL   =cms.InputTag("ZLLCand"),    # Starting point for all CRs
      ),
-    jetSrc = cms.InputTag("dressedJets"),
+    jetSrc = cms.InputTag("cleanJets"),
 )
 
-if (PROCESS_CR or not IsMC):
-    process.CRPath = cms.Path(process.CR)
-    if (not IsMC):
-        process.dump = cms.Path(process.ZZFiltered + process.ZZSelection + process.dumpUserData)
-        process.dumpCR = cms.Path(process.CRFiltered + process.CRSelection + process.dumpUserData)
-    process.trees = cms.EndPath( process.ZZTree + process.CRZLLTree + process.CRZLTree)
-else:
-#    process.CRPath = cms.Path(process.CRZl) #still needed by the plotter
-    process.trees = cms.EndPath(process.ZZTree)
+process.trees = cms.EndPath(process.LLTree)
 
-process.plots = cms.EndPath(process.PlotsZZ)
+# if (PROCESS_CR or not IsMC):
+#     process.CRPath = cms.Path(process.CR)
+#     if (not IsMC):
+#         process.dump = cms.Path(process.ZZFiltered + process.ZZSelection + process.dumpUserData)
+#         process.dumpCR = cms.Path(process.CRFiltered + process.CRSelection + process.dumpUserData)
+#     process.trees = cms.EndPath( process.ZZTree + process.CRZLLTree + process.CRZLTree)
+# else:
+# #    process.CRPath = cms.Path(process.CRZl) #still needed by the plotter
+#     process.trees = cms.EndPath(process.ZZTree)
+
+# process.plots = cms.EndPath(process.PlotsZZ)
 
 
-if (ADDLOOSEELE) :
-    if (PROCESS_CR or not IsMC):
-        process.CRPath += process.CRlooseEle
-        process.trees += cms.Sequence( process.ZZTreelooseEle + process.CRZLLTreelooseEle + process.CRZLTreelooseEle + process.CRZLLTreeZ1RSE)
-        #process.CRPath += process.CRtle
-        #process.trees += cms.Sequence( process.ZZTreetle + process.CRZLLTreetle + process.CRZLTreetle)
-    else:
-        process.trees += cms.Sequence(process.ZZTreelooseEle)
-        #process.trees += cms.Sequence(process.ZZTreetle)
+# if (ADDLOOSEELE) :
+#     if (PROCESS_CR or not IsMC):
+#         process.CRPath += process.CRlooseEle
+#         process.trees += cms.Sequence( process.ZZTreelooseEle + process.CRZLLTreelooseEle + process.CRZLTreelooseEle + process.CRZLLTreeZ1RSE)
+#         #process.CRPath += process.CRtle
+#         #process.trees += cms.Sequence( process.ZZTreetle + process.CRZLLTreetle + process.CRZLTreetle)
+#     else:
+#         process.trees += cms.Sequence(process.ZZTreelooseEle)
+#         #process.trees += cms.Sequence(process.ZZTreetle)
 
-if (ADDZTREE) :
-     process.trees += cms.Sequence(process.ZTree)
+# if (ADDZTREE) :
+#      process.trees += cms.Sequence(process.ZTree)

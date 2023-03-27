@@ -1,22 +1,22 @@
 
-#DATA_TAG = "ReReco" # Change to PromptReco for Run2016 period H
+# DATA_TAG = "ULAPV" # Change to PromptReco for Run2016 period H
 LEPTON_SETUP = 2016  # current default = 2017 = Moriond2017
 APPLYMUCORR = True  # Switch off muon scale corrections
 APPLYJEC = True     #
 APPLYJER = True     #
 RECORRECTMET = True #
 #KINREFIT = True    # control KinZFitter (very slow)
-PROCESS_CR = False   # Uncomment to run CR paths and trees
+#PROCESS_CR = False   # Uncomment to run CR paths and trees
 #ADDLOOSEELE = True  # Run paths for loose electrons
 #APPLYTRIG = False    # hack for samples missing correct triggers - use with caution
 #KEEPLOOSECOMB = True # Do not skip loose lepton ZZ combinations (for debugging)
-ADDZTREE = False      # Add tree for Z analysis
+#ADDZTREE = False      # Add tree for Z analysis
 APPLY_QCD_GGF_UNCERT = True
 #For MC:
 PD = ""
 MCFILTER = ""
 IsMC = True
-OLDPATTRIGGER = False#True
+#OLDPATTRIGGER = False#True
 #For DATA: 
 #IsMC = False
 #PD = "DoubleMu"
@@ -40,25 +40,19 @@ if not IsMC:
 ### ----------------------------------------------------------------------
 
 process.source.fileNames = cms.untracked.vstring(
-### LEGACY PAPER - 2016 sync files
-#'/store/mc/RunIISummer16MiniAODv3/GluGluToHHTo2B2Tau_node_10_13TeV-madgraph/MINIAODSIM/PUMoriond17_94X_mcRun2_asymptotic_v3-v2/00000/3A546715-316A-E911-8FC5-002590FD5A48.root'
-#'/store/mc/RunIISummer16MiniAODv2/ZZTo4L_13TeV_powheg_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/221CC46F-2FC6-E611-8FFC-0CC47A1E0488.root'#,
-#'/store/test/xrootd/T2_UA_KIPT/store/data/Run2016B/DoubleMuon/MINIAOD/17Jul2018_ver2-v1/00000/085049B8-D18A-E811-A362-0CC47A4C8E34.root'
-#'root://cmsxrootd.fnal.gov///store/data/Run2016B/DoubleMuon/MINIAOD/17Jul2018_ver2-v1/00000/085049B8-D18A-E811-A362-0CC47A4C8E34.root'
-#'/store/data/Run2016C/DoubleMuon/MINIAOD/17Jul2018-v1/40000/6EFE06FB-B18B-E811-924D-A0369FD0B3A0.root'
-#'/store/data/Run2016B/DoubleMuon/MINIAOD/17Jul2018_ver2-v1/00000/04F38EB5-D18A-E811-815D-0CC47A4C8F2C.root'
-#'/store/mc/RunIISummer16MiniAODv2/GluGluToContinToZZTo2e2mu_13TeV_MCFM701_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/7C9CA3F7-95BE-E611-B653-0025905B858A.root'
-'/store/mc/RunIISummer16MiniAODv3/ZZTo4L_13TeV_powheg_pythia8/MINIAODSIM/PUMoriond17_94X_mcRun2_asymptotic_v3-v1/100000/0A064D6A-F0C6-E811-B803-001A649D4815.root'
-#'/store/mc/RunIISummer16MiniAODv3/GluGluHToZZTo4L_M125_13TeV_powheg2_JHUgenV6_pythia8/MINIAODSIM/PUMoriond17_94X_mcRun2_asymptotic_v3-v1/40000/90B61523-A720-E911-A35B-1866DA890B10.root'
-#'/store/mc/RunIISummer16MiniAODv2/GluGluHToZZTo4L_M125_13TeV_powheg2_JHUGenV709_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/20000/8A6DC1B7-D1D3-E711-8D88-002590DE6E32.root'#,
-#'/store/mc/RunIISummer16MiniAODv2/ttH_HToZZ_4LFilter_M125_13TeV_powheg2_JHUGenV709_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/30000/CCDA7461-FDD7-E711-AFA4-008CFAF2224C.root',                                                                                                                                                                                                        
-#'/store/mc/RunIISummer16MiniAODv2/ZH_HToZZ_4LFilter_M125_13TeV_powheg2-minlo-HZJ_JHUGenV709_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/20000/622DA168-2DD2-E711-AE8A-E0071B7A5650.root'
+"/store/mc/RunIISummer20UL16MiniAODv2/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mcRun2_asymptotic_v17-v1/2520000/04A698D5-2AF9-B548-9A6D-DB5AFE92F0A6.root"
+#"/store/mc/RunIISummer20UL16MiniAOD/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mcRun2_asymptotic_v13-v2/260000/003F1A76-9CDA-7644-A34E-923C4B1C0E5E.root"
+# "/store/mc/RunIISummer20UL16MiniAOD/GluGluHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mcRun2_asymptotic_v13-v2/120000/0519E1FD-895C-5D40-A9FC-494B611CE9F1.root"
+#"/store/mc/RunIISummer20UL16MiniAODv2/GluGluHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mcRun2_asymptotic_v17-v2/2520000/005D2E78-273E-D241-BF7B-295CEB6B444D.root"
+
+### APV ###
+# "/store/mc/RunIISummer20UL16MiniAODAPVv2/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/120000/008E4139-6019-CE4C-B83C-A849F56F57B3.root"
 )
 
 #process.calibratedPatElectrons.isSynchronization = cms.bool(True) #process.calibratedPatElectrons.isSynchronization = cms.bool(True) # Not needed anymore since new EGamma smearing is event deterministic
 #process.calibratedMuons.isSynchronization = cms.bool(True)
 
-process.maxEvents.input = 2000
+process.maxEvents.input = 10000
 #process.source.skipEvents = cms.untracked.uint32(5750)
 
 # Silence output
@@ -91,7 +85,7 @@ process.dumpUserData =  cms.EDAnalyzer("dumpUserData",
         Z     = cms.InputTag("ZCand"),
 #        ZRSE     = cms.InputTag("ZCandlooseEle"),
 #        ZTLE     = cms.InputTag("ZCandtle"),
-        ZZ  = cms.InputTag("ZZCand"),
+#        ZZ  = cms.InputTag("ZZCand"),
 #        ZZRSE     = cms.InputTag("ZZCandlooseEle"),
 #        ZZTLE     = cms.InputTag("ZZCandtle"),
 #        ZLL  = cms.InputTag("ZLLCand"),

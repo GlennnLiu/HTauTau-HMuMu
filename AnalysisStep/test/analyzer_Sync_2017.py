@@ -8,11 +8,11 @@ APPLYJEC = True     #
 APPLYJER = True     #
 RECORRECTMET = True #
 #KINREFIT = True    # control KinZFitter (very slow)
-PROCESS_CR = True   # Uncomment to run CR paths and trees
+# PROCESS_CR = True   # Uncomment to run CR paths and trees
 #ADDLOOSEELE = True  # Run paths for loose electrons
 #APPLYTRIG = False    # hack for samples missing correct triggers - use with caution
 #KEEPLOOSECOMB = True # Do not skip loose lepton ZZ combinations (for debugging)
-ADDZTREE = True      # Add tree for Z analysis
+# ADDZTREE = True      # Add tree for Z analysis
 #SAMPLENAME = "THW" # For running locally, some samples needs this to be specified (TTZ, THW, WWZ,...) See MCHistoryTools for all samples
 
 PD = ""
@@ -43,15 +43,13 @@ if not IsMC:
 
 process.source.fileNames = cms.untracked.vstring(
 ### LEGACY PAPER - 2017 sync files
-'/store/mc/RunIIFall17MiniAODv2/GluGluHToZZTo4L_M125_13TeV_powheg2_JHUGenV7011_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v1/10000/F0ABD15B-AF42-E811-B204-00144F45BD0E.root'#,
-#'/store/mc/RunIIFall17MiniAODv2/ttH_HToZZ_4LFilter_M125_13TeV_powheg2_JHUGenV7011_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/110000/E852BBDD-1EB4-E811-81D5-FA163EE7A24E.root',
-#'/store/mc/RunIIFall17MiniAODv2/VBF_HToZZTo4L_M125_13TeV_powheg2_JHUGenV7011_pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14_ext2-v2/260000/1E7BEDB3-5859-E911-8751-FA163E5522F8.root'
+'/store/mc/RunIISummer20UL17MiniAODv2/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/100000/00827E5C-253F-F942-9751-3F3277340A21.root'
 )
 
 #process.calibratedPatElectrons.isSynchronization = cms.bool(True) #process.calibratedPatElectrons.isSynchronization = cms.bool(True) # Not needed anymore since new EGamma smearing is event deterministic
 #process.calibratedMuons.isSynchronization = cms.bool(True)
 
-process.maxEvents.input = 2000
+process.maxEvents.input = 10000
 #process.source.skipEvents = cms.untracked.uint32(5750)
 
 # Silence output
@@ -83,7 +81,7 @@ process.dumpUserData =  cms.EDAnalyzer("dumpUserData",
         Z     = cms.InputTag("ZCand"),
 #        ZRSE     = cms.InputTag("ZCandlooseEle"),
 #        ZTLE     = cms.InputTag("ZCandtle"),
-        ZZ  = cms.InputTag("ZZCand"),
+     #    ZZ  = cms.InputTag("ZZCand"),
 #        ZZRSE     = cms.InputTag("ZZCandlooseEle"),
 #        ZZTLE     = cms.InputTag("ZZCandtle"),
 #        ZLL  = cms.InputTag("ZLLCand"),
