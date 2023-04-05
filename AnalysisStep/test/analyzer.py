@@ -75,7 +75,7 @@ process.maxEvents.input = -1
 ### Output root file (monitoring histograms)
 ### ----------------------------------------------------------------------
 process.TFileService=cms.Service('TFileService',
-                                fileName=cms.string('HTauTauHMuMu_DYv2.root')
+                                fileName=cms.string('HTauTauHMuMu.root')
                                 )
 
 ### ----------------------------------------------------------------------

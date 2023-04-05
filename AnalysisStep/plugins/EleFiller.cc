@@ -16,7 +16,7 @@
 #include <FWCore/ParameterSet/interface/ParameterSet.h>
 #include <FWCore/Framework/interface/ESHandle.h>
 
-#include <DataFormats/Common/interface/TriggerResults.h>
+// #include <DataFormats/Common/interface/TriggerResults.h>
 #include "DataFormats/Math/interface/deltaR.h"
 
 #include <HTauTauHMuMu/AnalysisStep/interface/CutSet.h>
@@ -48,8 +48,8 @@ class EleFiller : public edm::EDProducer {
   edm::EDGetTokenT<pat::ElectronRefVector> electronToken;
   edm::EDGetTokenT<pat::ElectronRefVector> electronToken_bis;
     
-  const edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> triggerObjects_;
-  const edm::EDGetTokenT< edm::TriggerResults > triggerResultsToken_;
+  // const edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> triggerObjects_;
+  // const edm::EDGetTokenT< edm::TriggerResults > triggerResultsToken_;
   int sampleType;
   int setup;
   const StringCutObjectSelector<pat::Electron, true> cut;
@@ -63,8 +63,8 @@ class EleFiller : public edm::EDProducer {
 
 EleFiller::EleFiller(const edm::ParameterSet& iConfig) :
   electronToken(consumes<pat::ElectronRefVector>(iConfig.getParameter<edm::InputTag>("src"))),
-  triggerObjects_(consumes<pat::TriggerObjectStandAloneCollection> (iConfig.getParameter<edm::InputTag>("TriggerSet"))),
-  triggerResultsToken_( consumes< edm::TriggerResults >( iConfig.getParameter< edm::InputTag >( "TriggerResultsLabel" ) ) ),
+  // triggerObjects_(consumes<pat::TriggerObjectStandAloneCollection> (iConfig.getParameter<edm::InputTag>("TriggerSet"))),
+  // triggerResultsToken_( consumes< edm::TriggerResults >( iConfig.getParameter< edm::InputTag >( "TriggerResultsLabel" ) ) ),
   sampleType(iConfig.getParameter<int>("sampleType")),
   setup(iConfig.getParameter<int>("setup")),
   cut(iConfig.getParameter<std::string>("cut")),
@@ -88,11 +88,11 @@ EleFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   edm::Handle<pat::ElectronRefVector> electronHandle;
   iEvent.getByToken(electronToken, electronHandle);
 
-  edm::Handle< edm::TriggerResults > triggerResults;
-  iEvent.getByToken( triggerResultsToken_, triggerResults );
+  // edm::Handle< edm::TriggerResults > triggerResults;
+  // iEvent.getByToken( triggerResultsToken_, triggerResults );
 
-  edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects;
-  iEvent.getByToken(triggerObjects_, triggerObjects);
+  // edm::Handle<pat::TriggerObjectStandAloneCollection> triggerObjects;
+  // iEvent.getByToken(triggerObjects_, triggerObjects);
 
 
   edm::Handle<double> rhoHandle;

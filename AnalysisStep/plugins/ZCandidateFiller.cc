@@ -186,39 +186,23 @@ ZCandidateFiller::ZCandidateFiller(const edm::ParameterSet& iConfig) :
       DiMuFiltersDR = {0.001,0.001,-1,-1};
       //DiTau
       DiTauPaths = {
-          "HLT_DoubleMediumIsoPFTau32_Trk1_eta2p1_Reg_v*",
           "HLT_DoubleMediumIsoPFTau35_Trk1_eta2p1_Reg_v*",
-          "HLT_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v*",
-          "HLT_DoubleMediumCombinedIsoPFTau35_Trk1_eta2p1_Reg_v*",
-          "HLT_DoubleMediumCombinedIsoPFTau40_Trk1_eta2p1_Reg_v*",
-          "HLT_DoubleMediumCombinedIsoPFTau40_Trk1_eta2p1_v*"
+          "HLT_DoubleMediumCombinedIsoPFTau35_Trk1_eta2p1_Reg_v*"
       };
       DiTauFilters = {
-          "hltDoublePFTau32TrackPt1MediumIsolationDz02Reg",
           "hltDoublePFTau35TrackPt1MediumIsolationDz02Reg",
-          "hltDoublePFTau40TrackPt1MediumIsolationDz02Reg",
-          "hltDoublePFTau35TrackPt1MediumCombinedIsolationDz02Reg",
-          "hltDoublePFTau40TrackPt1MediumCombinedIsolationDz02Reg",
-          "hltDoublePFTau40TrackPt1MediumCombinedIsolationDz02"
+          "hltDoublePFTau35TrackPt1MediumCombinedIsolationDz02Reg"
       };
       DiTauFiltersLeg1 = {
-          "hltDoublePFTau32TrackPt1MediumIsolationDz02Reg",
           "hltDoublePFTau35TrackPt1MediumIsolationDz02Reg",
-          "hltDoublePFTau40TrackPt1MediumIsolationDz02Reg",
-          "hltDoublePFTau35TrackPt1MediumCombinedIsolationDz02Reg",
-          "hltDoublePFTau40TrackPt1MediumCombinedIsolationDz02Reg",
-          "hltDoublePFTau40TrackPt1MediumCombinedIsolationDz02"
+          "hltDoublePFTau35TrackPt1MediumCombinedIsolationDz02Reg"
       };
       DiTauFiltersLeg2 = {
-          "hltDoublePFTau32TrackPt1MediumIsolationDz02Reg",
           "hltDoublePFTau35TrackPt1MediumIsolationDz02Reg",
-          "hltDoublePFTau40TrackPt1MediumIsolationDz02Reg",
-          "hltDoublePFTau35TrackPt1MediumCombinedIsolationDz02Reg",
-          "hltDoublePFTau40TrackPt1MediumCombinedIsolationDz02Reg",
-          "hltDoublePFTau40TrackPt1MediumCombinedIsolationDz02"
+          "hltDoublePFTau35TrackPt1MediumCombinedIsolationDz02Reg"
       };
-      DiTauFiltersDZ = {0.2,0.2,0.2,0.2,0.2,0.2};
-      DiTauFiltersDR = {0.5,0.5,0.5,0.5,0.5,0.5};
+      DiTauFiltersDZ = {0.2,0.2};
+      DiTauFiltersDR = {0.5,0.5};
       //MuTau
       MuTauPaths = {
           "HLT_IsoMu19_eta2p1_LooseIsoPFTau20_v*",
@@ -239,12 +223,28 @@ ZCandidateFiller::ZCandidateFiller(const edm::ParameterSet& iConfig) :
       MuTauFiltersDZ = {-1,-1};
       MuTauFiltersDR = {0.3,0.3};
       //EleTau
-      EleTauPaths = {};
-      EleTauFilters = {};
-      EleTauFiltersLeg1 = {};
-      EleTauFiltersLeg2 = {};
-      EleTauFiltersDZ = {};
-      EleTauFiltersDR = {};
+      EleTauPaths = {
+        "HLT_Ele24_eta2p1_WPLoose_Gsf_LooseIsoPFTau20_SingleL1_v*",
+        "HLT_Ele24_eta2p1_WPLoose_Gsf_LooseIsoPFTau20_v*",
+        "HLT_Ele24_eta2p1_WPLoose_Gsf_LooseIsoPFTau30_v*"
+      };
+      EleTauFilters = {
+        "hltOverlapFilterSingleIsoEle24WPLooseGsfLooseIsoPFTau20",
+        "hltOverlapFilterIsoEle24WPLooseGsfLooseIsoPFTau20",
+        "hltOverlapFilterIsoEle24WPLooseGsfLooseIsoPFTau30"
+      };
+      EleTauFiltersLeg1 = {//Ele
+        "hltEle24WPLooseL1SingleIsoEG22erGsfTrackIsoFilter",
+        "hltEle24WPLooseL1IsoEG22erTau20erGsfTrackIsoFilter",
+        "hltEle24WPLooseL1IsoEG22erIsoTau26erGsfTrackIsoFilter"
+      };
+      EleTauFiltersLeg2 = {//Tau
+        "hltPFTau20TrackLooseIso",
+        "hltPFTau20TrackLooseIso",
+        "hltPFTau30TrackLooseIso"
+      };
+      EleTauFiltersDZ = {-1,-1,-1};
+      EleTauFiltersDR = {0.3,0.3,0.3};
       //MuEle
       MuElePaths = {
           "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v*",
@@ -546,6 +546,7 @@ void ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
   float tau1Pt = -1;
   int tau2Iso = -1;
   float tau2Pt = -1;
+  float best_ptSum = -1;
 
   //--- Loop over LL Candidates
   for(unsigned int i = 0; i < LLCands->size(); ++i) {
@@ -622,6 +623,44 @@ void ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
     myCand.addUserFloat("d0.isGoodTau",myCand.userFloat("d0.isGood_Tau"));
 	myCand.addUserFloat("d1.isGoodTau",myCand.userFloat("d1.isGood_Tau"));
     }
+
+    //veto extra electrons or muons
+    int nExtraLep = 0;
+    for (vector<reco::CandidatePtr>::const_iterator lepPtr = goodisoleptonPtrs.begin(); lepPtr != goodisoleptonPtrs.end(); ++lepPtr){
+      const reco::Candidate* lep = lepPtr->get();
+      if (
+        deltaR(lep->p4(), l1->p4()) > 0.02 &&
+        deltaR(lep->p4(), l2->p4()) > 0.02
+        ){
+        nExtraLep++;
+      }
+    }
+    if (nExtraLep > 0) continue;
+
+    //Extra pt and eta cuts
+    if (abs(id0*id1)==169) {
+        if (l1->pt()<20 || l2->pt()<20) continue;
+    }
+    else if (abs(id0*id1)==225) {
+        if (l1->pt()<40 || l2->pt()<40 || fabs(l1->eta())>2.1 || fabs(l2->eta())>2.1) continue;
+    }
+    else if (abs(id0)==11 && abs(id1)==15) {
+        if (l1->pt()<24 || l2->pt()<30) continue;
+    }
+    else if (abs(id0)==15 && abs(id1)==11) {
+        if (l1->pt()<30 || l2->pt()<24) continue;
+    }
+    else if (abs(id0)==13 && abs(id1)==15) {
+        if (l1->pt()<20 || l2->pt()<30) continue;
+    }
+    else if (abs(id0)==15 && abs(id1)==13) {
+        if (l1->pt()<30 || l2->pt()<20) continue;
+    }
+    else if (abs(id0)==11 && abs(id1)==13) {
+        if (l1->pt()>l2->pt()) {if (l1->pt()<24 || l2->pt()<15) continue;}
+        else {if (l1->pt()<15 || l2->pt()<24) continue;}
+    }
+
 
     // cout<<"HLTMatch: "<<id0*id1<<endl;
     //--------------------------------------------------------------
@@ -749,22 +788,14 @@ void ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
     //--------------------------------------------------------------
     //-----------------------END HLTMatch---------------------------
     //--------------------------------------------------------------
-      
-    //veto extra electrons or muons
-    int nExtraLep = 0;
-    for (vector<reco::CandidatePtr>::const_iterator lepPtr = goodisoleptonPtrs.begin(); lepPtr != goodisoleptonPtrs.end(); ++lepPtr){
-      const reco::Candidate* lep = lepPtr->get();
-      if (
-        deltaR(lep->p4(), l1->p4()) > 0.02 &&
-        deltaR(lep->p4(), l2->p4()) > 0.02
-        ){
-        nExtraLep++;
-      }
-    }
-    if (nExtraLep > 0) continue;
-      
 
     //--- Find "best Z" (closest to mZ) among those passing the "bestZAmong" selection
+    // if (preBestZSelection(myCand)) {
+    //     if (ptSum > best_ptSum) {
+    //         bestZidx = i;
+    //         best_ptSum = ptSum;
+    //     }
+    // }
     if (preBestZSelection(myCand)) {
       if (abs(id0*id1)==143 || abs(id0*id1)==169) {
           bestZidx=i;

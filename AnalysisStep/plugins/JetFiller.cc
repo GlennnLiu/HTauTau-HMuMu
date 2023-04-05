@@ -210,7 +210,9 @@ JetFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     float ptD = (*ptDHandle)[jetRef];
 
 
-    //--- loose jet ID, cf. https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID13TeVRun2016 
+
+    //--- JetID for UL, only one WP provided. Cf. https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID13TeVUL
+    //--- Lepton veto not included, as we perform our own cleaning and selection between leps and jets
     float NHF  = j.neutralHadronEnergyFraction();
     float NEMF = j.neutralEmEnergyFraction();
     float CHF  = j.chargedHadronEnergyFraction();

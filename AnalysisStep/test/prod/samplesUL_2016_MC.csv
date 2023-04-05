@@ -1,41 +1,69 @@
-identifier,process,crossSection=-1,BR=1,execute=True,dataset,prefix,pattern,splitLevel,::variables,::pyFragments,comment
-###  See  comment  field ,,,,,,,,,,, Unless  otherwise  stated;  signal  x-sections  are  taken  from  https://hypernews.cern.ch/HyperNews/CMS/get/higgs/1738.html 
-###,,,,,,,,,,, in  the  [120;130]  range  they  are  taken  from  the  YR4  SM  13TeV  tab;  i.e.  they  are  N3LO  QCD  +  NLO  EW 
-###,,,,,,,,,,, while  for  other  mass  points  they  are  taken  from  the  YR4  BSM  13TeV  tab;  i.e.  they  are  in  NWA  and  without  EWK  corrections;  see  https://hypernews.cern.ch/HyperNews/CMS/get/higgs/1738/1/1/1.html 
-###,,,,,,,,,,, For  ZH  and  ttH  the  BR  is  obtained  as  BR(H->ZZ->2L2X)  =  BR(H->4L)  +  BR(H->2L2q)  +  BR(H->ZZ*->2L2nu)  *  BR(H->2L2nu)  /  [  BR(H->ZZ*->2L2nu)  +  BR(H->WW*->2L2nu)  ]  where  BR(H->4L)  BR(H->2L2q)  and  BR(H->2L2nu)  are  taken  from  the  YR3  Twikis. 
-###,,,,,,,,,,, For  ZH  and  ttH  the  BR  column  also  includes  the  gen  filter  efficiency  (0.15038  for  ZH  and  0.1544  for  ttH). 
-
-#H
-ggH125,    ,48.58,0.0002745,,/GluGluHToZZTo4L_M125_TuneCP5_13TeV_powheg2_JHUGenV7011_pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,2,GENXSEC=29.99;GENBR=0.0002745;ADDLHEKINEMATICS=False;VVMODE=1;VVDECAYMODE=0;APPLY_K_NNLOQCD_ZZGG=2;APPLY_QCD_GGF_UNCERT=True;LEPTON_SETUP=2016,,
-VBFH125,    ,3.782,0.0002745,,/VBF_HToZZTo4L_M125_TuneCP5_13TeV_powheg2_JHUGenV7011_pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,1,GENXSEC=3.769;GENBR=0.0002745;ADDLHEKINEMATICS=False;VVMODE=1;VVDECAYMODE=0;LEPTON_SETUP=2016,,
-WplusH125,    ,0.839913391993366,0.0002745,,/WplusH_HToZZTo4L_M125_TuneCP5_13TeV_powheg2-minlo-HWJ_JHUGenV7011_pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,1,GENXSEC=0.85;GENBR=0.0002745;ADDLHEKINEMATICS=False;VVMODE=1;VVDECAYMODE=0;LEPTON_SETUP=2016,,
-WminusH125,    ,0.532731376975169,0.0002745,,/WminusH_HToZZTo4L_M125_TuneCP5_13TeV_powheg2-minlo-HWJ_JHUGenV7011_pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,1,GENXSEC=0.5343;GENBR=0.0002745;ADDLHEKINEMATICS=False;VVMODE=1;VVDECAYMODE=0;LEPTON_SETUP=2016,,
-ZH125,    ,0.7612,0.000704703501356,,/ZH_HToZZ_4LFilter_M125_TuneCP5_13TeV_powheg2-minlo-HZJ_JHUGenV7011_pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,2,GENXSEC=0.7612;GENBR=0.0006991275831543255;ADDLHEKINEMATICS=False;VVMODE=1;VVDECAYMODE=-2;LEPTON_SETUP=2016,,
-ttH125,    ,0.5071,0.000717679224618,,/ttH_HToZZ_4LFilter_M125_TuneCP5_13TeV_powheg2_JHUGenV7011_pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,2,GENXSEC=0.5071;GENBR=0.0007176792246;VVMODE=1;VVDECAYMODE=-2;LEPTON_SETUP=2016,,
-bbH125,    ,0.488,0.0002745,,/bbH_HToZZTo4L_M125_TuneCP2_13TeV-jhugenv7011-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,2,GENXSEC=0.488;GENBR=0.0.0002745;LEPTON_SETUP=2016,,
-bbH126,    ,0.476,0.000276,,/bbH_HToZZTo4L_M126_TuneCP2_13TeV-jhugenv7011-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,2,GENXSEC=0.476;GENBR=0.000276;LEPTON_SETUP=2016,,
-tqH125,    ,0.07713,0.0002745,,/tqH_HToZZTo4L_M125_TuneCP5_13TeV-jhugenv7011-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,2,GENXSEC=0.07713;GENBR=0.0002745;LEPTON_SETUP=2016,,#  Does  not  include  tWH 
-#tWH125,    ,0.01517,1,,unavailable,dbs,,2,GENXSEC=0.01517;GENBR=1;LEPTON_SETUP=2016,,#Inclusive  sample  at  the  moment 
-###,,,,,,,,,,, ggZH  xsec  is  from  https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt1314TeV2014.    However  some  older  numbers  I  have  from  HXSWG  give  1.227E-01  as  the  box  xsec.    If  you  multiply  by  the  ratio  (triangle+box+int)/box  from  JHUGen  you  get  0.02801.    (JHUGen  does  not  provide  absolute  xsecs.    But  its  ratios  are  correct.)    I  am  not  sure  if  they  use  box  only  in  the  way  I  interpret  it.    I  will  go  with  the  former  number  which  is  more  in  line  with  what  I  expect. 
-ggZH125,    ,0.1227,0.000699127583154,,/GluGluToZH_HToZZTo4L_M125_TuneCP5_13TeV-jhugenv723-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,2,GENXSEC=0.1227;GENBR=0.0006991275831543255;LEPTON_SETUP=2016,,
-#qqZZ
-ZZTo4l,,1.256,              ,,/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,1,GENXSEC=1.256;GENBR=1;PROCESS_CR=True;APPLY_K_NNLOQCD_ZZQQB=True;APPLY_K_NLOEW_ZZQQB=True;LEPTON_SETUP=2016,,
-#ggZZ
-
-#rare
-ZZZ,,0.01398,              ,,/ZZZ_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,1,GENXSEC=1;GENBR=1;PROCESS_CR=True;LEPTON_SETUP=2016,,
-# ZZZext1,,0.01398,              ,,/ZZZ_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17_ext1-v1/MINIAODSIM,dbs,,1,GENXSEC=1;GENBR=1;PROCESS_CR=True;LEPTON_SETUP=2016,,
-WZZ,,0.05565,              ,,/WZZ_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,1,GENXSEC=1;GENBR=1;PROCESS_CR=True;LEPTON_SETUP=2016,,
-# WZZext1,,0.05565,              ,,/WZZ_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17_ext1-v1/MINIAODSIM,dbs,,1,GENXSEC=1;GENBR=1;PROCESS_CR=True;LEPTON_SETUP=2016,,
-WWZ,,0.1651,              ,,/WWZJetsTo4L2Nu_4F_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,1,GENXSEC=1;GENBR=1;PROCESS_CR=True;LEPTON_SETUP=2016,,
-WWZ_4F,,0.1651,,,/WWZ_4F_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,1,GENXSEC=1;GENBR=1;PROCESS_CR=True;LEPTON_SETUP=2016,,
-# WWZ_4Fext1,,0.1651,,,/WWZ_4F_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17_ext1-v1/MINIAODSIM,dbs,,1,GENXSEC=1;GENBR=1;PROCESS_CR=True;LEPTON_SETUP=2016,,
-TTZZ,,0.001572,              ,,/TTZZ_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,1,GENXSEC=1.256;GENBR=1;PROCESS_CR=True;LEPTON_SETUP=2016,,
-TTWW,,0.007883,              ,,/TTWW_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,1,GENXSEC=1.256;GENBR=1;PROCESS_CR=True;LEPTON_SETUP=2016,,
-TTZToLLNuNu_M10,,0.25271,,,/TTZToLLNuNu_M-10_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,1,GENXSEC=0.25271;GENBR=1;LEPTON_SETUP=2016,,
-# TTZToLL_M1to10_MLM,,0.04695,,,unavailable,dbs,,1,GENXSEC=0.04695;GENBR=1;LEPTON_SETUP=2016,,
-TTZJets_M10_MLM,,0.259,,,/ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v4/MINIAODSIM,dbs,,4,GENXSEC=0.259;GENBR=1;LEPTON_SETUP=2016,,
-#For ZX studies
-# DYJetsToLL_M50,,6225.4,          ,,/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,4,GENXSEC=6025.2;GENBR=1;PROCESS_CR=True;LEPTON_SETUP=2016,,
-# TTTo2L2Nu,,87.3,,,/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,1,GENXSEC=91.7701;GENBR=1;PROCESS_CR=True;LEPTON_SETUP=2016,,
-WZTo3LNu,,4.67,        ,,/WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,4,GENXSEC=4.67;GENBR=1;PROCESS_CR=True;LEPTON_SETUP=2016,,
+identifier,crossSection=-1,BR=1,execute=True,dataset,prefix,pattern,splitLevel,::variables,::pyFragments,comment
+#HTauTau
+ggH125ToTauTau,48.58,0.0627,,/GluGluHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,2,GENXSEC=21.46;GENBR=0.0627;APPLY_QCD_GGF_UNCERT=True;LEPTON_SETUP=2016,,
+VBFH125TauTau,3.782,0.0627,,/VBFHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,1,GENXSEC=3.861;GENBR=0.0627;LEPTON_SETUP=2016,,
+WplusH125TauTau,0.8402,0.0627,,/WplusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,1,GENXSEC=0.867;GENBR=0.0627;LEPTON_SETUP=2016,,
+WminusH125ToTauTau,0.5325,0.0627,,/WminusHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,1,GENXSEC=0.5412;GENBR=0.0627;LEPTON_SETUP=2016,,
+ZH125ToTauTau,0.7612,0.0627,,/ZHToTauTau_M125_CP5_13TeV-powheg-pythia8_ext1/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,2,GENXSEC=0.7891;GENBR=0.0627;LEPTON_SETUP=2016,,
+#ggZH125ToTauTau,0.1227,0.0627,,/GluGluToZH_HToZZTo4L_M125_TuneCP5_13TeV-jhugenv723-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,2,GENXSEC=0;GENBR=0.0627;LEPTON_SETUP=2016,,ggZH  xsec  is  from  https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt1314TeV2014.    However  some  older  numbers  I  have  from  HXSWG  give  1.227E-01  as  the  box  xsec.    If  you  multiply  by  the  ratio  (triangle+box+int)/box  from  JHUGen  you  get  0.02801.    (JHUGen  does  not  provide  absolute  xsecs.    But  its  ratios  are  correct.)    I  am  not  sure  if  they  use  box  only  in  the  way  I  interpret  it.    I  will  go  with  the  former  number  which  is  more  in  line  with  what  I  expect.,,,,,,,,,,,
+ttH125ToTauTau,0.5071,0.0627,,/ttHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,2,GENXSEC=0.5269;GENBR=0.0627;LEPTON_SETUP=2016,,
+#bbH125ToTauTau,0.488,0.0627,,/bbHToTauTau_M-125_4FS_ybyt_TuneCP5-13TeV-amcatnlo-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,2,GENXSEC=0;GENBR=0.0627;LEPTON_SETUP=2016,,,,,,,,,,,,,
+#tqH125ToTauTau,0.07713,0.0627,,/tqH_HToZZTo4L_M125_TuneCP5_13TeV-jhugenv7011-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,2,GENXSEC=0;GENBR=0.0627;LEPTON_SETUP=2016,,#  Does  not  include  tWH,,,,,,,,,,,
+#HMuMu
+ggH125ToMuMu,48.58,0.0002176,,/GluGluHToMuMu_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,1,GENXSEC=21.46;GENBR=0.0002176;APPLY_QCD_GGF_UNCERT=True;LEPTON_SETUP=2016,,
+VBFH125ToMuMu,3.782,0.0002176,,/VBFHToMuMu_M125_TuneCP5_withDipoleRecoil_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,1,GENXSEC=3.861;GENBR=0.0002176;LEPTON_SETUP=2016,,
+WplusH125ToMuMu,0.8402,0.0002176,,/WplusHToMuMu_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,1,GENXSEC=0.867;GENBR=0.0002176;LEPTON_SETUP=2016,,
+WminusH125ToMuMu,0.5325,0.0002176,,/WminusHToMuMu_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,1,GENXSEC=0.5412;GENBR=0.0002176;LEPTON_SETUP=2016,,
+ZH125ToMuMu,0.7612,0.0002176,,/ZHToMuMu_M125_CP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,1,GENXSEC=0.7891;GENBR=0.0002176;LEPTON_SETUP=2016,,
+#ggZH125ToMuMu,0.1227,0.0002176,,,,,,,,,,,,,,,,,,,
+ttH125ToMuMu,0.5071,0.0002176,,/ttHToMuMu_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,1,GENXSEC=0.5269;GENBR=0.0002176;LEPTON_SETUP=2016,,
+#bbH125ToMuMu,0.488,0.0002176,,,,,,,,,,,,,,,,,,,
+#tqH125ToMuMu,0.07713,0.0002176,,,,,,,,,,,,,,,,,,,
+#HWW as backgrounds
+ggH125ToWW,48.58,0.02338,,/GluGluHToWWTo2L2Nu_M125_TuneCP5_13TeV_powheg2_JHUGenV714_pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,3,GENXSEC=21.47;GENBR=0.02338;APPLY_QCD_GGF_UNCERT=True;LEPTON_SETUP=2016,,
+VBFH125ToWW,3.782,0.02338,,/VBFHToWWTo2L2Nu_M125_TuneCP5_13TeV_powheg2_JHUGenV714_pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,2,GENXSEC=3.892;GENBR=0.02338;LEPTON_SETUP=2016,,
+WplusH125ToWW,0.8402,0.2137,,/HWplusJ_HToWW_M-125_TuneCP5_13TeV-powheg-jhugen727-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,2,GENXSEC=0.872;GENBR=0.2137;LEPTON_SETUP=2016,,
+WminusH125ToWW,0.5325,0.2137,,/HWminusJ_HToWW_M-125_TuneCP5_13TeV-powheg-jhugen727-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,2,GENXSEC=0.5445;GENBR=0.2137;LEPTON_SETUP=2016,,
+ZH125ToWW,0.7612,0.2137,,/HZJ_HToWW_M-125_TuneCP5_13TeV-powheg-jhugen727-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,2,GENXSEC=0.9595;GENBR=0.2137;LEPTON_SETUP=2016,,
+ggZH125ToWW,0.1227,0.02338,,/GluGluZH_HToWWTo2L2Nu_M-125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,1,GENXSEC=0.0616;GENBR=0.02338;LEPTON_SETUP=2016,,
+#ttH125ToWW,0.5071,0.02338,,,,,,,,,,,,,,,,,,,
+#Z
+DYJetsToLL,6077.22,,,/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,4,GENXSEC=6442.;GENBR=1;LEPTON_SETUP=2016,,
+EWKZToLL,6.215,,,/EWKZ2Jets_ZToLL_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,2,GENXSEC=6.229;GENBR=1;LEPTON_SETUP=2016,,
+#Di-boson
+ZZTo4l,1.256,,,/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,6,GENXSEC=1.325;GENBR=1;APPLY_K_NNLOQCD_ZZQQB=True;APPLY_K_NLOEW_ZZQQB=True;LEPTON_SETUP=2016,,
+ZZTo2L2Q,3.224,,,/ZZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,2,GENXSEC=3.676;GENBR=1;APPLY_K_NNLOQCD_ZZQQB=True;APPLY_K_NLOEW_ZZQQB=True;LEPTON_SETUP=2016,,
+ZZTo2L2Nu,0.564,,,/ZZTo2L2Nu_TuneCP5_13TeV_powheg_pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,3,GENXSEC=0.9738;GENBR=1;APPLY_K_NNLOQCD_ZZQQB=True;APPLY_K_NLOEW_ZZQQB=True;LEPTON_SETUP=2016,,
+WZTo2L2Q,5.606,,,/WZTo2Q2L_mllmin4p0_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,1,GENXSEC=6.419;GENBR=1;LEPTON_SETUP=2016,,
+WZTo3LNu,4.42965,,,/WZTo3LNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,4,GENXSEC=5.213;GENBR=1;PROCESS_CR=True;LEPTON_SETUP=2016,,
+WWTo2L2Nu,12.178,,,/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,2,GENXSEC=11.09;GENBR=1;LEPTON_SETUP=2016,,
+ggTo2e2mu,0.00318,,,/GluGluToContinToZZTo2e2mu_TuneCP5_13TeV-mcfm701-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,2,GENXSEC=0.003292;GENBR=1;APPLY_K_NNLOQCD_ZZGG=1;LEPTON_SETUP=2016,,
+ggTo2e2tau,0.00318,,,/GluGluToContinToZZTo2e2tau_TuneCP5_13TeV-mcfm701-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,2,GENXSEC=0.003292;GENBR=1;APPLY_K_NNLOQCD_ZZGG=1;LEPTON_SETUP=2016,,
+ggTo2mu2tau,0.00318,,,/GluGluToContinToZZTo2mu2tau_TuneCP5_13TeV-mcfm701-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,2,GENXSEC=0.003292;GENBR=1;APPLY_K_NNLOQCD_ZZGG=1;LEPTON_SETUP=2016,,
+ggTo4e,0.00157,,,/GluGluToContinToZZTo4e_TuneCP5_13TeV-mcfm701-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,2,GENXSEC=0.001619;GENBR=1;APPLY_K_NNLOQCD_ZZGG=1;LEPTON_SETUP=2016,,
+ggTo4mu,0.00157,,,/GluGluToContinToZZTo4mu_TuneCP5_13TeV-mcfm701-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,2,GENXSEC=0.001619;GENBR=1;APPLY_K_NNLOQCD_ZZGG=1;LEPTON_SETUP=2016,,
+ggTo4tau,0.00157,,,/GluGluToContinToZZTo4tau_TuneCP5_13TeV-mcfm701-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,2,GENXSEC=0.001619;GENBR=1;APPLY_K_NNLOQCD_ZZGG=1;LEPTON_SETUP=2016,,
+ggTo2e2nu,0.00149,,,/GluGluToContinToZZTo2e2nu_TuneCP5_13TeV-mcfm701-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,2,GENXSEC=0.001773;GENBR=1;APPLY_K_NNLOQCD_ZZGG=1;LEPTON_SETUP=2016,,
+ggTo2mu2nu,0.00149,,,/GluGluToContinToZZTo2mu2nu_TuneCP5_13TeV-mcfm701-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,2,GENXSEC=0.001773;GENBR=1;APPLY_K_NNLOQCD_ZZGG=1;LEPTON_SETUP=2016,,
+# ggTo2tau2nu,0.00149,,,,,,,,,,,,,,,,,,,,
+#Tri-boson
+ZZZ,0.01398,,,/ZZZ_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,1,GENXSEC=0.01476;GENBR=1;LEPTON_SETUP=2016,,
+WZZ,0.05565,,,/WZZ_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,1,GENXSEC=0.05709;GENBR=1;LEPTON_SETUP=2016,,
+WWZ,0.1651,,,/WWZ_4F_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,1,GENXSEC=0.1707;GENBR=1;LEPTON_SETUP=2016,,
+WWW,0.2086,,,/WWW_4F_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,1,GENXSEC=0.2158;GENBR=1;LEPTON_SETUP=2016,,
+#Top
+tW_top,35.85,,,/ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,2,GENXSEC=32.45;GENBR=1;LEPTON_SETUP=2016,,
+tW_antitop,35.85,,,/ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,2,GENXSEC=32.51;GENBR=1;LEPTON_SETUP=2016,,
+tZq,0.0758,,,/tZq_ll_4f_ckm_NLO_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,4,GENXSEC=0.07561;GENBR=1;LEPTON_SETUP=2016,,
+TTTo2L2Nu,88.51,,,/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,6,GENXSEC=88.29;GENBR=1;LEPTON_SETUP=2016,,
+TTW,0.2043,,,/TTWJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,3,GENXSEC=0.2161;GENBR=1;LEPTON_SETUP=2016,,
+TTZZ,0.001572,,,/TTZZ_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,2,GENXSEC=0.001386;GENBR=1;LEPTON_SETUP=2016,,
+TTWW,0.007883,,,/TTWW_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,2,GENXSEC=0.007003;GENBR=1;LEPTON_SETUP=2016,,
+TTZToLLNuNu_M10,0.2529,,,/TTZToLLNuNu_M-10_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,5,GENXSEC=0.2439;GENBR=1;LEPTON_SETUP=2016,,
+TTZToLL_M1to10,0.04695,,,/TTZToLL_M-1to10_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,2,GENXSEC=0.0537;GENBR=1;LEPTON_SETUP=2016,,
+# TTZJets_M10,0.259,,,/ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v4/MINIAODSIM,dbs,,6,GENXSEC=0.2158;GENBR=1;LEPTON_SETUP=2016,,,,,,,,,,,,,
+#Jet fake L
+# WJetsToLNu,61526.7,,,/WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v2/MINIAODSIM,dbs,,,GENXSEC=66660;GENBR=1;LEPTON_SETUP=2016,,,,,,,,,,,,,
+# ST_top,136.02,,,/ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v3/MINIAODSIM,dbs,,6,GENXSEC=113.4;GENBR=1;LEPTON_SETUP=2016,,,,,,,,,,,,,
+# ST_antitop,80.95,,,/ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v3/MINIAODSIM,dbs,,,GENXSEC=67.93;GENBR=1;LEPTON_SETUP=2016,,,,,,,,,,,,,
+# ST_s,3.40,,,/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,,,,GENXSEC=3.549;GENBR=1;LEPTON_SETUP=2016,,,,,,,,,,,,,

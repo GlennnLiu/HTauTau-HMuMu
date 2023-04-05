@@ -166,9 +166,9 @@ if (LEPTON_SETUP == 2016):
     process.hltFilterSingleMu.HLTPaths = ["HLT_IsoMu22_v*","HLT_IsoMu22_eta2p1_v*","HLT_IsoTkMu22_v*","HLT_IsoTkMu22_eta2p1_v*","HLT_IsoMu24_v*","HLT_IsoTkMu24_v*"]
     process.hltFilterSingleEle.HLTPaths = ["HLT_Ele25_eta2p1_WPTight_Gsf_v*","HLT_Ele27_WPTight_Gsf_v*","HLT_Ele27_eta2p1_WPLoose_Gsf_v*", "HLT_Ele32_eta2p1_WPTight_Gsf_v*"]
     process.hltFilterDiMu.HLTPaths = ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*","HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*","HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*"]
-    process.hltFilterDiTau.HLTPaths = ["HLT_DoubleMediumIsoPFTau32_Trk1_eta2p1_Reg_v*","HLT_DoubleMediumIsoPFTau35_Trk1_eta2p1_Reg_v*","HLT_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v*","HLT_DoubleMediumCombinedIsoPFTau35_Trk1_eta2p1_Reg_v*","HLT_DoubleMediumCombinedIsoPFTau40_Trk1_eta2p1_Reg_v*","HLT_DoubleMediumCombinedIsoPFTau40_Trk1_eta2p1_v*"]
+    process.hltFilterDiTau.HLTPaths = ["HLT_DoubleMediumIsoPFTau35_Trk1_eta2p1_Reg_v*","HLT_DoubleMediumCombinedIsoPFTau35_Trk1_eta2p1_Reg_v*"]
     process.hltFilterMuTau.HLTPaths = ["HLT_IsoMu19_eta2p1_LooseIsoPFTau20_v*","HLT_IsoMu19_eta2p1_LooseIsoPFTau20_SingleL1_v*"]
-    process.hltFilterEleTau.HLTPaths = []
+    process.hltFilterEleTau.HLTPaths = ["HLT_Ele24_eta2p1_WPLoose_Gsf_LooseIsoPFTau20_SingleL1_v*","HLT_Ele24_eta2p1_WPLoose_Gsf_LooseIsoPFTau20_v*","HLT_Ele24_eta2p1_WPLoose_Gsf_LooseIsoPFTau30_v*"]
     process.hltFilterMuEle.HLTPaths = ["HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v*","HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v*","HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v*","HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*"]
     
     process.triggerSingleMu  = cms.Path(process.hltFilterSingleMu)
@@ -358,7 +358,7 @@ else:
 
 process.bareSoftMuons = cms.EDFilter("PATMuonRefSelector",
     src = cms.InputTag("calibratedMuons"),
-    cut = cms.string("pt>15 && abs(eta)<2.4 && (isGlobalMuon || (isTrackerMuon && numberOfMatchedStations>0))")
+    cut = cms.string("pt>10 && abs(eta)<2.4 && (isGlobalMuon || (isTrackerMuon && numberOfMatchedStations>0))")
 #    Lowering pT cuts
 #    cut = cms.string("(isGlobalMuon || (isTrackerMuon && numberOfMatchedStations>0)) && pt>3 && p>3.5 && abs(eta)<2.4")
 )
@@ -382,8 +382,8 @@ process.softMuons = cms.EDProducer("MuFiller",
     sampleType = cms.int32(SAMPLE_TYPE),
     setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
     cut = cms.string(DXY_DZ), #dxy, dz cuts
-    TriggerResultsLabel = cms.InputTag('TriggerResults','','HLT'),
-    TriggerSet = cms.InputTag(TRIGGERSET),
+    # TriggerResultsLabel = cms.InputTag('TriggerResults','','HLT'),
+    # TriggerSet = cms.InputTag(TRIGGERSET),
     flags = cms.PSet(
         ID = cms.string(TIGHTMUON), #"userFloat('isBDT')"), # muonMVA ID
         isSIP = cms.string(SIP),
@@ -466,11 +466,11 @@ process.bareSoftElectrons = cms.EDFilter("PATElectronRefSelector",
 
 process.softElectrons = cms.EDProducer("EleFiller",
    src    = cms.InputTag("bareSoftElectrons"),
-   TriggerResultsLabel = cms.InputTag('TriggerResults','','HLT'),
-   TriggerSet = cms.InputTag(TRIGGERSET),
+#    TriggerResultsLabel = cms.InputTag('TriggerResults','','HLT'),
+#    TriggerSet = cms.InputTag(TRIGGERSET),
    sampleType = cms.int32(SAMPLE_TYPE),
    setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
-   cut = cms.string("pt>15 && abs(eta) < 2.5 &&"+ DXY_DZ),
+   cut = cms.string("pt>10 && abs(eta) < 2.5 &&"+ DXY_DZ),
    flags = cms.PSet(
         ID = cms.string("userFloat('isBDT')"),
         isSIP = cms.string(SIP),
@@ -488,7 +488,7 @@ process.electrons = cms.Sequence(process.egammaPostRecoSeq + process.selectedSli
 #--- TrackLess Electrons
 process.bareSoftPhotons = cms.EDFilter("PATPhotonRefSelector",
    src = cms.InputTag("slimmedPhotons"),
-   cut = cms.string("pt>7 && abs(eta)<2.5")
+   cut = cms.string("pt>10 && abs(eta)<2.5")
    )
 
 process.softPhotons = cms.EDProducer("Philler",
@@ -548,7 +548,7 @@ process.cleanSoftElectrons = cms.EDProducer("PATElectronCleaner",
 
 #------- TAU LEPTONS -------
 
-TAUCUT       = "pt>20 & abs(eta)<2.3"#"tauID('byCombinedIsolationDeltaBetaCorrRaw3Hits') < 1000.0 && pt>18"
+TAUCUT       = "pt>30 & abs(eta)<2.3"#"tauID('byCombinedIsolationDeltaBetaCorrRaw3Hits') < 1000.0 && pt>18"
 SOSOTAU      = "decayMode()!=5 && decayMode()!=6 && tauID('decayModeFindingNewDMs') == 1 && userFloat('dz') < 1"
 GOODTAU      = SOSOTAU# + " && tauID('byVVVLooseDeepTau2017v2p1VSjet') == 1 && tauID('byVVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byVLooseDeepTau2017v2p1VSmu') == 1"
 GOODTAU_MU   = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"

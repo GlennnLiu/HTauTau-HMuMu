@@ -145,6 +145,46 @@ LLConfigHelper::passFilter(const edm::Event & event, edm::Handle<edm::TriggerRes
 
 }
 
+bool
+LLConfigHelper::passMETFilter(const edm::Event & event, edm::Handle<edm::TriggerResults> & trigRes, short& metworld) {
 
+  if (trigRes.isValid()) {
+    triggerResults = trigRes;
+  } else {
+    cout << "ERROR: failed to get TriggerResults" << endl;
+  }
+  const edm::TriggerNames &metNames = event.triggerNames(*triggerResults);
+
+  vector<string> METFilters = {
+    "Flag_goodVertices",
+    "Flag_globalSuperTightHalo2016Filter",
+    "Flag_HBHENoiseFilter",
+    "Flag_HBHENoiseIsoFilter",
+    "Flag_EcalDeadCellTriggerPrimitiveFilter",
+    "Flag_BadPFMuonFilter",
+    "Flag_BadPFMuonDzFilter",
+    "Flag_eeBadScFilter"
+  };
+  if (theSampleType==2017 || theSampleType==2018) METFilters.push_back("Flag_ecalBadCalibFilter");
+
+  bool _passMETFilter=true;
+  for (size_t im=0;im<METFilters.size();im++) {
+    bool foundFilter = false;
+    for (size_t i=0;i<triggerResults->size();i++) {
+      if (METFilters[im].compare(metNames.triggerName(i))==0) {
+        foundFilter = true;
+        if (triggerResults->accept(i)) {
+          set_bit_16(metworld,im);
+          break;
+        }
+      }
+    }
+    if (!foundFilter) {
+      cout << "** LLConfigHelper :: Failed to find MET filter " << METFilters[im] << endl;
+    }
+    _passMETFilter &=test_bit_16(metworld,im);
+  }
+  return _passMETFilter;
+}
 
 

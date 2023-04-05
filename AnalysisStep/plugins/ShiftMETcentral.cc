@@ -138,19 +138,32 @@ void ShiftMETcentral::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     // Calculate the correction
     float shiftMetPx = patMET.px() - deltaTaus.Px() - deltaJets.Px();
     float shiftMetPy = patMET.py() - deltaTaus.Py() - deltaJets.Py();
-//     cout<<"Original MET: "<<patMET.px()<<","<<patMET.py()<<endl;
-//     cout<<"Corrected MET: "<<shiftMetPx<<","<<shiftMetPy<<endl;
     reco::Candidate::LorentzVector shiftedMetP4(shiftMetPx, shiftMetPy, 0., sqrt(shiftMetPx*shiftMetPx + shiftMetPy*shiftMetPy));
-    //cout << "-- shiftedMetP4 : " << shiftedMetP4 << endl;
-
     pat::MET corrMEt(patMET);
     corrMEt.setP4(shiftedMetP4);
     corrMEt.setSignificanceMatrix(patMET.getSignificanceMatrix());
-    //cout << "-- corrMEt : " << corrMEt.momentum() << endl;
-
     out_MET_ptr->push_back(corrMEt);
-    //cout << "-- SHIFTED MET  : " << (*out_MET_ptr)[0].momentum() << endl;
-    //cout << "-- SHIFTED MET  : " << (*out_MET_ptr)[0].pt() << " / " << (*out_MET_ptr)[0].phi() << endl;
+
+    // only correct tau
+    float shiftMetPxTau = patMET.px() - deltaTaus.Px();
+    float shiftMetPyTau = patMET.py() - deltaTaus.Py();
+    reco::Candidate::LorentzVector shiftedMetP4Tau(shiftMetPxTau, shiftMetPyTau, 0., sqrt(shiftMetPxTau*shiftMetPxTau + shiftMetPyTau*shiftMetPyTau));
+    pat::MET corrMEtTau(patMET);
+    corrMEtTau.setP4(shiftedMetP4Tau);
+    corrMEtTau.setSignificanceMatrix(patMET.getSignificanceMatrix());
+    out_MET_ptr->push_back(corrMEtTau);
+
+    // only correct jet
+    float shiftMetPxJet = patMET.px() - deltaJets.Px();
+    float shiftMetPyJet = patMET.py() - deltaJets.Py();
+    reco::Candidate::LorentzVector shiftedMetP4Jet(shiftMetPxJet, shiftMetPyJet, 0., sqrt(shiftMetPxJet*shiftMetPxJet + shiftMetPyJet*shiftMetPyJet));
+    pat::MET corrMEtJet(patMET);
+    corrMEtJet.setP4(shiftedMetP4Jet);
+    corrMEtJet.setSignificanceMatrix(patMET.getSignificanceMatrix());
+    out_MET_ptr->push_back(corrMEtJet);
+
+    // raw one
+    out_MET_ptr->push_back(patMET);
 
     iEvent.put(std::move(out_MET_ptr));
 }

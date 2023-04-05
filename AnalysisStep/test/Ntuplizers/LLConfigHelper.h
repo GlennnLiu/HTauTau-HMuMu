@@ -39,6 +39,11 @@ class LLConfigHelper {
   /// Pass trigger requests (and set bits in trigworld)
   bool passTrigger(const edm::Event & event, edm::Handle<edm::TriggerResults> & trigRes, short& trigworld);
 
+  /// Pass MC filters
+
+  bool passMETFilter(const edm::Event & event, edm::Handle<edm::TriggerResults> & trigRes, short& metworld);
+
+
   /// Pass MET trigger requests
   // bool passMETTrigger(const edm::Event & event, edm::Handle<edm::TriggerResults> & trigRes);
 

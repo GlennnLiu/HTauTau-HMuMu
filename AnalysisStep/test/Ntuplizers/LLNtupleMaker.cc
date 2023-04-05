@@ -133,6 +133,21 @@ namespace {
   Float_t METx = -99;
   Float_t METy = -99;
   TMatrixD covMET(2, 2);
+
+  Float_t PFMETTau = -99;
+  Float_t PFMETPhiTau = -99;
+  Float_t METxTau = -99;
+  Float_t METyTau = -99;
+  Float_t PFMETJet = -99;
+  Float_t PFMETPhiJet = -99;
+  Float_t METxJet = -99;
+  Float_t METyJet = -99;
+  Float_t PFMETRaw = -99;
+  Float_t PFMETPhiRaw = -99;
+  Float_t METxRaw = -99;
+  Float_t METyRaw = -99;
+
+  Float_t Pzeta;
 //   Float_t METxUPTES = -99;
 //   Float_t METyUPTES = -99;
 //   Float_t METxDOWNTES = -99;
@@ -218,6 +233,7 @@ namespace {
   Short_t nCleanedJetsPt30BTagged_bTagSFUp  = 0;
   Short_t nCleanedJetsPt30BTagged_bTagSFDn  = 0;
   Short_t trigWord  = 0;
+  Short_t metWord = 0;
  
   Float_t LLMass  = 0;
   Float_t LLPt  = 0;
@@ -580,6 +596,7 @@ private:
   edm::EDGetTokenT<GenEventInfoProduct> genInfoToken;
   edm::EDGetTokenT<edm::View<pat::CompositeCandidate> > candToken;
   edm::EDGetTokenT<edm::TriggerResults> triggerResultToken;
+  edm::EDGetTokenT<edm::TriggerResults> triggerResultPATToken;
   edm::EDGetTokenT<vector<reco::Vertex> > vtxToken;
   edm::EDGetTokenT<edm::View<pat::Jet> > jetToken;
   edm::EDGetTokenT<pat::PhotonCollection> photonToken;
@@ -709,6 +726,7 @@ LLNtupleMaker::LLNtupleMaker(const edm::ParameterSet& pset) :
   candToken = consumes<edm::View<pat::CompositeCandidate> >(edm::InputTag(theCandLabel));
 
   triggerResultToken = consumes<edm::TriggerResults>(edm::InputTag("TriggerResults"));
+  triggerResultPATToken = consumes<edm::TriggerResults>(edm::InputTag("TriggerResults","","PAT"));
   vtxToken = consumes<vector<reco::Vertex> >(edm::InputTag("goodPrimaryVertices"));
   jetToken = consumes<edm::View<pat::Jet> >(edm::InputTag("cleanJets"));
   photonToken = consumes<pat::PhotonCollection>(edm::InputTag("slimmedPhotons"));
@@ -1101,8 +1119,9 @@ void LLNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& eSet
   // For Z+L CRs, we want only events with exactly 1 Z+l candidate. FIXME: this has to be reviewed.
 
   // Retrieve trigger results
-  Handle<edm::TriggerResults> triggerResults;
+  Handle<edm::TriggerResults> triggerResults, triggerResultsPAT;
   event.getByToken(triggerResultToken, triggerResults);
+  event.getByToken(triggerResultPATToken, triggerResultsPAT);
 
   bool failed = false;
 
@@ -1110,6 +1129,8 @@ void LLNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& eSet
   // Heshy note: I'm not turning return into failed = true because it looks like it's applied even if !skipEmptyEvents.
   //             It only does anything if the MCFILTER variable is set in the csv file, which is not currently the case.
   if (isMC && !(myHelper.passMCFilter(event,triggerResults))) return;
+
+  if (!myHelper.passMETFilter(event,triggerResultsPAT,metWord)) return;
 
   // Apply skim
   bool evtPassSkim = myHelper.passSkim(event,triggerResults,trigWord);
@@ -1202,6 +1223,22 @@ void LLNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& eSet
   covMET[1][0] = (*covHandle)(1,0);
   covMET[0][1] = covMET[1][0]; // (1,0) is the only one saved
   covMET[1][1] = (*covHandle)(1,1);
+
+  const pat::MET &metTau = metHandle->at(1);
+  PFMETTau = metTau.pt();
+  PFMETPhiTau = metTau.phi();
+  METxTau = metTau.px();
+  METyTau = metTau.py();
+  const pat::MET &metJet = metHandle->at(2);
+  PFMETJet = metJet.pt();
+  PFMETPhiJet = metJet.phi();
+  METxJet = metJet.px();
+  METyJet = metJet.py();
+  const pat::MET &metRaw = metHandle->at(3);
+  PFMETRaw = metRaw.pt();
+  PFMETPhiRaw = metRaw.phi();
+  METxRaw = metRaw.px();
+  METyRaw = metRaw.py();
   // METxUPTES=*METdxUPTESHandle;
   // METyUPTES=*METdyUPTESHandle;
   // METxDOWNTES=*METdxDOWNTESHandle;
@@ -1872,6 +1909,20 @@ void LLNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool evtP
   if (swi) {idx1=1;idx2=0;}
   else {idx1=0;idx2=1;}
 
+  TVector3 tau1_3,tau2_3,met_3;
+  tau1_3.SetXYZ(leptons[idx1]->px(),leptons[idx1]->py(),leptons[idx1]->pz());
+  tau2_3.SetXYZ(leptons[idx2]->px(),leptons[idx2]->py(),leptons[idx2]->pz());
+  met_3.SetXYZ(METx,METy,0);
+  TVector3 zeta(leptons[idx1]->px()+leptons[idx2]->px(),leptons[idx1]->py()+leptons[idx2]->py(),0);
+  if (zeta.Mag()==0) {
+    Pzeta=-999;
+    }
+  else {
+    Float_t Pall=(tau1_3+tau2_3+met_3).Dot(zeta)/zeta.Mag();
+    Float_t Pvis=(tau1_3+tau2_3).Dot(zeta)/zeta.Mag();
+    Pzeta=Pall-0.85*Pvis;
+  }
+
   //central
   TLorentzVector LLp4;
   LLp4.SetPtEtaPhiM(LLPt,LLEta,LLPhi,LLMass);
@@ -1895,6 +1946,8 @@ void LLNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool evtP
       LLSVPhi=results_central.at(2);
       LLSVMass=results_central.at(3);
   }
+
+
 
   // //TES UP/DOWN
   // TLorentzVector tau1_tesup,tau2_tesup,met_tesup;
@@ -2642,6 +2695,20 @@ void LLNtupleMaker::BookAllBranches(){
   myTree->Book("PFMETPhi", PFMETPhi, failedTreeLevel >= fullFailedTree);
   myTree->Book("METx", METx, failedTreeLevel >= fullFailedTree);
   myTree->Book("METy", METy, failedTreeLevel >= fullFailedTree);
+  myTree->Book("PFMETTau", PFMETTau, failedTreeLevel >= fullFailedTree);
+  myTree->Book("PFMETPhiTau", PFMETPhiTau, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METxTau", METxTau, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METyTau", METyTau, failedTreeLevel >= fullFailedTree);
+  myTree->Book("PFMETJet", PFMETJet, failedTreeLevel >= fullFailedTree);
+  myTree->Book("PFMETPhiJet", PFMETPhiJet, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METxJet", METxJet, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METyJet", METyJet, failedTreeLevel >= fullFailedTree);
+  myTree->Book("PFMETRaw", PFMETRaw, failedTreeLevel >= fullFailedTree);
+  myTree->Book("PFMETPhiRaw", PFMETPhiRaw, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METxRaw", METxRaw, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METyRaw", METyRaw, failedTreeLevel >= fullFailedTree);
+  myTree->Book("Pzeta", Pzeta, failedTreeLevel >= fullFailedTree);
+
   // myTree->Book("METxUPTES", METxUPTES, failedTreeLevel >= fullFailedTree);
   // myTree->Book("METyUPTES", METyUPTES, failedTreeLevel >= fullFailedTree);
   // myTree->Book("METxDOWNTES", METxDOWNTES, failedTreeLevel >= fullFailedTree);
@@ -2727,6 +2794,8 @@ void LLNtupleMaker::BookAllBranches(){
   myTree->Book("nCleanedJetsPt30BTagged_bTagSFDn",nCleanedJetsPt30BTagged_bTagSFDn, failedTreeLevel >= minimalFailedTree);
     
   myTree->Book("trigWord",trigWord, failedTreeLevel >= minimalFailedTree);
+  myTree->Book("metWord",metWord, failedTreeLevel >= minimalFailedTree);
+
   // myTree->Book("evtPassMETFilter",evtPassMETTrigger, failedTreeLevel >= minimalFailedTree);
 //   myTree->Book("ZZGoodMass",ZZGoodMass, false);
   myTree->Book("pass_SingleTrigger",pass_SingleTrigger, false);
