@@ -1,0 +1,4 @@
+identifier,crossSection=-1,BR=1,execute=True,dataset,prefix,pattern,splitLevel,::variables,::pyFragments,comment
+TTTo2L2Nu,88.51,,,/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,6,GENXSEC=88.29;GENBR=1;LEPTON_SETUP=2016;PROCESS_CR=True,,
+TTToHadronic,378.93,,,/TTToHadronic_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,4,GENXSEC=377.96;GENBR=1;LEPTON_SETUP=2016;PROCESS_CR=True;PROCESS_CRTT=True,,
+TTToSemiLeptonic,366.29,,,/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16MiniAODv2-106X_mcRun2_asymptotic_v17-v1/MINIAODSIM,dbs,,4,GENXSEC=365.34;GENBR=1;LEPTON_SETUP=2016;PROCESS_CR=True;PROCESS_CRTT=True,,
