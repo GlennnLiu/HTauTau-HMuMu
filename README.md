@@ -45,8 +45,11 @@ git clone https://github.com/bonanomi/MuonMVAReader.git MuonMVAReader
 (cd MuonMVAReader; git checkout 3d53269)
 
 #NanoAODTools
-git clone https://github.com/cms-nanoAOD/nanoAOD-tools.git PhysicsTools/NanoAODTools
-(cd PhysicsTools/NanoAODTools ; git checkout -b from-c32f055 c32f055)
+#git clone https://github.com/cms-nanoAOD/nanoAOD-tools.git PhysicsTools/NanoAODTools
+#(cd PhysicsTools/NanoAODTools ; git checkout -b from-c32f055 c32f055)
+
+# MET recoil
+git clone https://github.com/CMS-HTT/RecoilCorrections.git HTT-utilities/RecoilCorrections
 
 # compile
 scramv1 b -j 8
