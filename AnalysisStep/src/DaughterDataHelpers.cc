@@ -147,20 +147,20 @@ void userdatahelpers::getSortedLeptons(const pat::CompositeCandidate& cand, vect
   // Sort leptons by charge
   bool need_swap = false;
 
-  if(abs(leptons[0]->pdgId()) == 22 || abs(leptons[1]->pdgId()) == 22) {
-      int non_TLE_index = -1;
-      if(abs(leptons[0]->pdgId()) != 22) non_TLE_index = 0;
-      if(abs(leptons[1]->pdgId()) != 22) non_TLE_index = 1;   
-      if(non_TLE_index == -1) {
-        edm::LogError("") << "Found a Z candidate made of two TLE, this should never happen!";
-        abort();
-      }
-      if(leptons[non_TLE_index]->charge() < 0 && non_TLE_index == 0) need_swap = true; 
-  } else {
-    if (leptons[0]->charge() < 0 && leptons[0]->charge()*leptons[1]->charge()<0) {
-      need_swap = true;
-    }
-  }
+  // if(abs(leptons[0]->pdgId()) == 22 || abs(leptons[1]->pdgId()) == 22) {
+  //     int non_TLE_index = -1;
+  //     if(abs(leptons[0]->pdgId()) != 22) non_TLE_index = 0;
+  //     if(abs(leptons[1]->pdgId()) != 22) non_TLE_index = 1;
+  //     if(non_TLE_index == -1) {
+  //       edm::LogError("") << "Found a Z candidate made of two TLE, this should never happen!";
+  //       abort();
+  //     }
+  //     if(leptons[non_TLE_index]->charge() < 0 && non_TLE_index == 0) need_swap = true; 
+  // } else {
+  //   if (leptons[0]->charge() < 0 && leptons[0]->charge()*leptons[1]->charge()<0) {
+  //     need_swap = true;
+  //   }
+  // }
   if(need_swap) {
       swap(leptons[0],leptons[1]);
       swap(labels[0],labels[1]);

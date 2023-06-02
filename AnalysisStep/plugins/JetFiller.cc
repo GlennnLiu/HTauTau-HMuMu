@@ -176,11 +176,14 @@ JetFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
   // if(applyJEC_ && isMC_)
   if(applyJEC_)
     {
+    // cout<<jecUncFile_<<endl;
       for (unsigned s_unc = 0; s_unc < uncSources.size(); s_unc++)
 	{
-	  JetCorrectorParameters corrParams = JetCorrectorParameters(jecUncFile_, uncSources[s_unc]);
+	  // cout<<uncSources[s_unc]<<", ";
+    JetCorrectorParameters corrParams = JetCorrectorParameters(jecUncFile_, uncSources[s_unc]);
 	  splittedUncerts_.push_back(new JetCorrectionUncertainty(corrParams));
 	}
+  // cout<<endl;
     }
     
   //--- Output collection

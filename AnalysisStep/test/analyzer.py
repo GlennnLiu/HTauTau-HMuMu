@@ -13,7 +13,11 @@ declareDefault("MCFILTER", "", globals())
 declareDefault("XSEC", 1, globals())
 declareDefault("GENXSEC", 1, globals())
 declareDefault("GENBR", 1, globals())
-#declareDefault("PROCESS_CR", False, globals())
+declareDefault("PROCESS_CR", False, globals())
+declareDefault("PROCESS_CRTT", False, globals())
+declareDefault("PROCESS_CRWJ", False, globals())
+
+declareDefault("DOMETRECOIL", False, globals())
 #declareDefault("ADDZTREE", False, globals())
 
 # LHE info
@@ -145,6 +149,7 @@ process.TFileService=cms.Service('TFileService',
 TreeSetup = cms.EDAnalyzer("LLNtupleMaker",
                            channel = cms.untracked.string('aChannel'),
                            CandCollection = cms.untracked.string('ZCand'),
+                           cut = cms.string(""),
                            fileName = cms.untracked.string('candTree'),
                            isMC = cms.untracked.bool(IsMC),
                            sampleType = cms.int32(SAMPLE_TYPE),
@@ -158,6 +163,8 @@ TreeSetup = cms.EDAnalyzer("LLNtupleMaker",
                            #for MET and SV fit
                            metSrc = cms.InputTag("ShiftMETcentral"),#srcMETTag,#metTag,
                            covSrc = cms.InputTag("METSignificance", "METCovariance"),
+                           metJESup = cms.InputTag("ShiftMETforJES","up"),
+                           metJESdown = cms.InputTag("ShiftMETforJES","down"),
 #                            METdxUPTES = cms.InputTag("ShiftMETforTES", "METdxUP"),
 #                            METdyUPTES = cms.InputTag("ShiftMETforTES", "METdyUP"),
 #                            METdxDOWNTES = cms.InputTag("ShiftMETforTES", "METdxDOWN"),
@@ -181,6 +188,7 @@ TreeSetup = cms.EDAnalyzer("LLNtupleMaker",
                            
                            applyTrigger = cms.bool(APPLYTRIG), #Skip events failing required triggers. They are stored with sel<0 if set to false
                            applyTrigEff = cms.bool(False), #Add trigger efficiency as a weight, for samples where the trigger cannot be applied (obsoltete)
+                           doMETRecoil = cms.bool(DOMETRECOIL),
                            skipEmptyEvents = cms.bool(SKIP_EMPTY_EVENTS),
                            failedTreeLevel = cms.int32(FAILED_TREE_LEVEL),
                            sampleName = cms.string(SAMPLENAME),
@@ -202,64 +210,45 @@ TreeSetup = cms.EDAnalyzer("LLNtupleMaker",
                            Apply_QCD_GGF_UNCERT = cms.bool(APPLY_QCD_GGF_UNCERT),
                            )
 
-### Signal region
-process.LLTree = TreeSetup.clone()
-process.LLTree.channel = 'SR'
+process.SRTree = TreeSetup.clone()
+process.SRTree.channel = 'SR'
+process.SRTree.cut = cms.string('userFloat("OS") && userFloat("IsoLeptons")')
 
-# ### Trees for control regions
-# process.CRZLLTree = TreeSetup.clone()
-# process.CRZLLTree.channel = 'ZLL'
-# process.CRZLLTree.CandCollection = 'ZLLCand'
+process.CRTTTree = TreeSetup.clone()
+process.CRTTTree.channel = 'CRTT'
+process.CRTTTree.cut = cms.string('userFloat("OS") && userFloat("IsoLepton1") && userFloat("NmedB")>=1')
 
-# ### Trilepton CR, for fake rate
-# process.CRZLTree = TreeSetup.clone()
-# process.CRZLTree.channel = 'ZL'
-# process.CRZLTree.CandCollection = 'ZlCand'
+process.CRQCDTree = TreeSetup.clone()
+process.CRQCDTree.channel = 'CRQCD'
+process.CRQCDTree.cut = cms.string('userFloat("SS") && userFloat("IsoLepton1") && userFloat("NmedB")<1')
 
-# ### Loose electron candidates, signal region
-# process.ZZTreelooseEle = TreeSetup.clone()
-# process.ZZTreelooseEle.channel = 'ZZ'
-# process.ZZTreelooseEle.is_loose_ele_selection = cms.bool(True)
-# process.ZZTreelooseEle.CandCollection = 'ZZCandlooseEle'
+process.CRWJTree = TreeSetup.clone()
+process.CRWJTree.channel = 'CRWJ'
+process.CRWJTree.cut = cms.string('userFloat("OS") && userFloat("IsoLepton1") && userFloat("NmedB")<1 && userFloat("MtLMET")>70')
 
-# #### Loose electron control regions
-# process.CRZLLTreelooseEle = TreeSetup.clone()
-# process.CRZLLTreelooseEle.channel = 'ZLL'
-# process.CRZLLTreelooseEle.CandCollection = 'ZLLCandlooseEle'
+process.CRQCDvSRTree = TreeSetup.clone()
+process.CRQCDvSRTree.channel = 'CRQCDvSR'
+process.CRQCDvSRTree.cut = cms.string('userFloat("SS") && !userFloat("IsoLepton1") && userFloat("NmedB")<1')
 
-# #### Loose electron control region where Z1 is from tight real RSE and the regular leptons are fake
-# process.CRZLLTreeZ1RSE = TreeSetup.clone()
-# process.CRZLLTreeZ1RSE.channel = 'ZLL'
-# process.CRZLLTreeZ1RSE.CandCollection = 'ZLLCandZ1RSE'
+process.CRQCDvSROSTree = TreeSetup.clone()
+process.CRQCDvSROSTree.channel = 'CRQCDvSROS'
+process.CRQCDvSROSTree.cut = cms.string('userFloat("OS") && !userFloat("IsoLepton1") && !userFloat("IsoLepton2") && userFloat("NmedB")<1')
 
+process.CRQCDvSRSSTree = TreeSetup.clone()
+process.CRQCDvSRSSTree.channel = 'CRQCDvSRSS'
+process.CRQCDvSRSSTree.cut = cms.string('userFloat("SS") && !userFloat("IsoLepton1") && !userFloat("IsoLepton2") && userFloat("NmedB")<1')
 
+process.CRWJvSRTree = TreeSetup.clone()
+process.CRWJvSRTree.channel = 'CRWJvSR'
+process.CRWJvSRTree.cut = cms.string('userFloat("OS") && userFloat("IsoLepton1") && userFloat("NmedB")<1')
 
-# #### Loose electron Trilepton CR, for fake rate
-# process.CRZLTreelooseEle = TreeSetup.clone()
-# process.CRZLTreelooseEle.channel = 'ZL'
-# process.CRZLTreelooseEle.CandCollection = 'ZlCandlooseEle'
+process.CRAPPOSTree = TreeSetup.clone()
+process.CRAPPOSTree.channel = 'CRAPPOS'
+process.CRAPPOSTree.cut = cms.string('userFloat("OS") && userFloat("IsoLepton1") && !userFloat("IsoLepton2") && userFloat("NmedB")<1')
 
-
-# #### TLE Signal region
-# #process.ZZTreetle = TreeSetup.clone()
-# #process.ZZTreetle.channel = 'ZZ'
-# #process.ZZTreetle.is_loose_ele_selection = cms.bool(True)
-# #process.ZZTreetle.CandCollection = 'ZZCandtle'
-# #
-# #### TLE Trees for control regions only
-# #process.CRZLLTreetle = TreeSetup.clone()
-# #process.CRZLLTreetle.channel = 'ZLL'
-# #process.CRZLLTreetle.CandCollection = 'ZLLCandtle'
-# ##process.CRZLLTreetle.is_loose_ele_selection = cms.bool(True)
-# ##process.CRZLLTreetle.CandCollection_regular = cms.untracked.string('ZLLCand')
-# #
-# #### TLE Trilepton CR, for fake rate
-# #process.CRZLTreetle = TreeSetup.clone()
-# #process.CRZLTreetle.channel = 'ZL'
-# #process.CRZLTreetle.CandCollection = 'ZlCandtle'
-# ##process.CRZLTreetle.is_loose_ele_selection = cms.bool(True)
-# ##process.CRZLTreetle.CandCollection_regular = cms.untracked.string('ZlCand')
-
+process.CRAPPSSTree = TreeSetup.clone()
+process.CRAPPSSTree.channel = 'CRAPPSS'
+process.CRAPPSSTree.cut = cms.string('userFloat("SS") && userFloat("IsoLepton1") && !userFloat("IsoLepton2") && userFloat("NmedB")<1')
 
 # ### ----------------------------------------------------------------------
 # ### Z tree
@@ -323,7 +312,13 @@ process.dumpUserData =  cms.EDAnalyzer("dumpUserData",
     jetSrc = cms.InputTag("cleanJets"),
 )
 
-process.trees = cms.EndPath(process.LLTree)
+process.trees = cms.EndPath(process.SRTree)
+if PROCESS_CR:
+   process.trees += cms.Sequence( process.CRQCDTree + process.CRWJTree + process.CRQCDvSRTree + process.CRQCDvSROSTree + process.CRQCDvSRSSTree + process.CRAPPOSTree + process.CRAPPSSTree)
+if PROCESS_CRTT:
+   process.trees += process.CRTTTree
+if PROCESS_CRWJ:
+   process.trees += process.CRWJvSRTree
 
 # if (PROCESS_CR or not IsMC):
 #     process.CRPath = cms.Path(process.CR)

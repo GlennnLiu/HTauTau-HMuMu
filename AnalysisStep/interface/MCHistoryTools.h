@@ -52,7 +52,7 @@ class MCHistoryTools {
 
   const reco::Candidate * genH() {init(); return theGenH;}
 
-  const std::vector<const reco::Candidate *>& genZs() {init(); return theGenZ;}
+  const std::vector<const reco::Candidate *>& genVs() {init(); return theGenV;}
 
   /// Z1 is defined as the Z closest to nominal mass.
 //   const reco::Candidate * genZ1() {init(); return theGenZ1;}
@@ -123,7 +123,7 @@ class MCHistoryTools {
   
   bool isInit;
   const reco::Candidate * theGenH; 
-  std::vector<const reco::Candidate *> theGenZ;
+  std::vector<const reco::Candidate *> theGenV;
   std::vector<const reco::Candidate *> theAssociatedV;
   std::vector<const reco::Candidate *> theGenLeps;
   std::vector<const reco::Candidate *> theSortedGenLepts;

@@ -35,6 +35,7 @@
 #include <DataFormats/JetReco/interface/PFJetCollection.h>
 #include <DataFormats/Math/interface/LorentzVector.h>
 #include <CommonTools/UtilAlgos/interface/TFileService.h>
+#include <CommonTools/Utils/interface/StringCutObjectSelector.h>
 #include <DataFormats/Common/interface/MergeableCounter.h>
 #include <DataFormats/VertexReco/interface/Vertex.h>
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
@@ -65,12 +66,17 @@
 #include <HTauTauHMuMu/AnalysisStep/interface/miscenums.h>
 #include <HTauTauHMuMu/AnalysisStep/interface/ggF_qcd_uncertainty_2017.h>
 #include <HTauTauHMuMu/AnalysisStep/interface/LeptonSFHelper.h>
-
 #include <HTauTauHMuMu/AnalysisStep/interface/SVfit.h>
+
+#include <TauPOG/TauIDSFs/interface/TauIDSFTool.h>
+
 #include <TauAnalysis/ClassicSVfit/interface/ClassicSVfit.h>
 #include <TauAnalysis/ClassicSVfit/interface/ClassicSVfitIntegrand.h>
 #include <TauAnalysis/ClassicSVfit/interface/MeasuredTauLepton.h>
 #include <TauAnalysis/ClassicSVfit/interface/svFitHistogramAdapter.h>
+
+#include <HTT-utilities/RecoilCorrections/interface/RecoilCorrector.h>
+#include <HTT-utilities/RecoilCorrections/interface/MEtSys.h>
 
 #include "LLConfigHelper.h"
 #include "LLNtupleFactory.h"
@@ -86,13 +92,14 @@
 bool verbose = false; //ATbbf
 
 namespace {
-  bool writeJets = false;     // Write jets in the tree. FIXME: make this configurable
+  bool writeJets = true;     // Write jets in the tree. FIXME: make this configurable
   bool writePhotons = false; // Write photons in the tree. FIXME: make this configurable
   bool addSVfit = true;
   bool addFSRDetails = false;
   bool addQGLInputs = true;
   bool skipMuDataMCWeight = false; // skip computation of data/MC weight for mu 
   bool skipEleDataMCWeight = false; // skip computation of data/MC weight for ele
+  bool skipTauDataMCWeight = false;
 
   //List of variables with default values
   Int_t RunNumber  = 0;
@@ -128,26 +135,23 @@ namespace {
   //-------------------------------
   Float_t GenMET = -99;
   Float_t GenMETPhi = -99;
+  Float_t GenMETx = -99;
+  Float_t GenMETy = -99;
+
+  Float_t PFMETRecoil = -99;
+  Float_t PFMETPhiRecoil = -99;
+  Float_t METxRecoil = -99;
+  Float_t METyRecoil = -99;
   Float_t PFMET = -99;
   Float_t PFMETPhi = -99;
   Float_t METx = -99;
   Float_t METy = -99;
+
   TMatrixD covMET(2, 2);
 
-  Float_t PFMETTau = -99;
-  Float_t PFMETPhiTau = -99;
-  Float_t METxTau = -99;
-  Float_t METyTau = -99;
-  Float_t PFMETJet = -99;
-  Float_t PFMETPhiJet = -99;
-  Float_t METxJet = -99;
-  Float_t METyJet = -99;
-  Float_t PFMETRaw = -99;
-  Float_t PFMETPhiRaw = -99;
-  Float_t METxRaw = -99;
-  Float_t METyRaw = -99;
-
-  Float_t Pzeta;
+  Float_t Pzeta1;
+  Float_t Pzeta2;
+  Float_t MtLMET;
 //   Float_t METxUPTES = -99;
 //   Float_t METyUPTES = -99;
 //   Float_t METxDOWNTES = -99;
@@ -202,6 +206,7 @@ namespace {
   Short_t nCleanedJetsPt30_jerDn  = 0;
   Short_t nCleanedJetsPt30BTagged  = 0;
   Short_t nCleanedJetsPt30BTagged_bTagSF  = 0;
+  Short_t nCleanedJetsPt25BTagged_bTagSF  = 0;
   Short_t nCleanedJetsPt30BTagged_bTagSF_jesUp  = 0;
   Short_t nCleanedJetsPt30BTagged_bTagSF_jesUp_Total           = 0;
   Short_t nCleanedJetsPt30BTagged_bTagSF_jesUp_Abs             = 0;
@@ -239,6 +244,7 @@ namespace {
   Float_t LLPt  = 0;
   Float_t LLEta  = 0;
   Float_t LLPhi  = 0;
+  Float_t LLDR = 0;
   Short_t LLFlav  = 0;
   Short_t LLisGoodTau = 0;
   Short_t LLisGoodTau_Ele = 0;
@@ -250,11 +256,25 @@ namespace {
 //---------------------SV Fit variables------------------------------
 //-------------------------------------------------------------------
 
-  Float_t LLSVMass = -999;
-  Float_t LLSVPt = -999;
-  Float_t LLSVEta = -999;
-  Float_t LLSVPhi = -999;
-  Float_t LLGoodMass = -999;
+  Float_t LLSVMass = -99;
+  Float_t LLSVPt = -99;
+  Float_t LLSVEta = -99;
+  Float_t LLSVPhi = -99;
+  Float_t LLGoodMass = -99;
+
+  std::vector<float> LLSVMass_up;
+  std::vector<float> LLSVPt_up;
+  std::vector<float> LLSVEta_up;
+  std::vector<float> LLSVPhi_up;
+  std::vector<float> LLMass_up;
+  std::vector<float> LLGoodMass_up;
+  std::vector<float> LLSVMass_dn;
+  std::vector<float> LLSVPt_dn;
+  std::vector<float> LLSVEta_dn;
+  std::vector<float> LLSVPhi_dn;
+  std::vector<float> LLMass_dn;
+  std::vector<float> LLGoodMass_dn;
+  // std::vector<std::string> Names_shift;
     
   //------------------------------End SV fit variables--------------------------------
     
@@ -270,17 +290,47 @@ namespace {
   std::vector<float> Lepdz;
   std::vector<float> LepTime;
   std::vector<bool> LepisID;
-  std::vector<float> LepBDT;
+  // std::vector<float> LepBDT;
   std::vector<bool> LepisCrack;
-  std::vector<char> LepMissingHit;
+  std::vector<short> LepMissingHit;
+  std::vector<bool> LepConversionVeto;
   std::vector<float> LepChargedHadIso;
   std::vector<float> LepNeutralHadIso;
   std::vector<float> LepPhotonIso;
   std::vector<float> LepPUIsoComponent;
   std::vector<float> LepCombRelIsoPF;
   std::vector<short> LepisLoose;
+
   std::vector<float> LepSF;
-  std::vector<float> LepSF_Unc;
+  std::vector<float> LepSF_UncUp;
+  std::vector<float> LepSF_UncDn;
+  std::vector<float> LepSF_UncUp_RECO_syst;
+  std::vector<float> LepSF_UncUp_RECO_stat;
+  std::vector<float> LepSF_UncUp_ID_syst;
+  std::vector<float> LepSF_UncUp_ID_stat;
+  std::vector<float> LepSF_UncUp_ISO_syst;
+  std::vector<float> LepSF_UncUp_ISO_stat;
+  std::vector<float> LepSF_UncDn_RECO_syst;
+  std::vector<float> LepSF_UncDn_RECO_stat;
+  std::vector<float> LepSF_UncDn_ID_syst;
+  std::vector<float> LepSF_UncDn_ID_stat;
+  std::vector<float> LepSF_UncDn_ISO_syst;
+  std::vector<float> LepSF_UncDn_ISO_stat;
+  std::vector<float> LepSF_UncUp_uncert0;
+  std::vector<float> LepSF_UncUp_uncert1;
+  std::vector<float> LepSF_UncUp_syst_alleras;
+  std::vector<float> LepSF_UncUp_syst_year;
+  std::vector<float> LepSF_UncUp_syst_dm_year;
+  std::vector<float> LepSF_UncUp_fakeEle;
+  std::vector<float> LepSF_UncUp_fakeMu;
+  std::vector<float> LepSF_UncDn_uncert0;
+  std::vector<float> LepSF_UncDn_uncert1;
+  std::vector<float> LepSF_UncDn_syst_alleras;
+  std::vector<float> LepSF_UncDn_syst_year;
+  std::vector<float> LepSF_UncDn_syst_dm_year;
+  std::vector<float> LepSF_UncDn_fakeEle;
+  std::vector<float> LepSF_UncDn_fakeMu;
+
   std::vector<float> LepScale_Total_Up;
   std::vector<float> LepScale_Total_Dn;
   std::vector<float> LepScale_Stat_Up;
@@ -302,18 +352,18 @@ namespace {
   std::vector<short> TauVSjet;
   std::vector<float> TauDecayMode;
   std::vector<short> TauGenMatch;
-//   std::vector<float> TauTES_p_Up;
-//   std::vector<float> TauTES_p_Dn;
-//   std::vector<float> TauTES_m_Up;
-//   std::vector<float> TauTES_m_Dn;
-//   std::vector<float> TauTES_e_Up;
-//   std::vector<float> TauTES_e_Dn;
-//   std::vector<float> TauFES_p_Up;
-//   std::vector<float> TauFES_p_Dn;
-//   std::vector<float> TauFES_m_Up;
-//   std::vector<float> TauFES_m_Dn;
-//   std::vector<float> TauFES_e_Up;
-//   std::vector<float> TauFES_e_Dn;
+  std::vector<float> TauTES_p_Up;
+  std::vector<float> TauTES_p_Dn;
+  std::vector<float> TauTES_m_Up;
+  std::vector<float> TauTES_m_Dn;
+  std::vector<float> TauTES_e_Up;
+  std::vector<float> TauTES_e_Dn;
+  std::vector<float> TauFES_p_Up;
+  std::vector<float> TauFES_p_Dn;
+  std::vector<float> TauFES_m_Up;
+  std::vector<float> TauFES_m_Dn;
+  std::vector<float> TauFES_e_Up;
+  std::vector<float> TauFES_e_Dn;
 
 //HLT trigger match
   Short_t pass_SingleTrigger = 0;
@@ -397,6 +447,12 @@ namespace {
    
   std::vector<float> JetJERUp ;
   std::vector<float> JetJERDown ;
+
+  //VBF jets
+  Float_t DeltaEtaJJ = 0;
+  Float_t DiJetMass = 0;
+  Short_t VBFJetIdx1 = -1;
+  Short_t VBFJetIdx2 = -1;
   
   // Photon info
   std::vector<float> PhotonPt ;
@@ -426,7 +482,7 @@ namespace {
   Float_t genxsection = 0;
   Float_t genbranchingratio = 0;
   Float_t dataMCWeight  = 0;
-  Float_t trigEffWeight  = 0;
+  Float_t trigEffWeight  = 1;
   Float_t overallEventWeight  = 0;
   Float_t L1prefiringWeight = 0;
   Float_t L1prefiringWeightUp = 0;
@@ -510,6 +566,7 @@ namespace {
 
 using namespace std;
 using namespace edm;
+
 //
 // class declaration
 //
@@ -577,11 +634,16 @@ private:
   Float_t genbr;
   int year;
   double sqrts;
+  
+  const StringCutObjectSelector<pat::CompositeCandidate, true> cut;
+
 
   int apply_K_NNLOQCD_ZZGG; // 0: Do not; 1: NNLO/LO; 2: NNLO/NLO; 3: NLO/LO
   bool apply_K_NNLOQCD_ZZQQB;
   bool apply_K_NLOEW_ZZQQB;
   bool apply_QCD_GGF_UNCERT;
+
+  bool do_MET_Recoil;
 
   edm::EDGetTokenT<edm::View<reco::Candidate> > genParticleToken;
   edm::Handle<edm::View<reco::Candidate> > genParticles;
@@ -603,6 +665,8 @@ private:
   
   edm::EDGetTokenT<pat::METCollection> metToken;
   edm::EDGetTokenT<math::Error<2>::type> theCovTag;
+  edm::EDGetTokenT<pat::METCollection> metJESupToken;
+  edm::EDGetTokenT<pat::METCollection> metJESdnToken;
 //   edm::EDGetTokenT<double> theMETdxUPTESTag;
 //   edm::EDGetTokenT<double> theMETdyUPTESTag;
 //   edm::EDGetTokenT<double> theMETdxDOWNTESTag;
@@ -670,6 +734,11 @@ private:
   TSpline3* spkfactor_ggzz_nlo[9]; // Nominal, PDFScaleDn, PDFScaleUp, QCDScaleDn, QCDScaleUp, AsDn, AsUp, PDFReplicaDn, PDFReplicaUp
 
   LeptonSFHelper *lepSFHelper;
+  TauIDSFTool *DeepTauSF_VSe_ETau, *DeepTauSF_VSmu_ETau, *DeepTauSF_VSjet_ETau, *DeepTauSF_VSe_MuTau, *DeepTauSF_VSmu_MuTau, *DeepTauSF_VSjet_MuTau, *DeepTauSF_VSe_TauTau, *DeepTauSF_VSmu_TauTau, *DeepTauSF_VSjet_TauTau;
+  RecoilCorrector *recoilPFMetCorrector;
+  MEtSys *recoilPFMetSyst;
+  std::vector<string> uncSources {};
+
 
   TGraphErrors *gr_NNLOPSratio_pt_powheg_0jet;
   TGraphErrors *gr_NNLOPSratio_pt_powheg_1jet;
@@ -701,12 +770,15 @@ LLNtupleMaker::LLNtupleMaker(const edm::ParameterSet& pset) :
   genbr(pset.getParameter<double>("GenBR")),
   year(pset.getParameter<int>("setup")),
   sqrts(SetupToSqrts(year)),
+  cut(pset.getParameter<std::string>("cut")),
 
   //lheHandler(nullptr),
   apply_K_NNLOQCD_ZZGG(pset.getParameter<int>("Apply_K_NNLOQCD_ZZGG")),
   apply_K_NNLOQCD_ZZQQB(pset.getParameter<bool>("Apply_K_NNLOQCD_ZZQQB")),
   apply_K_NLOEW_ZZQQB(pset.getParameter<bool>("Apply_K_NLOEW_ZZQQB")),
   apply_QCD_GGF_UNCERT(pset.getParameter<bool>("Apply_QCD_GGF_UNCERT")),
+
+  do_MET_Recoil(pset.getParameter<bool>("doMETRecoil")),
 
   pileUpReweight(nullptr),
   sampleName(pset.getParameter<string>("sampleName")),
@@ -733,26 +805,8 @@ LLNtupleMaker::LLNtupleMaker(const edm::ParameterSet& pset) :
       
   metToken = consumes<pat::METCollection>(pset.getParameter<edm::InputTag>("metSrc"));
   theCovTag = consumes<math::Error<2>::type>(pset.getParameter<edm::InputTag>("covSrc"));
-//   theMETdxUPTESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdxUPTES"));
-//   theMETdyUPTESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdyUPTES"));
-//   theMETdxDOWNTESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdxDOWNTES"));
-//   theMETdyDOWNTESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdyDOWNTES"));
-//   theMETdxUPEESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdxUPEES"));
-//   theMETdyUPEESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdyUPEES"));
-//   theMETdxDOWNEESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdxDOWNEES"));
-//   theMETdyDOWNEESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdyDOWNEES"));
-//   theMETdxUPMESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdxUPMES"));
-//   theMETdyUPMESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdyUPMES"));
-//   theMETdxDOWNMESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdxDOWNMES"));
-//   theMETdyDOWNMESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdyDOWNMES"));
-//   theMETdxUPJESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdxUPJES"));
-//   theMETdyUPJESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdyUPJES"));
-//   theMETdxDOWNJESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdxDOWNJES"));
-//   theMETdyDOWNJESTag = consumes<double>(pset.getParameter<edm::InputTag>("METdyDOWNJES"));
-//   theMETdxUPJERTag = consumes<double>(pset.getParameter<edm::InputTag>("METdxUPJER"));
-//   theMETdyUPJERTag = consumes<double>(pset.getParameter<edm::InputTag>("METdyUPJER"));
-//   theMETdxDOWNJERTag = consumes<double>(pset.getParameter<edm::InputTag>("METdxDOWNJER"));
-//   theMETdyDOWNJERTag = consumes<double>(pset.getParameter<edm::InputTag>("METdyDOWNJER"));
+  metJESupToken = consumes<pat::METCollection>(pset.getParameter<edm::InputTag>("metJESup"));
+  metJESdnToken = consumes<pat::METCollection>(pset.getParameter<edm::InputTag>("metJESdown"));
       
   muonToken = consumes<pat::MuonCollection>(edm::InputTag("slimmedMuons"));
   electronToken = consumes<pat::ElectronCollection>(edm::InputTag("slimmedElectrons"));
@@ -765,6 +819,7 @@ LLNtupleMaker::LLNtupleMaker(const edm::ParameterSet& pset) :
     applySkim=false;
     failedTreeLevel=noFailedTree; // This overrides the card failedTreeLevel
   }
+  if (theChannel!=SR) failedTreeLevel=noFailedTree;
 
   if (applyTrigEffWeight&&applyTrigger) {
     cout << "ERROR: cannot have applyTrigEffWeight == applyTrigger == true" << endl;
@@ -848,6 +903,51 @@ LLNtupleMaker::LLNtupleMaker(const edm::ParameterSet& pset) :
 
   //Scale factors for data/MC efficiency
   if (!skipEleDataMCWeight && isMC) { lepSFHelper = new LeptonSFHelper(preVFP); }
+  if (!skipTauDataMCWeight && isMC) {
+    string period;
+    if (year==2016 && preVFP) period="UL2016_preVFP";
+    else if (year==2016 && !preVFP) period="UL2016_postVFP";
+    else if (year==2017) period="UL2017";
+    else period="UL2018";
+
+    DeepTauSF_VSe_ETau = new TauIDSFTool(period,"DeepTau2017v2p1VSe","Tight");
+    DeepTauSF_VSmu_ETau = new TauIDSFTool(period,"DeepTau2017v2p1VSmu","VLoose");
+    DeepTauSF_VSjet_ETau = new TauIDSFTool(period,"DeepTau2017v2p1VSjet","Medium", "Tight", false, true);
+    DeepTauSF_VSe_MuTau = new TauIDSFTool(period,"DeepTau2017v2p1VSe","VVLoose");
+    DeepTauSF_VSmu_MuTau = new TauIDSFTool(period,"DeepTau2017v2p1VSmu","Tight");
+    DeepTauSF_VSjet_MuTau = new TauIDSFTool(period,"DeepTau2017v2p1VSjet","Medium", "VVLoose", false, true);
+    DeepTauSF_VSe_TauTau = new TauIDSFTool(period,"DeepTau2017v2p1VSe","VVLoose");
+    DeepTauSF_VSmu_TauTau = new TauIDSFTool(period,"DeepTau2017v2p1VSmu","VLoose");
+    DeepTauSF_VSjet_TauTau = new TauIDSFTool(period,"DeepTau2017v2p1VSjet","Medium", "VVLoose", false, true);
+
+    if (do_MET_Recoil) {
+      TString recoilFile;
+      if (year == 2016) recoilFile="HTT-utilities/RecoilCorrections/data/TypeI-PFMet_Run2016_legacy.root";
+      else if (year == 2017) recoilFile="HTT-utilities/RecoilCorrections/data/Type1_PFMET_2017.root";
+      else recoilFile="HTT-utilities/RecoilCorrections/data/TypeI-PFMet_Run2018.root";
+
+      recoilPFMetCorrector = new RecoilCorrector(recoilFile);
+
+      if (year == 2016) recoilFile="HTT-utilities/RecoilCorrections/data/PFMEtSys_2016.root";
+      else if (year == 2017) recoilFile="HTT-utilities/RecoilCorrections/data/PFMEtSys_2017.root";
+      else recoilFile="HTT-utilities/RecoilCorrections/data/PFMEtSys_2018.root";
+
+      recoilPFMetSyst = new MEtSys(recoilFile);
+    }
+
+    uncSources.push_back("Total");
+    uncSources.push_back("Abs");
+    uncSources.push_back("Abs_year");
+    uncSources.push_back("BBEC1");
+    uncSources.push_back("BBEC1_year");
+    uncSources.push_back("EC2");
+    uncSources.push_back("EC2_year");
+    uncSources.push_back("FlavQCD");
+    uncSources.push_back("HF");
+    uncSources.push_back("HF_year");
+    uncSources.push_back("RelBal");
+    uncSources.push_back("RelSample_year");
+  }
 }
 
 LLNtupleMaker::~LLNtupleMaker()
@@ -869,7 +969,7 @@ void LLNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& eSet
   bool InEtaPtAcceptance = false; // All 4 gen leptons in eta,pT acceptance
 
   const reco::Candidate * genH = 0;
-  std::vector<const reco::Candidate *> genZ;
+  std::vector<const reco::Candidate *> genV;
   std::vector<const reco::Candidate *> genLeps;
   std::vector<const reco::Candidate *> genAssocLeps;
   std::vector<const reco::Candidate *> genVisLeps;
@@ -1006,7 +1106,7 @@ void LLNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& eSet
 
     //Information on generated candidates, will be used later
     genH = mch.genH();
-    genZ = mch.genZs();
+    genV = mch.genVs();
     genLeps     = mch.sortedGenZZLeps();
     genAssocLeps = mch.genAssociatedLeps();
     genFSR       = mch.genFSR();
@@ -1018,6 +1118,7 @@ void LLNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& eSet
     genCleanedJet= mch.GenCleanedJets(); //ATjets
 
     // cout<<genZ.size()<<","<<genLeps.size()<<endl;
+
 
 
     // ATjets
@@ -1042,27 +1143,54 @@ void LLNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& eSet
 
     }
       
-    if (genFinalState!=BUGGY && genFinalState!=NONE) {
-
-      if (genLeps.size()!=2) cout<<"[ERROR] Number of leptons = "<<genLeps.size()<<"!"<<endl;
+    // if (genFinalState!=BUGGY && genFinalState!=NONE) {
+    if (genLeps.size()>=2) {
+      if (genH!=0) {
+        FillLLGenInfo(genLeps.at(0)->pdgId()*genLeps.at(1)->pdgId(), genH->p4());
+      }
+      else if (genV.size()>0) {
+        FillLLGenInfo(genLeps.at(0)->pdgId()*genLeps.at(1)->pdgId(), genV.at(0)->p4());
+      }
       else {
-        if (genH!=0) {
-          FillLLGenInfo(genLeps.at(0)->pdgId()*genLeps.at(1)->pdgId(), genH->p4());
-        }
-        else {
-          FillLLGenInfo(genLeps.at(0)->pdgId()*genLeps.at(1)->pdgId(), genLeps.at(0)->mother()->p4());
-        }
-        FillLepGenInfo(genLeps.at(0)->pdgId(),genLeps.at(1)->pdgId(),genLeps.at(0)->p4(),genLeps.at(1)->p4());
-        math::XYZTLorentzVector genVisLep1p4,genVisLep2p4;
-        if (abs(genVisLeps.at(0)->pdgId())!=15 || genTauNus.at(0)==0) genVisLep1p4=genVisLeps.at(0)->p4();
-        else genVisLep1p4=genVisLeps.at(0)->p4()-genTauNus.at(0)->p4();
-        if (abs(genVisLeps.at(1)->pdgId())!=15 || genTauNus.at(1)==0) genVisLep2p4=genVisLeps.at(1)->p4();
-        else genVisLep2p4=genVisLeps.at(1)->p4()-genTauNus.at(1)->p4();
-        FillVisLLGenInfo(genVisLeps.at(0)->pdgId()*genVisLeps.at(1)->pdgId(), genVisLep1p4+genVisLep2p4);
-        FillVisLepGenInfo(genVisLeps.at(0)->pdgId(),genVisLeps.at(1)->pdgId(), genVisLep1p4,genVisLep2p4);
-        FillLepGenIso(genIso.at(0), genIso.at(1));
+        FillLLGenInfo(genLeps.at(0)->pdgId()*genLeps.at(1)->pdgId(), genLeps.at(0)->p4()+genLeps.at(1)->p4());
+      }
+      FillLepGenInfo(genLeps.at(0)->pdgId(),genLeps.at(1)->pdgId(),genLeps.at(0)->p4(),genLeps.at(1)->p4());
+      math::XYZTLorentzVector genVisLep1p4,genVisLep2p4;
+      if (abs(genVisLeps.at(0)->pdgId())!=15 || genTauNus.at(0)==0) genVisLep1p4=genVisLeps.at(0)->p4();
+      else genVisLep1p4=genVisLeps.at(0)->p4()-genTauNus.at(0)->p4();
+      if (abs(genVisLeps.at(1)->pdgId())!=15 || genTauNus.at(1)==0) genVisLep2p4=genVisLeps.at(1)->p4();
+      else genVisLep2p4=genVisLeps.at(1)->p4()-genTauNus.at(1)->p4();
+      FillVisLLGenInfo(genVisLeps.at(0)->pdgId()*genVisLeps.at(1)->pdgId(), genVisLep1p4+genVisLep2p4);
+      FillVisLepGenInfo(genVisLeps.at(0)->pdgId(),genVisLeps.at(1)->pdgId(), genVisLep1p4,genVisLep2p4);
+      FillLepGenIso(genIso.at(0), genIso.at(1));
+    }
+    else {
+      if (genH!=0) {
+        FillLLGenInfo(0, genH->p4());
+      }
+      else if (genV.size()>0) {
+        FillLLGenInfo(0, genV.at(0)->p4());
       }
     }
+    // if (genLeps.size()!=2) cout<<"[WARNING] Number of leptons = "<<genLeps.size()<<"!"<<endl;
+    // else {
+    //   if (genH!=0) {
+    //     FillLLGenInfo(genLeps.at(0)->pdgId()*genLeps.at(1)->pdgId(), genH->p4());
+    //   }
+    //   else {
+    //     FillLLGenInfo(genLeps.at(0)->pdgId()*genLeps.at(1)->pdgId(), genLeps.at(0)->mother()->p4());
+    //   }
+    //   FillLepGenInfo(genLeps.at(0)->pdgId(),genLeps.at(1)->pdgId(),genLeps.at(0)->p4(),genLeps.at(1)->p4());
+    //   math::XYZTLorentzVector genVisLep1p4,genVisLep2p4;
+    //   if (abs(genVisLeps.at(0)->pdgId())!=15 || genTauNus.at(0)==0) genVisLep1p4=genVisLeps.at(0)->p4();
+    //   else genVisLep1p4=genVisLeps.at(0)->p4()-genTauNus.at(0)->p4();
+    //   if (abs(genVisLeps.at(1)->pdgId())!=15 || genTauNus.at(1)==0) genVisLep2p4=genVisLeps.at(1)->p4();
+    //   else genVisLep2p4=genVisLeps.at(1)->p4()-genTauNus.at(1)->p4();
+    //   FillVisLLGenInfo(genVisLeps.at(0)->pdgId()*genVisLeps.at(1)->pdgId(), genVisLep1p4+genVisLep2p4);
+    //   FillVisLepGenInfo(genVisLeps.at(0)->pdgId(),genVisLeps.at(1)->pdgId(), genVisLep1p4,genVisLep2p4);
+    //   FillLepGenIso(genIso.at(0), genIso.at(1));
+    // }
+    // }
 
       // keep track of sum of weights
       addweight(gen_sumPUWeight, PUWeight);
@@ -1146,7 +1274,7 @@ void LLNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& eSet
   if (skipEmptyEvents && !failedTreeLevel && (cands->size() == 0 || failed)) return; // Skip events with no candidate, unless skipEmptyEvents = false or failedTreeLevel != 0
 
   //Fill MC truth information
-  if (isMC) FillKFactors(genInfo, genZ, genLeps);
+  if (isMC) FillKFactors(genInfo, genV, genLeps);
 
   // General event information
   RunNumber=event.id().run();
@@ -1185,34 +1313,12 @@ void LLNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& eSet
             FillPhoton(year, *(photons.at(i)));
          }
    }
-      
+
   // MET
   Handle<pat::METCollection> metHandle;
   event.getByToken(metToken, metHandle);
   Handle<math::Error<2>::type> covHandle;
   event.getByToken(theCovTag, covHandle);
-  // Handle<double> METdxUPTESHandle, METdyUPTESHandle, METdxDOWNTESHandle, METdyDOWNTESHandle, METdxUPEESHandle, METdyUPEESHandle, METdxDOWNEESHandle, METdyDOWNEESHandle, METdxUPMESHandle, METdyUPMESHandle, METdxDOWNMESHandle, METdyDOWNMESHandle, METdxUPJESHandle, METdyUPJESHandle, METdxDOWNJESHandle, METdyDOWNJESHandle, METdxUPJERHandle, METdyUPJERHandle, METdxDOWNJERHandle, METdyDOWNJERHandle;
-  
-  // event.getByToken(theMETdxUPTESTag, METdxUPTESHandle);
-  // event.getByToken(theMETdyUPTESTag, METdyUPTESHandle);
-  // event.getByToken(theMETdxDOWNTESTag, METdxDOWNTESHandle);
-  // event.getByToken(theMETdyDOWNTESTag, METdyDOWNTESHandle);
-  // event.getByToken(theMETdxUPEESTag, METdxUPEESHandle);
-  // event.getByToken(theMETdyUPEESTag, METdyUPEESHandle);
-  // event.getByToken(theMETdxDOWNEESTag, METdxDOWNEESHandle);
-  // event.getByToken(theMETdyDOWNEESTag, METdyDOWNEESHandle);
-  // event.getByToken(theMETdxUPMESTag, METdxUPMESHandle);
-  // event.getByToken(theMETdyUPMESTag, METdyUPMESHandle);
-  // event.getByToken(theMETdxDOWNMESTag, METdxDOWNMESHandle);
-  // event.getByToken(theMETdyDOWNMESTag, METdyDOWNMESHandle);
-  // event.getByToken(theMETdxUPJESTag, METdxUPJESHandle);
-  // event.getByToken(theMETdyUPJESTag, METdyUPJESHandle);
-  // event.getByToken(theMETdxDOWNJESTag, METdxDOWNJESHandle);
-  // event.getByToken(theMETdyDOWNJESTag, METdyDOWNJESHandle);
-  // event.getByToken(theMETdxUPJERTag, METdxUPJERHandle);
-  // event.getByToken(theMETdyUPJERTag, METdyUPJERHandle);
-  // event.getByToken(theMETdxDOWNJERTag, METdxDOWNJERHandle);
-  // event.getByToken(theMETdyDOWNJERTag, METdyDOWNJERHandle);
     
   const pat::MET &met = metHandle->front();
   PFMET = met.pt();
@@ -1223,47 +1329,13 @@ void LLNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& eSet
   covMET[1][0] = (*covHandle)(1,0);
   covMET[0][1] = covMET[1][0]; // (1,0) is the only one saved
   covMET[1][1] = (*covHandle)(1,1);
-
-  const pat::MET &metTau = metHandle->at(1);
-  PFMETTau = metTau.pt();
-  PFMETPhiTau = metTau.phi();
-  METxTau = metTau.px();
-  METyTau = metTau.py();
-  const pat::MET &metJet = metHandle->at(2);
-  PFMETJet = metJet.pt();
-  PFMETPhiJet = metJet.phi();
-  METxJet = metJet.px();
-  METyJet = metJet.py();
-  const pat::MET &metRaw = metHandle->at(3);
-  PFMETRaw = metRaw.pt();
-  PFMETPhiRaw = metRaw.phi();
-  METxRaw = metRaw.px();
-  METyRaw = metRaw.py();
-  // METxUPTES=*METdxUPTESHandle;
-  // METyUPTES=*METdyUPTESHandle;
-  // METxDOWNTES=*METdxDOWNTESHandle;
-  // METyDOWNTES=*METdyDOWNTESHandle;
-  // METxUPEES=*METdxUPEESHandle;
-  // METyUPEES=*METdyUPEESHandle;
-  // METxDOWNEES=*METdxDOWNEESHandle;
-  // METyDOWNEES=*METdyDOWNEESHandle;
-  // METxUPMES=*METdxUPMESHandle;
-  // METyUPMES=*METdyUPMESHandle;
-  // METxDOWNMES=*METdxDOWNMESHandle;
-  // METyDOWNMES=*METdyDOWNMESHandle;
-  // METxUPJES=*METdxUPJESHandle;
-  // METyUPJES=*METdyUPJESHandle;
-  // METxDOWNJES=*METdxDOWNJESHandle;
-  // METyDOWNJES=*METdyDOWNJESHandle;
-  // METxUPJER=*METdxUPJERHandle;
-  // METyUPJER=*METdyUPJERHandle;
-  // METxDOWNJER=*METdxDOWNJERHandle;
-  // METyDOWNJER=*METdyDOWNJERHandle;
     
   GenMET=GenMETPhi=-99;
   if (isMC && met.genMET()){
       GenMET = met.genMET()->pt();
       GenMETPhi = met.genMET()->phi();
+      GenMETx = met.genMET()->px();
+      GenMETy = met.genMET()->py();
   }
   else if (isMC){
       cms::Exception e("GenMET");
@@ -1334,7 +1406,7 @@ void LLNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& eSet
 
 
   }
-   
+
   //Loop on the candidates
   // vector<Int_t> CRFLAG(cands->size());
   // for( edm::View<pat::CompositeCandidate>::const_iterator cand = cands->begin(); cand != cands->end(); ++cand) {
@@ -1418,6 +1490,11 @@ void LLNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& eSet
     float pt_jes_dn_RelBal = pt_nominal * (1.0 - jes_unc_RelBal);
     float pt_jes_dn_RelSample_year = pt_nominal * (1.0 - jes_unc_RelSample_year);
 
+    float abseta = fabs(cleanedJets[i]->eta());
+
+    if(pt_nominal>25 && abseta<2.4) {
+      if (cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt25BTagged_bTagSF;
+    }
     if(pt_nominal>30){
       ++nCleanedJetsPt30;
       if(cleanedJets[i]->userFloat("isBtagged")) ++nCleanedJetsPt30BTagged;
@@ -1542,24 +1619,77 @@ void LLNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& eSet
        ++nCleanedJetsPt30_jerDn;
        if(cleanedJets[i]->userFloat("isBtaggedWithSF")) ++nCleanedJetsPt30BTagged_bTagSF_jerDn;
     }
-     
+    
     if (writeJets) FillJet(*(cleanedJets.at(i))); // No additional pT cut (for JEC studies)
   }
 
+  //VBF jets
+  Float_t best_DiJetMass=0;
+  for (unsigned i=0; i<cleanedJets.size(); ++i) {
+    for (unsigned j=i+1; j<cleanedJets.size(); ++j) {
+      Float_t DeltaEtaJJ, DiJetMass;
+      DeltaEtaJJ=fabs(cleanedJets[i]->eta()-cleanedJets[j]->eta());
+      DiJetMass=(cleanedJets[i]->p4()+cleanedJets[j]->p4()).M();
+      if (DeltaEtaJJ<2.5 || DiJetMass<350) continue;
+      if (DiJetMass>best_DiJetMass) {
+        best_DiJetMass=DiJetMass;
+        VBFJetIdx1=i;
+        VBFJetIdx2=j;
+      }
+    }
+  }
+
+  //MET recoil
+  if (do_MET_Recoil) {
+    recoilPFMetCorrector->CorrectByMeanResolution(
+      METx,
+      METy,
+      GenLLPt*cos(GenLLPhi),
+      GenLLPt*sin(GenLLPhi),
+      GenVisLLPt*cos(GenVisLLPhi),
+      GenVisLLPt*sin(GenVisLLPhi),
+      nCleanedJetsPt30,
+      METxRecoil,
+      METyRecoil
+    );
+  }
+  else {
+    METxRecoil=METx;
+    METyRecoil=METy;
+  }
+  PFMETRecoil=TMath::Sqrt(METxRecoil*METxRecoil+METyRecoil*METyRecoil);
+  PFMETPhiRecoil=TMath::ATan2(METyRecoil,METxRecoil);
+
   // Now we can write the variables for candidates
   int nFilled=0;
-  for( edm::View<pat::CompositeCandidate>::const_iterator cand = cands->begin(); cand != cands->end(); ++cand) {
+  for(unsigned int i = 0; i < cands->size(); ++i) {
+    const pat::CompositeCandidate& c = (*cands)[i];
+    pat::CompositeCandidate cand(c);
     if (failed) break; //don't waste time on this
     // size_t icand= cand-cands->begin();
 
-    if (!(bool)(cand->userFloat("isBestCand")) ) continue; // Skip events other than the best cand
+    if (!(bool)(cand.userFloat("isBestCand")) ) continue; // Skip events other than the best cand
+
+    if (abs(cand.daughter(0)->pdgId()*cand.daughter(1)->pdgId())==195 || abs(cand.daughter(0)->pdgId()*cand.daughter(1)->pdgId())==165) {
+      TLorentzVector tau1,METRecoil;
+      tau1.SetPxPyPzE(cand.daughter(0)->px(),cand.daughter(0)->py(),cand.daughter(0)->pz(),cand.daughter(0)->energy());
+      METRecoil.SetPxPyPzE(METxRecoil,METyRecoil,0,std::hypot(METxRecoil,METyRecoil));
+      MtLMET=(tau1+METRecoil).Mt();
+    }
+    else {
+      MtLMET=-99;
+    }
+
+    cand.addUserFloat("NmedB",nCleanedJetsPt25BTagged_bTagSF);
+    cand.addUserFloat("MtLMET",MtLMET);
+    if (!cut(cand)) continue;
 
     //For the SR, also fold information about acceptance in CRflag.
     // if (isMC && (theChannel==ZZ)) {
     //   if (InEtaAcceptance)   set_bit(CRFLAG[icand],28);
     //   if (InEtaPtAcceptance) set_bit(CRFLAG[icand],29);
     // }
-    FillCandidate(*cand, evtPassTrigger&&evtPassSkim, event);
+    FillCandidate(cand, evtPassTrigger&&evtPassSkim, event);
 
     // Fill the candidate as one entry in the tree. Do not reinitialize the event variables, as in CRs
     // there could be several candidates per event.
@@ -1574,6 +1704,7 @@ void LLNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& eSet
     else
       myTree->FillCurrentTree(false); //puts it in the failed tree if there is one
   }
+
 }
 
 
@@ -1809,9 +1940,10 @@ void LLNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool evtP
   Lepdz.clear();
   LepTime.clear();
   LepisID.clear();
-  LepBDT.clear();
+  // LepBDT.clear();
   LepisCrack.clear();
   LepMissingHit.clear();
+  LepConversionVeto.clear();
   LepChargedHadIso.clear();
   LepNeutralHadIso.clear();
   LepPhotonIso.clear();
@@ -1819,8 +1951,36 @@ void LLNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool evtP
   LepCombRelIsoPF.clear();
 
   LepSF.clear();
-  LepSF_Unc.clear();
-	
+  LepSF_UncUp.clear();
+	LepSF_UncDn.clear();
+  LepSF_UncUp_RECO_syst.clear();
+  LepSF_UncUp_RECO_stat.clear();
+  LepSF_UncUp_ID_syst.clear();
+  LepSF_UncUp_ID_stat.clear();
+  LepSF_UncUp_ISO_syst.clear();
+  LepSF_UncUp_ISO_stat.clear();
+  LepSF_UncDn_RECO_syst.clear();
+  LepSF_UncDn_RECO_stat.clear();
+  LepSF_UncDn_ID_syst.clear();
+  LepSF_UncDn_ID_stat.clear();
+  LepSF_UncDn_ISO_syst.clear();
+  LepSF_UncDn_ISO_stat.clear();
+  LepSF_UncUp_uncert0.clear();
+  LepSF_UncUp_uncert1.clear();
+  LepSF_UncUp_syst_alleras.clear();
+  LepSF_UncUp_syst_year.clear();
+  LepSF_UncUp_syst_dm_year.clear();
+  LepSF_UncUp_fakeEle.clear();
+  LepSF_UncUp_fakeMu.clear();
+  LepSF_UncDn_uncert0.clear();
+  LepSF_UncDn_uncert1.clear();
+  LepSF_UncDn_syst_alleras.clear();
+  LepSF_UncDn_syst_year.clear();
+  LepSF_UncDn_syst_dm_year.clear();
+  LepSF_UncDn_fakeEle.clear();
+  LepSF_UncDn_fakeMu.clear();
+
+
   LepScale_Total_Up.clear();
   LepScale_Total_Dn.clear();
   LepScale_Stat_Up.clear();
@@ -1844,19 +2004,18 @@ void LLNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool evtP
   TauVSjet.clear();
   TauDecayMode.clear();
   TauGenMatch.clear();
-  // TauTES_p_Up.clear();
-  // TauTES_p_Dn.clear();
-  // TauTES_m_Up.clear();
-  // TauTES_m_Dn.clear();
-  // TauTES_e_Up.clear();
-  // TauTES_e_Dn.clear();
-  // TauFES_p_Up.clear();
-  // TauFES_p_Dn.clear();
-  // TauFES_m_Up.clear();
-  // TauFES_m_Dn.clear();
-  // TauFES_e_Up.clear();
-  // TauFES_e_Dn.clear();
-
+  TauTES_p_Up.clear();
+  TauTES_p_Dn.clear();
+  TauTES_m_Up.clear();
+  TauTES_m_Dn.clear();
+  TauTES_e_Up.clear();
+  TauTES_e_Dn.clear();
+  TauFES_p_Up.clear();
+  TauFES_p_Dn.clear();
+  TauFES_m_Up.clear();
+  TauFES_m_Dn.clear();
+  TauFES_e_Up.clear();
+  TauFES_e_Dn.clear();
  
   fsrPt.clear();
   fsrEta.clear();
@@ -1865,15 +2024,20 @@ void LLNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool evtP
   fsrLeptID.clear();
   fsrDR.clear();
   fsrGenPt.clear();
-  // ExtraLepPt.clear();
-  // ExtraLepEta.clear();
-  // ExtraLepPhi.clear();
-  // ExtraLepLepId.clear();
 
-  // CRflag = CRFLAG;
-
-  // MET = cand.userFloat("MET");
-  // METPhi = cand.userFloat("METPhi");
+  LLSVPhi_up.clear();
+  LLSVEta_up.clear();
+  LLSVPt_up.clear();
+  LLSVMass_up.clear();
+  LLMass_up.clear();
+  LLGoodMass_up.clear();
+  LLSVPhi_dn.clear();
+  LLSVEta_dn.clear();
+  LLSVPt_dn.clear();
+  LLSVMass_dn.clear();
+  LLMass_dn.clear();
+  LLGoodMass_dn.clear();
+  // Names_shift.clear();
 
   vector<const reco::Candidate*> leptons;
   vector<const reco::Candidate*> fsrPhot;
@@ -1886,6 +2050,10 @@ void LLNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool evtP
   LLPt = cand.pt();
   LLEta = cand.eta();
   LLPhi = cand.phi();
+  LLDR = deltaR(cand.daughter(0)->p4(),cand.daughter(1)->p4());
+  TLorentzVector LLP4;
+  LLP4.SetPtEtaPhiM(LLPt,LLEta,LLPhi,LLMass);
+
   LLFlav = getPdgId(cand.daughter(0)) * getPdgId(cand.daughter(1));
 
   LLisGoodTau = cand.userFloat("isGoodTau");
@@ -1894,12 +2062,14 @@ void LLNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool evtP
   pass_CrossTrigger = cand.userInt("pass_CrossTrigger");
   pass_Trigger = cand.userInt("pass_Trigger");
 
-//-------------------------------------------------------------------------------------------------------
-//----------------------------------------SV FIT---------------------------------------------------------
-//-------------------------------------------------------------------------------------------------------
-  
+
+  //-------------------------------------------------------------------------------------------------------
+  //----------------------------------------SV FIT---------------------------------------------------------
+  //-------------------------------------------------------------------------------------------------------
+  // cout<<"Begin begin SVFit: "<<LLFlav<<endl;
   bool doSVFit=false;
   if (abs(LLFlav)==165 || abs(LLFlav)==195 || abs(LLFlav)==225 || abs(LLFlav)==143) doSVFit=true;
+
   bool swi;
   if (abs(leptons[0]->pdgId()) > abs(leptons[1]->pdgId())) swi=true;
   else if (abs(leptons[0]->pdgId()) < abs(leptons[1]->pdgId())) swi=false;
@@ -1915,23 +2085,32 @@ void LLNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool evtP
   met_3.SetXYZ(METx,METy,0);
   TVector3 zeta(leptons[idx1]->px()+leptons[idx2]->px(),leptons[idx1]->py()+leptons[idx2]->py(),0);
   if (zeta.Mag()==0) {
-    Pzeta=-999;
+    Pzeta1=-999;
+    Pzeta2=-999;
     }
   else {
-    Float_t Pall=(tau1_3+tau2_3+met_3).Dot(zeta)/zeta.Mag();
+    Float_t Pall1=met_3.Dot(zeta)/zeta.Mag();
+    Float_t Pall2=(tau1_3+tau2_3+met_3).Dot(zeta)/zeta.Mag();
     Float_t Pvis=(tau1_3+tau2_3).Dot(zeta)/zeta.Mag();
-    Pzeta=Pall-0.85*Pvis;
+    Pzeta1=Pall1-0.85*Pvis;
+    Pzeta2=Pall2-0.85*Pvis;
   }
 
   //central
   TLorentzVector LLp4;
   LLp4.SetPtEtaPhiM(LLPt,LLEta,LLPhi,LLMass);
-  TLorentzVector tau1,tau2,met;
+  TLorentzVector tau1,tau2,MET,METTau,METJet,METRaw,METRecoil;
   int pairType;
   int dm1,dm2;
   tau1.SetPxPyPzE(leptons[idx1]->px(),leptons[idx1]->py(),leptons[idx1]->pz(),leptons[idx1]->energy());
   tau2.SetPxPyPzE(leptons[idx2]->px(),leptons[idx2]->py(),leptons[idx2]->pz(),leptons[idx2]->energy());
-  met.SetPxPyPzE(METx,METy,0,std::hypot(METx,METy));
+  // MET.SetPxPyPzE(METx,METy,0,std::hypot(METx,METy));
+  // cout<<"Fill other METs"<<endl;
+  // METTau.SetPxPyPzE(METxTau,METyTau,0,std::hypot(METxTau,METyTau));
+  // METJet.SetPxPyPzE(METxJet,METyJet,0,std::hypot(METxJet,METyJet));
+  // METRaw.SetPxPyPzE(METxRaw,METyRaw,0,std::hypot(METxRaw,METyRaw));
+  METRecoil.SetPxPyPzE(METxRecoil,METyRecoil,0,std::hypot(METxRecoil,METyRecoil));
+
   if (abs(LLFlav)==195) pairType=0;
   else if (abs(LLFlav)==165) pairType=1;
   else if (abs(LLFlav)==225) pairType=2;
@@ -1939,16 +2118,374 @@ void LLNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool evtP
   dm1=abs(leptons[idx1]->pdgId())==15?userdatahelpers::getUserFloat(leptons[idx1],"decayMode"):-1;
   dm2=abs(leptons[idx2]->pdgId())==15?userdatahelpers::getUserFloat(leptons[idx2],"decayMode"):-1;
   if (doSVFit) {
-      SVfit algo_central(0,tau1,tau2,met,covMET,pairType,dm1,dm2);
-      std::vector<double> results_central=algo_central.FitAndGetResult();
-      LLSVPt=results_central.at(0);
-      LLSVEta=results_central.at(1);
-      LLSVPhi=results_central.at(2);
-      LLSVMass=results_central.at(3);
+    // cout<<"Begin SVFit"<<endl;
+    SVfit algo_central_Recoil(0,tau1,tau2,METRecoil,covMET,pairType,dm1,dm2);
+    std::vector<double> results_central_Recoil=algo_central_Recoil.FitAndGetResult();
+    LLSVPt=results_central_Recoil.at(0);
+    LLSVEta=results_central_Recoil.at(1);
+    LLSVPhi=results_central_Recoil.at(2);
+    LLSVMass=results_central_Recoil.at(3);
+  }
+  else {
+    LLSVPt=-99;
+    LLSVEta=-99;
+    LLSVPhi=-99;
+    LLSVMass=-99;
   }
 
+  //-------------------------------------------------------------------------------
+  //-----------SYSTEMATICS AFFECTING SVFIT MASS AND VISIBLE MASS-------------------
+  //-------------------------------------------------------------------------------
 
+  // Electron energy corrections
+  std::vector<std::string> correctionNames={"scale_stat","scale_syst","scale_gain","sigma_rho","sigma_phi"};
+  std::vector<std::string> NPNames={"CMS_scale_e_stat_year","CMS_scale_e_syst","CMS_scale_e_gain_year","CMS_res_e_rho","CMS_res_e_rho"};
+  if (theChannel==SR) {
+    if (doSVFit && (abs(LLFlav)==165 || abs(LLFlav)==143)) {
+      TLorentzVector tau1_up, tau1_dn;
+      for (size_t iNP=0;iNP<correctionNames.size();iNP++) {
+        tau1_up=tau1*userdatahelpers::getUserFloat(leptons[idx1],(correctionNames[iNP]+"_up").c_str());
+        SVfit algo_up(0,tau1_up,tau2,METRecoil,covMET,pairType,dm1,dm2);
+        std::vector<double> results_up=algo_up.FitAndGetResult();
+        LLSVPt_up.push_back(results_up.at(0));
+        LLSVEta_up.push_back(results_up.at(1));
+        LLSVPhi_up.push_back(results_up.at(2));
+        LLSVMass_up.push_back(results_up.at(3));
+        LLMass_up.push_back((LLP4-tau1+tau1_up).M());
+        tau1_dn=tau1*userdatahelpers::getUserFloat(leptons[idx1],(correctionNames[iNP]+"_dn").c_str());
+        SVfit algo_dn(0,tau1_dn,tau2,METRecoil,covMET,pairType,dm1,dm2);
+        std::vector<double> results_dn=algo_dn.FitAndGetResult();
+        LLSVPt_dn.push_back(results_dn.at(0));
+        LLSVEta_dn.push_back(results_dn.at(1));
+        LLSVPhi_dn.push_back(results_dn.at(2));
+        LLSVMass_dn.push_back(results_dn.at(3));
+        LLMass_dn.push_back((LLP4-tau1+tau1_dn).M());
+        // Names_shift.push_back(NPNames[iNP]);
+      }
+    }
+    else {
+      for (size_t iNP=0;iNP<correctionNames.size();iNP++) {
+        LLSVPt_up.push_back(LLSVPt);
+        LLSVEta_up.push_back(LLSVEta);
+        LLSVPhi_up.push_back(LLSVPhi);
+        LLSVMass_up.push_back(LLSVMass);
+        LLMass_up.push_back(LLMass);
+        LLSVPt_dn.push_back(LLSVPt);
+        LLSVEta_dn.push_back(LLSVEta);
+        LLSVPhi_dn.push_back(LLSVPhi);
+        LLSVMass_dn.push_back(LLSVMass);
+        LLMass_dn.push_back(LLMass);
+        // Names_shift.push_back(NPNames[iNP]);
+      }
+    }
+  }
 
+  // Muon energy corrections
+  correctionNames.clear();
+  correctionNames={"scale_total","sigma_total"};
+  NPNames.clear();
+  NPNames={"CMS_scale_m","CMS_res_m"};
+  if (theChannel==SR) {
+    TLorentzVector tau1_up, tau2_up, tau1_dn, tau2_dn;
+    for (size_t iNP=0;iNP<correctionNames.size();iNP++) {
+      if (abs(leptons[idx1]->pdgId())==13) {
+        tau1_up=tau1*userdatahelpers::getUserFloat(leptons[idx1],(correctionNames[iNP]+"_up").c_str());
+        tau1_dn=tau1*userdatahelpers::getUserFloat(leptons[idx1],(correctionNames[iNP]+"_dn").c_str());
+      }
+      else {
+        tau1_up=tau1;
+        tau1_dn=tau1;
+      }
+      if (abs(leptons[idx2]->pdgId())==13) {
+        tau2_up=tau2*userdatahelpers::getUserFloat(leptons[idx2],(correctionNames[iNP]+"_up").c_str());
+        tau2_dn=tau2*userdatahelpers::getUserFloat(leptons[idx2],(correctionNames[iNP]+"_dn").c_str());
+      }
+      else {
+        tau2_up=tau2;
+        tau2_dn=tau2;
+      }
+      LLMass_up.push_back((LLP4-tau1-tau2+tau1_up+tau2_up).M());
+      LLMass_dn.push_back((LLP4-tau1-tau2+tau1_dn+tau2_dn).M());
+      if (doSVFit && (abs(leptons[idx1]->pdgId())==13 || abs(leptons[idx2]->pdgId())==13)) {
+        SVfit algo_up(0,tau1_up,tau2_up,METRecoil,covMET,pairType,dm1,dm2);
+        std::vector<double> results_up=algo_up.FitAndGetResult();
+        LLSVPt_up.push_back(results_up.at(0));
+        LLSVEta_up.push_back(results_up.at(1));
+        LLSVPhi_up.push_back(results_up.at(2));
+        LLSVMass_up.push_back(results_up.at(3));
+        SVfit algo_dn(0,tau1_dn,tau2_dn,METRecoil,covMET,pairType,dm1,dm2);
+        std::vector<double> results_dn=algo_dn.FitAndGetResult();
+        LLSVPt_dn.push_back(results_dn.at(0));
+        LLSVEta_dn.push_back(results_dn.at(1));
+        LLSVPhi_dn.push_back(results_dn.at(2));
+        LLSVMass_dn.push_back(results_dn.at(3));
+      }
+      else {
+        LLSVPt_up.push_back(LLSVPt);
+        LLSVEta_up.push_back(LLSVEta);
+        LLSVPhi_up.push_back(LLSVPhi);
+        LLSVMass_up.push_back(LLSVMass);
+        LLSVPt_dn.push_back(LLSVPt);
+        LLSVEta_dn.push_back(LLSVEta);
+        LLSVPhi_dn.push_back(LLSVPhi);
+        LLSVMass_dn.push_back(LLSVMass);
+      }
+    }
+  }
+
+  // Tau lepton energy corrections
+  correctionNames.clear();
+  correctionNames={"Tau","Ele","Mu"};
+  std::vector<std::string> correctionNames1={"isTESShifted","isEESShifted","isMESShifted"};
+  NPNames.clear();
+  NPNames={"CMS_scale_t_year","CMS_scale_efaket_year","CMS_scale_mfaket_year"};
+  if (theChannel==SR) {
+    TLorentzVector tau1_up, tau2_up, tau1_dn, tau2_dn;
+    for (size_t iNP=0;iNP<correctionNames.size();iNP++) {
+      bool changed=false;
+      if (iNP<correctionNames.size()-1) {
+        if (abs(leptons[idx1]->pdgId())==15 && userdatahelpers::getUserInt(leptons[idx1],correctionNames1[iNP].c_str())) {
+          changed=true;
+          tau1_up.SetPxPyPzE(userdatahelpers::getUserFloat(leptons[idx1],("px_"+correctionNames[iNP]+"Up").c_str()),userdatahelpers::getUserFloat(leptons[idx1],("py_"+correctionNames[iNP]+"Up").c_str()),userdatahelpers::getUserFloat(leptons[idx1],("pz_"+correctionNames[iNP]+"Up").c_str()),userdatahelpers::getUserFloat(leptons[idx1],("e_"+correctionNames[iNP]+"Up").c_str()));
+          tau1_dn.SetPxPyPzE(userdatahelpers::getUserFloat(leptons[idx1],("px_"+correctionNames[iNP]+"Down").c_str()),userdatahelpers::getUserFloat(leptons[idx1],("py_"+correctionNames[iNP]+"Down").c_str()),userdatahelpers::getUserFloat(leptons[idx1],("pz_"+correctionNames[iNP]+"Down").c_str()),userdatahelpers::getUserFloat(leptons[idx1],("e_"+correctionNames[iNP]+"Down").c_str()));
+        }
+        else {
+          tau1_up=tau1;
+          tau1_dn=tau1;
+        }
+        if (abs(leptons[idx2]->pdgId())==15 && userdatahelpers::getUserInt(leptons[idx2],correctionNames1[iNP].c_str())) {
+          changed=true;
+          tau2_up.SetPxPyPzE(userdatahelpers::getUserFloat(leptons[idx2],("px_"+correctionNames[iNP]+"Up").c_str()),userdatahelpers::getUserFloat(leptons[idx2],("py_"+correctionNames[iNP]+"Up").c_str()),userdatahelpers::getUserFloat(leptons[idx2],("pz_"+correctionNames[iNP]+"Up").c_str()),userdatahelpers::getUserFloat(leptons[idx2],("e_"+correctionNames[iNP]+"Up").c_str()));
+          tau2_dn.SetPxPyPzE(userdatahelpers::getUserFloat(leptons[idx2],("px_"+correctionNames[iNP]+"Down").c_str()),userdatahelpers::getUserFloat(leptons[idx2],("py_"+correctionNames[iNP]+"Down").c_str()),userdatahelpers::getUserFloat(leptons[idx2],("pz_"+correctionNames[iNP]+"Down").c_str()),userdatahelpers::getUserFloat(leptons[idx2],("e_"+correctionNames[iNP]+"Down").c_str()));
+        }
+        else {
+          tau2_up=tau2;
+          tau2_dn=tau2;
+        }
+      }
+      else {
+        if (abs(leptons[idx1]->pdgId())==15 && (userdatahelpers::getUserFloat(leptons[idx1],"genmatch")==2 || userdatahelpers::getUserFloat(leptons[idx1],"genmatch")==4)) {
+          changed=true;
+          tau1_up=1.01*tau1;
+          tau1_dn=0.99*tau1;
+        }
+        else {
+          tau1_up=tau1;
+          tau1_dn=tau1;
+        }
+        if (abs(leptons[idx2]->pdgId())==15 && (userdatahelpers::getUserFloat(leptons[idx2],"genmatch")==2 || userdatahelpers::getUserFloat(leptons[idx2],"genmatch")==4)) {
+          changed=true;
+          tau2_up=1.01*tau2;
+          tau2_dn=0.99*tau2;
+        }
+        else {
+          tau2_up=tau2;
+          tau2_dn=tau2;
+        }
+      }
+      LLMass_up.push_back((LLP4-tau1-tau2+tau1_up+tau2_up).M());
+      LLMass_dn.push_back((LLP4-tau1-tau2+tau1_dn+tau2_dn).M());
+      if (doSVFit && changed) {
+        SVfit algo_up(0,tau1_up,tau2_up,METRecoil,covMET,pairType,dm1,dm2);
+        std::vector<double> results_up=algo_up.FitAndGetResult();
+        LLSVPt_up.push_back(results_up.at(0));
+        LLSVEta_up.push_back(results_up.at(1));
+        LLSVPhi_up.push_back(results_up.at(2));
+        LLSVMass_up.push_back(results_up.at(3));
+        SVfit algo_dn(0,tau1_dn,tau2_dn,METRecoil,covMET,pairType,dm1,dm2);
+        std::vector<double> results_dn=algo_dn.FitAndGetResult();
+        LLSVPt_dn.push_back(results_dn.at(0));
+        LLSVEta_dn.push_back(results_dn.at(1));
+        LLSVPhi_dn.push_back(results_dn.at(2));
+        LLSVMass_dn.push_back(results_dn.at(3));
+      }
+      else {
+        LLSVPt_up.push_back(LLSVPt);
+        LLSVEta_up.push_back(LLSVEta);
+        LLSVPhi_up.push_back(LLSVPhi);
+        LLSVMass_up.push_back(LLSVMass);
+        LLSVPt_dn.push_back(LLSVPt);
+        LLSVEta_dn.push_back(LLSVEta);
+        LLSVPhi_dn.push_back(LLSVPhi);
+        LLSVMass_dn.push_back(LLSVMass);
+      }
+    }
+  }
+
+  // Jet energy corrections
+  correctionNames.clear();
+  correctionNames=uncSources;
+  NPNames.clear();
+  NPNames=uncSources;
+  
+  Handle<pat::METCollection> metJESupHandle;
+  event.getByToken(metJESupToken, metJESupHandle);
+  Handle<pat::METCollection> metJESdnHandle;
+  event.getByToken(metJESdnToken, metJESdnHandle); 
+  
+  if (theChannel==SR) {
+    TLorentzVector MET_up, MET_dn;
+    for (size_t iNP=0;iNP<correctionNames.size();iNP++) {
+      const pat::MET &met_up = metJESupHandle->at(iNP);
+      Float_t metx_up, mety_up;
+      if (do_MET_Recoil) {
+        recoilPFMetCorrector->CorrectByMeanResolution(met_up.px(),met_up.py(),GenLLPt*cos(GenLLPhi),GenLLPt*sin(GenLLPhi),GenVisLLPt*cos(GenVisLLPhi),GenVisLLPt*sin(GenVisLLPhi),nCleanedJetsPt30,metx_up,mety_up);
+      }
+      else {
+        metx_up=met_up.px();
+        mety_up=met_up.py();
+      }
+      MET_up.SetPxPyPzE(metx_up,mety_up,0,std::hypot(metx_up,mety_up));
+
+      const pat::MET &met_dn = metJESdnHandle->at(iNP);
+      Float_t metx_dn, mety_dn;
+      if (do_MET_Recoil) {
+        recoilPFMetCorrector->CorrectByMeanResolution(met_dn.px(),met_dn.py(),GenLLPt*cos(GenLLPhi),GenLLPt*sin(GenLLPhi),GenVisLLPt*cos(GenVisLLPhi),GenVisLLPt*sin(GenVisLLPhi),nCleanedJetsPt30,metx_dn,mety_dn);
+      }
+      else {
+        metx_dn=met_dn.px();
+        mety_dn=met_dn.py();
+      }
+      MET_dn.SetPxPyPzE(metx_dn,mety_dn,0,std::hypot(metx_dn,mety_dn));
+
+      LLMass_up.push_back(LLMass);
+      LLMass_dn.push_back(LLMass);
+
+      if (doSVFit) {
+        SVfit algo_up(0,tau1,tau2,MET_up,covMET,pairType,dm1,dm2);
+        std::vector<double> results_up=algo_up.FitAndGetResult();
+        LLSVPt_up.push_back(results_up.at(0));
+        LLSVEta_up.push_back(results_up.at(1));
+        LLSVPhi_up.push_back(results_up.at(2));
+        LLSVMass_up.push_back(results_up.at(3));
+        SVfit algo_dn(0,tau1,tau2,MET_dn,covMET,pairType,dm1,dm2);
+        std::vector<double> results_dn=algo_dn.FitAndGetResult();
+        LLSVPt_dn.push_back(results_dn.at(0));
+        LLSVEta_dn.push_back(results_dn.at(1));
+        LLSVPhi_dn.push_back(results_dn.at(2));
+        LLSVMass_dn.push_back(results_dn.at(3));
+      }
+      else {
+        LLSVPt_up.push_back(-99);
+        LLSVEta_up.push_back(-99);
+        LLSVPhi_up.push_back(-99);
+        LLSVMass_up.push_back(-99);
+        LLSVPt_dn.push_back(-99);
+        LLSVEta_dn.push_back(-99);
+        LLSVPhi_dn.push_back(-99);
+        LLSVMass_dn.push_back(-99);
+      }
+    }
+  }
+
+  // MET recoil
+  correctionNames.clear();
+  correctionNames={"CMS_scale_met","CMS_res_met"};
+  NPNames.clear();
+  NPNames={"CMS_scale_met","CMS_res_met"};
+  if (theChannel==SR) {
+    if (do_MET_Recoil) {
+      TLorentzVector MET_up, MET_dn;
+
+      Float_t metx_up, mety_up;
+      Float_t metx_dn, mety_dn;
+
+      LLMass_up.push_back(LLMass);
+      LLMass_dn.push_back(LLMass);
+
+      Float_t tmpGenLLPt=GenLLPt>99?99:GenLLPt;
+
+      if (doSVFit) {
+
+        recoilPFMetSyst->ApplyMEtSys(METxRecoil,METyRecoil,tmpGenLLPt*cos(GenLLPhi),tmpGenLLPt*sin(GenLLPhi),GenVisLLPt*cos(GenVisLLPhi),GenVisLLPt*sin(GenVisLLPhi),nCleanedJetsPt30,0,0,0,metx_up, mety_up);
+        MET_up.SetPxPyPzE(metx_up,mety_up,0,std::hypot(metx_up,mety_up));
+
+        recoilPFMetSyst->ApplyMEtSys(METxRecoil,METyRecoil,tmpGenLLPt*cos(GenLLPhi),tmpGenLLPt*sin(GenLLPhi),GenVisLLPt*cos(GenVisLLPhi),GenVisLLPt*sin(GenVisLLPhi),nCleanedJetsPt30,0,0,1,metx_up, mety_up);
+        MET_dn.SetPxPyPzE(metx_dn,mety_dn,0,std::hypot(metx_dn,mety_dn));
+        
+        SVfit algo_up(0,tau1,tau2,MET_up,covMET,pairType,dm1,dm2);
+        std::vector<double> results_up=algo_up.FitAndGetResult();
+        LLSVPt_up.push_back(results_up.at(0));
+        LLSVEta_up.push_back(results_up.at(1));
+        LLSVPhi_up.push_back(results_up.at(2));
+        LLSVMass_up.push_back(results_up.at(3));
+        SVfit algo_dn(0,tau1,tau2,MET_dn,covMET,pairType,dm1,dm2);
+        std::vector<double> results_dn=algo_dn.FitAndGetResult();
+        LLSVPt_dn.push_back(results_dn.at(0));
+        LLSVEta_dn.push_back(results_dn.at(1));
+        LLSVPhi_dn.push_back(results_dn.at(2));
+        LLSVMass_dn.push_back(results_dn.at(3));
+      }
+      else {
+        LLSVPt_up.push_back(-99);
+        LLSVEta_up.push_back(-99);
+        LLSVPhi_up.push_back(-99);
+        LLSVMass_up.push_back(-99);
+        LLSVPt_dn.push_back(-99);
+        LLSVEta_dn.push_back(-99);
+        LLSVPhi_dn.push_back(-99);
+        LLSVMass_dn.push_back(-99);
+      }
+
+      LLMass_up.push_back(LLMass);
+      LLMass_dn.push_back(LLMass);
+
+      if (doSVFit) {
+        recoilPFMetSyst->ApplyMEtSys(METxRecoil,METyRecoil,tmpGenLLPt*cos(GenLLPhi),tmpGenLLPt*sin(GenLLPhi),GenVisLLPt*cos(GenVisLLPhi),GenVisLLPt*sin(GenVisLLPhi),nCleanedJetsPt30,0,1,0,metx_up, mety_up);
+        MET_up.SetPxPyPzE(metx_up,mety_up,0,std::hypot(metx_up,mety_up));
+
+        recoilPFMetSyst->ApplyMEtSys(METxRecoil,METyRecoil,tmpGenLLPt*cos(GenLLPhi),tmpGenLLPt*sin(GenLLPhi),GenVisLLPt*cos(GenVisLLPhi),GenVisLLPt*sin(GenVisLLPhi),nCleanedJetsPt30,0,1,1,metx_up, mety_up);
+        MET_dn.SetPxPyPzE(metx_dn,mety_dn,0,std::hypot(metx_dn,mety_dn));
+
+        SVfit algo_up(0,tau1,tau2,MET_up,covMET,pairType,dm1,dm2);
+        std::vector<double> results_up=algo_up.FitAndGetResult();
+        LLSVPt_up.push_back(results_up.at(0));
+        LLSVEta_up.push_back(results_up.at(1));
+        LLSVPhi_up.push_back(results_up.at(2));
+        LLSVMass_up.push_back(results_up.at(3));
+        SVfit algo_dn(0,tau1,tau2,MET_dn,covMET,pairType,dm1,dm2);
+        std::vector<double> results_dn=algo_dn.FitAndGetResult();
+        LLSVPt_dn.push_back(results_dn.at(0));
+        LLSVEta_dn.push_back(results_dn.at(1));
+        LLSVPhi_dn.push_back(results_dn.at(2));
+        LLSVMass_dn.push_back(results_dn.at(3));
+      }
+      else {
+        LLSVPt_up.push_back(-99);
+        LLSVEta_up.push_back(-99);
+        LLSVPhi_up.push_back(-99);
+        LLSVMass_up.push_back(-99);
+        LLSVPt_dn.push_back(-99);
+        LLSVEta_dn.push_back(-99);
+        LLSVPhi_dn.push_back(-99);
+        LLSVMass_dn.push_back(-99);
+      }
+    }
+    else {
+      LLSVPt_up.push_back(LLSVPt);
+      LLSVEta_up.push_back(LLSVEta);
+      LLSVPhi_up.push_back(LLSVPhi);
+      LLSVMass_up.push_back(LLSVMass);
+      LLMass_up.push_back(LLMass);
+      LLSVPt_dn.push_back(LLSVPt);
+      LLSVEta_dn.push_back(LLSVEta);
+      LLSVPhi_dn.push_back(LLSVPhi);
+      LLSVMass_dn.push_back(LLSVMass);
+      LLMass_dn.push_back(LLMass);
+      LLSVPt_up.push_back(LLSVPt);
+      LLSVEta_up.push_back(LLSVEta);
+      LLSVPhi_up.push_back(LLSVPhi);
+      LLSVMass_up.push_back(LLSVMass);
+      LLMass_up.push_back(LLMass);
+      LLSVPt_dn.push_back(LLSVPt);
+      LLSVEta_dn.push_back(LLSVEta);
+      LLSVPhi_dn.push_back(LLSVPhi);
+      LLSVMass_dn.push_back(LLSVMass);
+      LLMass_dn.push_back(LLMass);
+    }
+  }
+
+  
   // //TES UP/DOWN
   // TLorentzVector tau1_tesup,tau2_tesup,met_tesup;
   // if (abs(leptons[idx1]->pdgId())==15 && userdatahelpers::getUserInt(leptons[idx1],"isTESShifted")) tau1_tesup.SetPxPyPzE(
@@ -2192,8 +2729,13 @@ void LLNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool evtP
   //         Z2SVMass_JERdn=results_jerdn.at(3);
   //     }
   // }
-  
-  LLGoodMass=(LLSVMass>0?LLSVMass:LLMass);
+  // for (size_t i=0;i<LLSVMass.size();i++)
+  //   LLGoodMass.push_back(LLSVMass[i]>0?LLSVMass[i]:LLMass);
+  LLGoodMass=LLSVMass>0?LLSVMass:LLMass;
+  for (size_t i=0;i<LLSVMass_up.size();i++) {
+    LLGoodMass_up.push_back(LLSVMass_up[i]>0?LLSVMass_up[i]:LLMass_up[i]);
+    LLGoodMass_dn.push_back(LLSVMass_dn[i]>0?LLSVMass_dn[i]:LLMass_dn[i]);
+  }
   // Z2GoodMass_TESup=(Z2SVMass_TESup>0?Z2SVMass_TESup:Z2Mass_TESup);
   // Z2GoodMass_TESdn=(Z2SVMass_TESdn>0?Z2SVMass_TESdn:Z2Mass_TESdn);
   // Z2GoodMass_EESup=(Z2SVMass_EESup>0?Z2SVMass_EESup:Z2Mass_EESup);
@@ -2252,6 +2794,7 @@ void LLNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool evtP
   vector<float> SIP(2);
   vector<float> combRelIsoPF(2);
   passIsoPreFSR = true;
+
   for (unsigned int i=0; i<leptons.size(); ++i){
     // float curr_dR = 999;
     // if(i != TLE_index && TLE_index < 999)
@@ -2280,10 +2823,11 @@ void LLNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool evtP
     Lepdxy  .push_back( userdatahelpers::getUserFloat(leptons[i],"dxy") );
     Lepdz   .push_back( userdatahelpers::getUserFloat(leptons[i],"dz") );
     LepTime .push_back( lepFlav==13 ? userdatahelpers::getUserFloat(leptons[i],"time") : 0. );
-    LepisID .push_back( userdatahelpers::getUserFloat(leptons[i],"ID") );
-    LepBDT  .push_back( (lepFlav==13 || lepFlav==11) ? userdatahelpers::getUserFloat(leptons[i],"BDT") : -99. );
+    LepisID .push_back( userdatahelpers::getUserFloat(leptons[i],"isGood") );
+    // LepBDT  .push_back( (lepFlav==13 || lepFlav==11) ? userdatahelpers::getUserFloat(leptons[i],"BDT") : -99. );
     LepisCrack.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"isCrack") : 0 );
     LepMissingHit.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"missingHit") : 0 );
+    LepConversionVeto.push_back( lepFlav==11 ? userdatahelpers::getUserFloat(leptons[i],"ConversionVeto") : true);
     if (userdatahelpers::hasUserFloat(leptons[i],"scale_total_up")) { // These are not set when APPLYMUCORR=false
       LepScale_Total_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"scale_total_up") );
       LepScale_Total_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"scale_total_dn") );
@@ -2314,54 +2858,54 @@ void LLNtupleMaker::FillCandidate(const pat::CompositeCandidate& cand, bool evtP
 
       TauDecayMode.push_back( userdatahelpers::getUserFloat(leptons[i],"decayMode") );
       TauGenMatch.push_back( userdatahelpers::getUserFloat(leptons[i],"genmatch") );
-	// if (userdatahelpers::getUserInt(leptons[i],"isTESShifted")){
-	//     TauTES_p_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"px_TauUp")/leptons[i]->px() );
-	//     TauTES_p_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"px_TauDown")/leptons[i]->px() );
-  //           TauTES_m_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"m_TauUp")/leptons[i]->mass() );
-  //           TauTES_m_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"m_TauDown")/leptons[i]->mass() );
-  //           TauTES_e_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"e_TauUp")/leptons[i]->energy() );
-  //           TauTES_e_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"e_TauDown")/leptons[i]->energy() );
-	// } else{
-	//     TauTES_p_Up.push_back(0.);
-  //           TauTES_p_Dn.push_back(0.);
-  //           TauTES_m_Up.push_back(0.);
-  //           TauTES_m_Dn.push_back(0.);
-  //           TauTES_e_Up.push_back(0.);
-  //           TauTES_e_Dn.push_back(0.);
-	// }
-	// if (userdatahelpers::getUserInt(leptons[i],"isEESShifted")){
-	//     TauFES_p_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"px_EleUp")/leptons[i]->px() );
-  //           TauFES_p_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"px_EleDown")/leptons[i]->px() );
-  //           TauFES_m_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"m_EleUp")/leptons[i]->mass() );
-  //           TauFES_m_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"m_EleDown")/leptons[i]->mass() );
-  //           TauFES_e_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"e_EleUp")/leptons[i]->energy() );
-  //           TauFES_e_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"e_EleDown")/leptons[i]->energy() );
-	// } else{
-	//     TauFES_p_Up.push_back(0.);
-  //           TauFES_p_Dn.push_back(0.);
-  //           TauFES_m_Up.push_back(0.);
-  //           TauFES_m_Dn.push_back(0.);
-  //           TauFES_e_Up.push_back(0.);
-  //           TauFES_e_Dn.push_back(0.);
-	// }
+      if (userdatahelpers::getUserInt(leptons[i],"isTESShifted")){
+          TauTES_p_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"px_TauUp")/leptons[i]->px() );
+          TauTES_p_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"px_TauDown")/leptons[i]->px() );
+                TauTES_m_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"m_TauUp")/leptons[i]->mass() );
+                TauTES_m_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"m_TauDown")/leptons[i]->mass() );
+                TauTES_e_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"e_TauUp")/leptons[i]->energy() );
+                TauTES_e_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"e_TauDown")/leptons[i]->energy() );
+      } else{
+          TauTES_p_Up.push_back(0.);
+                TauTES_p_Dn.push_back(0.);
+                TauTES_m_Up.push_back(0.);
+                TauTES_m_Dn.push_back(0.);
+                TauTES_e_Up.push_back(0.);
+                TauTES_e_Dn.push_back(0.);
+      }
+      if (userdatahelpers::getUserInt(leptons[i],"isEESShifted")){
+          TauFES_p_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"px_EleUp")/leptons[i]->px() );
+                TauFES_p_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"px_EleDown")/leptons[i]->px() );
+                TauFES_m_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"m_EleUp")/leptons[i]->mass() );
+                TauFES_m_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"m_EleDown")/leptons[i]->mass() );
+                TauFES_e_Up.push_back( userdatahelpers::getUserFloat(leptons[i],"e_EleUp")/leptons[i]->energy() );
+                TauFES_e_Dn.push_back( userdatahelpers::getUserFloat(leptons[i],"e_EleDown")/leptons[i]->energy() );
+      } else{
+          TauFES_p_Up.push_back(0.);
+                TauFES_p_Dn.push_back(0.);
+                TauFES_m_Up.push_back(0.);
+                TauFES_m_Dn.push_back(0.);
+                TauFES_e_Up.push_back(0.);
+                TauFES_e_Dn.push_back(0.);
+      }
     } else {
       TauVSmu.push_back(-1);
       TauVSe.push_back(-1);
       TauVSjet.push_back(-1);
       TauDecayMode.push_back(-1);
       TauGenMatch.push_back(-1);
-      // TauTES_p_Up.push_back(0.);
-      // TauTES_p_Dn.push_back(0.);
-      // TauTES_m_Up.push_back(0.);
-      // TauTES_m_Dn.push_back(0.);
-      // TauTES_e_Up.push_back(0.);
-      // TauTES_e_Dn.push_back(0.);
-	    // TauFES_p_Up.push_back(0.);
-      // TauFES_p_Dn.push_back(0.);
-      // TauFES_m_Up.push_back(0.);
-      // TauFES_m_Dn.push_back(0.);
-      // TauFES_e_Up.push_back(0.);
-      // TauFES_e_Dn.push_back(0.);
+      TauTES_p_Up.push_back(0.);
+      TauTES_p_Dn.push_back(0.);
+      TauTES_m_Up.push_back(0.);
+      TauTES_m_Dn.push_back(0.);
+      TauTES_e_Up.push_back(0.);
+      TauTES_e_Dn.push_back(0.);
+	    TauFES_p_Up.push_back(0.);
+      TauFES_p_Dn.push_back(0.);
+      TauFES_m_Up.push_back(0.);
+      TauFES_m_Dn.push_back(0.);
+      TauFES_e_Up.push_back(0.);
+      TauFES_e_Dn.push_back(0.);
     }
 
     // HLTMatch1.push_back( userdatahelpers::hasUserFloat(leptons[i],"HLTMatch1") ? userdatahelpers::getUserFloat(leptons[i],"HLTMatch1") : -1 );
@@ -2540,19 +3084,51 @@ void LLNtupleMaker::fillDescriptions(edm::ConfigurationDescriptions& description
   descriptions.addDefault(desc);
 }
 
-
 Float_t LLNtupleMaker::getAllWeight(const vector<const reco::Candidate*>& leptons) 
 {
   Float_t totWeight = 1.;
+  int flav=abs(leptons[0]->pdgId()*leptons[1]->pdgId());
 	
-  for(unsigned int i=0; i<leptons.size(); ++i){ 
+  for(unsigned int i=0; i<leptons.size(); ++i){
     Int_t   myLepID = abs(leptons[i]->pdgId());
-    if (skipMuDataMCWeight&& myLepID==13) return 1.;
-    if (skipEleDataMCWeight&& myLepID==11) return 1.;
+    if (skipMuDataMCWeight && myLepID==13) return 1.;
+    if (skipEleDataMCWeight && myLepID==11) return 1.;
+    if (skipTauDataMCWeight && myLepID==15) return 1.;
     
     float SF = 1.0;
-    float SF_Unc = 0.0;
-  
+    //ele
+    float SF_UncUp = 1.0;
+    float SF_UncDn = 1.0;
+    //mu
+    float SF_UncUp_RECO_syst = 1.0;
+    float SF_UncUp_RECO_stat = 1.0;
+    float SF_UncUp_ID_syst = 1.0;
+    float SF_UncUp_ID_stat = 1.0;
+    float SF_UncUp_ISO_syst = 1.0;
+    float SF_UncUp_ISO_stat = 1.0;
+    float SF_UncDn_RECO_syst = 1.0;
+    float SF_UncDn_RECO_stat = 1.0;
+    float SF_UncDn_ID_syst = 1.0;
+    float SF_UncDn_ID_stat = 1.0;
+    float SF_UncDn_ISO_syst = 1.0;
+    float SF_UncDn_ISO_stat = 1.0;
+    //tau
+    float SF_UncUp_uncert0 = 1.0;
+    float SF_UncUp_uncert1 = 1.0;
+    float SF_UncUp_syst_alleras = 1.0;
+    float SF_UncUp_syst_year = 1.0;
+    float SF_UncUp_syst_dm_year = 1.0;
+    float SF_UncUp_fakeEle = 1.0;
+    float SF_UncUp_fakeMu = 1.0;
+    float SF_UncDn_uncert0 = 1.0;
+    float SF_UncDn_uncert1 = 1.0;
+    float SF_UncDn_syst_alleras = 1.0;
+    float SF_UncDn_syst_year = 1.0;
+    float SF_UncDn_syst_dm_year = 1.0;
+    float SF_UncDn_fakeEle = 1.0;
+    float SF_UncDn_fakeMu = 1.0;
+
+
     Float_t myLepPt = leptons[i]->pt();
     Float_t myLepEta = leptons[i]->eta();
      
@@ -2567,17 +3143,145 @@ Float_t LLNtupleMaker::getAllWeight(const vector<const reco::Candidate*>& lepton
     else if ( myLepEta >= -2.5 && SCeta <= -2.5) mySCeta = -2.49;
     else mySCeta = SCeta;
      
-    bool isCrack;
-    if (myLepID == 11) isCrack = userdatahelpers::getUserFloat(leptons[i],"isCrack");
-    else isCrack = false;
-     
- 
-    SF = lepSFHelper->getSF(year,myLepID,myLepPt,myLepEta, mySCeta, isCrack);
-    SF_Unc = lepSFHelper->getSFError(year,myLepID,myLepPt,myLepEta, mySCeta, isCrack);
+    // bool isCrack;
+    // if (myLepID == 11) isCrack = userdatahelpers::getUserFloat(leptons[i],"isCrack");
+    // else isCrack = false;
 
+    if (myLepID == 11) {
+      SF = lepSFHelper->getSF(year, myLepID, myLepPt, myLepEta, mySCeta, "", "");
+      SF_UncUp = SF + lepSFHelper->getSF(year, myLepID, myLepPt, myLepEta, mySCeta, "unc", "");
+      SF_UncDn = 2*SF - SF_UncUp;
+    }
+    else if (myLepID == 13) {
+      SF = lepSFHelper->getSF(year, myLepID, myLepPt, myLepEta, mySCeta, "", "");
+      SF_UncUp_RECO_syst = SF + lepSFHelper->getSF(year, myLepID, myLepPt, myLepEta, mySCeta, "unc", "RECO_syst");
+      SF_UncDn_RECO_syst = 2*SF - SF_UncUp_RECO_syst;
+      SF_UncUp_RECO_stat = SF + lepSFHelper->getSF(year, myLepID, myLepPt, myLepEta, mySCeta, "unc", "RECO_stat");
+      SF_UncDn_RECO_stat = 2*SF - SF_UncUp_RECO_stat;
+      SF_UncUp_ID_syst = SF + lepSFHelper->getSF(year, myLepID, myLepPt, myLepEta, mySCeta, "unc", "ID_syst");
+      SF_UncDn_ID_syst = 2*SF - SF_UncUp_ID_syst;
+      SF_UncUp_ID_stat = SF + lepSFHelper->getSF(year, myLepID, myLepPt, myLepEta, mySCeta, "unc", "ID_stat");
+      SF_UncDn_ID_stat = 2*SF - SF_UncUp_ID_stat;
+      SF_UncUp_ISO_syst = SF + lepSFHelper->getSF(year, myLepID, myLepPt, myLepEta, mySCeta, "unc", "ISO_syst");
+      SF_UncDn_ISO_syst = 2*SF - SF_UncUp_ISO_syst;
+      SF_UncUp_ISO_stat = SF + lepSFHelper->getSF(year, myLepID, myLepPt, myLepEta, mySCeta, "unc", "ISO_stat");
+      SF_UncDn_ISO_stat = 2*SF - SF_UncUp_ISO_stat;
+    }
+    else {
+      int gm=userdatahelpers::getUserFloat(leptons[i],"genmatch");
+      int dm= userdatahelpers::getUserFloat(leptons[i],"decayMode");
+
+
+      if (gm==5) {
+        if (flav==165) {
+          SF=DeepTauSF_VSjet_ETau->getSFvsDMandPT(myLepPt,dm,gm);
+          SF_UncUp_uncert0=DeepTauSF_VSjet_ETau->getSFvsDMandPT(myLepPt,dm,gm,"uncert0_up");
+          SF_UncUp_uncert1=DeepTauSF_VSjet_ETau->getSFvsDMandPT(myLepPt,dm,gm,"uncert1_up");
+          SF_UncUp_syst_alleras=DeepTauSF_VSjet_ETau->getSFvsDMandPT(myLepPt,dm,gm,"syst_alleras_up");
+          SF_UncUp_syst_year=DeepTauSF_VSjet_ETau->getSFvsDMandPT(myLepPt,dm,gm,"syst_"+std::to_string(year)+(year==2016?(preVFP?"_preVFP":"_postVFP"):"")+"_up");
+          SF_UncUp_syst_dm_year=DeepTauSF_VSjet_ETau->getSFvsDMandPT(myLepPt,dm,gm,"syst_dm"+std::to_string(dm)+"_"+std::to_string(year)+(year==2016?(preVFP?"_preVFP":"_postVFP"):"")+"_up");
+          SF_UncDn_uncert0=DeepTauSF_VSjet_ETau->getSFvsDMandPT(myLepPt,dm,gm,"uncert0_down");
+          SF_UncDn_uncert1=DeepTauSF_VSjet_ETau->getSFvsDMandPT(myLepPt,dm,gm,"uncert1_down");
+          SF_UncDn_syst_alleras=DeepTauSF_VSjet_ETau->getSFvsDMandPT(myLepPt,dm,gm,"syst_alleras_down");
+          SF_UncDn_syst_year=DeepTauSF_VSjet_ETau->getSFvsDMandPT(myLepPt,dm,gm,"syst_"+std::to_string(year)+(year==2016?(preVFP?"_preVFP":"_postVFP"):"")+"_down");
+          SF_UncDn_syst_dm_year=DeepTauSF_VSjet_ETau->getSFvsDMandPT(myLepPt,dm,gm,"syst_dm"+std::to_string(dm)+"_"+std::to_string(year)+(year==2016?(preVFP?"_preVFP":"_postVFP"):"")+"_down");
+
+        }
+        else if (flav==195) {
+          SF=DeepTauSF_VSjet_MuTau->getSFvsDMandPT(myLepPt,dm,gm);
+          SF_UncUp_uncert0=DeepTauSF_VSjet_MuTau->getSFvsDMandPT(myLepPt,dm,gm,"uncert0_up");
+          SF_UncUp_uncert1=DeepTauSF_VSjet_MuTau->getSFvsDMandPT(myLepPt,dm,gm,"uncert1_up");
+          SF_UncUp_syst_alleras=DeepTauSF_VSjet_MuTau->getSFvsDMandPT(myLepPt,dm,gm,"syst_alleras_up");
+          SF_UncUp_syst_year=DeepTauSF_VSjet_MuTau->getSFvsDMandPT(myLepPt,dm,gm,"syst_"+std::to_string(year)+(year==2016?(preVFP?"_preVFP":"_postVFP"):"")+"_up");
+          SF_UncUp_syst_dm_year=DeepTauSF_VSjet_MuTau->getSFvsDMandPT(myLepPt,dm,gm,"syst_dm"+std::to_string(dm)+"_"+std::to_string(year)+(year==2016?(preVFP?"_preVFP":"_postVFP"):"")+"_up");
+          SF_UncDn_uncert0=DeepTauSF_VSjet_MuTau->getSFvsDMandPT(myLepPt,dm,gm,"uncert0_down");
+          SF_UncDn_uncert1=DeepTauSF_VSjet_MuTau->getSFvsDMandPT(myLepPt,dm,gm,"uncert1_down");
+          SF_UncDn_syst_alleras=DeepTauSF_VSjet_MuTau->getSFvsDMandPT(myLepPt,dm,gm,"syst_alleras_down");
+          SF_UncDn_syst_year=DeepTauSF_VSjet_MuTau->getSFvsDMandPT(myLepPt,dm,gm,"syst_"+std::to_string(year)+(year==2016?(preVFP?"_preVFP":"_postVFP"):"")+"_down");
+          SF_UncDn_syst_dm_year=DeepTauSF_VSjet_MuTau->getSFvsDMandPT(myLepPt,dm,gm,"syst_dm"+std::to_string(dm)+"_"+std::to_string(year)+(year==2016?(preVFP?"_preVFP":"_postVFP"):"")+"_down");
+        }
+        else if (flav==225) {
+          SF=DeepTauSF_VSjet_TauTau->getSFvsDMandPT(myLepPt,dm,gm);
+          SF_UncUp_uncert0=DeepTauSF_VSjet_TauTau->getSFvsDMandPT(myLepPt,dm,gm,"uncert0_up");
+          SF_UncUp_uncert1=DeepTauSF_VSjet_TauTau->getSFvsDMandPT(myLepPt,dm,gm,"uncert1_up");
+          SF_UncUp_syst_alleras=DeepTauSF_VSjet_TauTau->getSFvsDMandPT(myLepPt,dm,gm,"syst_alleras_up");
+          SF_UncUp_syst_year=DeepTauSF_VSjet_TauTau->getSFvsDMandPT(myLepPt,dm,gm,"syst_"+std::to_string(year)+(year==2016?(preVFP?"_preVFP":"_postVFP"):"")+"_up");
+          SF_UncUp_syst_dm_year=DeepTauSF_VSjet_TauTau->getSFvsDMandPT(myLepPt,dm,gm,"syst_dm"+std::to_string(dm)+"_"+std::to_string(year)+(year==2016?(preVFP?"_preVFP":"_postVFP"):"")+"_up");
+          SF_UncDn_uncert0=DeepTauSF_VSjet_TauTau->getSFvsDMandPT(myLepPt,dm,gm,"uncert0_down");
+          SF_UncDn_uncert1=DeepTauSF_VSjet_TauTau->getSFvsDMandPT(myLepPt,dm,gm,"uncert1_down");
+          SF_UncDn_syst_alleras=DeepTauSF_VSjet_TauTau->getSFvsDMandPT(myLepPt,dm,gm,"syst_alleras_down");
+          SF_UncDn_syst_year=DeepTauSF_VSjet_TauTau->getSFvsDMandPT(myLepPt,dm,gm,"syst_"+std::to_string(year)+(year==2016?(preVFP?"_preVFP":"_postVFP"):"")+"_down");
+          SF_UncDn_syst_dm_year=DeepTauSF_VSjet_TauTau->getSFvsDMandPT(myLepPt,dm,gm,"syst_dm"+std::to_string(dm)+"_"+std::to_string(year)+(year==2016?(preVFP?"_preVFP":"_postVFP"):"")+"_down");
+        }
+      }
+      else if (gm==1 || gm==3) {
+        if (flav==165) {
+          SF=DeepTauSF_VSe_ETau->getSFvsEta(myLepEta,gm);
+          SF_UncUp_fakeEle=DeepTauSF_VSe_ETau->getSFvsEta(myLepEta,gm,"Up");
+          SF_UncDn_fakeEle=DeepTauSF_VSe_ETau->getSFvsEta(myLepEta,gm,"Down");
+        }
+        else if (flav==195) {
+          SF=DeepTauSF_VSe_MuTau->getSFvsEta(myLepEta,gm);
+          SF_UncUp_fakeEle=DeepTauSF_VSe_MuTau->getSFvsEta(myLepEta,gm,"Up");
+          SF_UncDn_fakeEle=DeepTauSF_VSe_MuTau->getSFvsEta(myLepEta,gm,"Dn");
+        }
+        else if (flav==225) {
+          SF=DeepTauSF_VSe_TauTau->getSFvsEta(myLepEta,gm);
+          SF_UncUp_fakeEle=DeepTauSF_VSe_TauTau->getSFvsEta(myLepEta,gm,"Up");
+          SF_UncDn_fakeEle=DeepTauSF_VSe_TauTau->getSFvsEta(myLepEta,gm,"Dn");
+        }
+      }
+      else if (gm==2 || gm==4) {
+        if (flav==165) { 
+          SF=DeepTauSF_VSmu_ETau->getSFvsEta(myLepEta,gm);
+          SF_UncUp_fakeMu=DeepTauSF_VSmu_ETau->getSFvsEta(myLepEta,gm,"Up");
+          SF_UncDn_fakeMu=DeepTauSF_VSmu_ETau->getSFvsEta(myLepEta,gm,"Dn");
+        }
+        else if (flav==195) {
+          SF=DeepTauSF_VSmu_MuTau->getSFvsEta(myLepEta,gm);
+          SF_UncUp_fakeMu=DeepTauSF_VSmu_MuTau->getSFvsEta(myLepEta,gm,"Up");
+          SF_UncDn_fakeMu=DeepTauSF_VSmu_MuTau->getSFvsEta(myLepEta,gm,"Dn");
+        }
+        else if (flav==225) {
+          SF=DeepTauSF_VSmu_TauTau->getSFvsEta(myLepEta,gm);
+          SF_UncUp_fakeMu=DeepTauSF_VSmu_TauTau->getSFvsEta(myLepEta,gm,"Up");
+          SF_UncDn_fakeMu=DeepTauSF_VSmu_TauTau->getSFvsEta(myLepEta,gm,"Dn");
+        }
+      }
+
+    }
     LepSF.push_back(SF);
-    LepSF_Unc.push_back(SF_Unc);
+    LepSF_UncUp.push_back(SF_UncUp);
+    LepSF_UncDn.push_back(SF_UncDn);
 
+    LepSF_UncUp_RECO_syst.push_back(SF_UncUp_RECO_syst);
+    LepSF_UncDn_RECO_syst.push_back(SF_UncDn_RECO_syst);
+    LepSF_UncUp_RECO_stat.push_back(SF_UncUp_RECO_stat);
+    LepSF_UncDn_RECO_stat.push_back(SF_UncDn_RECO_stat);
+    LepSF_UncUp_ID_syst.push_back(SF_UncUp_ID_syst);
+    LepSF_UncDn_ID_syst.push_back(SF_UncDn_ID_syst);
+    LepSF_UncUp_ID_stat.push_back(SF_UncUp_ID_stat);
+    LepSF_UncDn_ID_stat.push_back(SF_UncDn_ID_stat);
+    LepSF_UncUp_ISO_syst.push_back(SF_UncUp_ISO_syst);
+    LepSF_UncDn_ISO_syst.push_back(SF_UncDn_ISO_syst);
+    LepSF_UncUp_ISO_stat.push_back(SF_UncUp_ISO_stat);
+    LepSF_UncDn_ISO_stat.push_back(SF_UncDn_ISO_stat);
+
+    LepSF_UncUp_uncert0.push_back(SF_UncUp_uncert0);
+    LepSF_UncUp_uncert1.push_back(SF_UncUp_uncert1);
+    LepSF_UncUp_syst_alleras.push_back(SF_UncUp_syst_alleras);
+    LepSF_UncUp_syst_year.push_back(SF_UncUp_syst_year);
+    LepSF_UncUp_syst_dm_year.push_back(SF_UncUp_syst_dm_year);
+    LepSF_UncUp_fakeEle.push_back(SF_UncUp_fakeEle);
+    LepSF_UncUp_fakeMu.push_back(SF_UncUp_fakeMu);
+    LepSF_UncDn_uncert0.push_back(SF_UncDn_uncert0);
+    LepSF_UncDn_uncert1.push_back(SF_UncDn_uncert1);
+    LepSF_UncDn_syst_alleras.push_back(SF_UncDn_syst_alleras);
+    LepSF_UncDn_syst_year.push_back(SF_UncDn_syst_year);
+    LepSF_UncDn_syst_dm_year.push_back(SF_UncDn_syst_dm_year);
+    LepSF_UncDn_fakeEle.push_back(SF_UncDn_fakeEle);
+    LepSF_UncDn_fakeMu.push_back(SF_UncDn_fakeMu);
+    
     totWeight *= SF;
   } 
 
@@ -2691,23 +3395,36 @@ void LLNtupleMaker::BookAllBranches(){
 
   myTree->Book("GenMET", GenMET, failedTreeLevel >= minimalFailedTree);
   myTree->Book("GenMETPhi", GenMETPhi, failedTreeLevel >= minimalFailedTree);
+  myTree->Book("GenMETx", GenMETx, failedTreeLevel >= minimalFailedTree);
+  myTree->Book("GenMETy", GenMETy, failedTreeLevel >= minimalFailedTree);
   myTree->Book("PFMET", PFMET, failedTreeLevel >= fullFailedTree);
   myTree->Book("PFMETPhi", PFMETPhi, failedTreeLevel >= fullFailedTree);
   myTree->Book("METx", METx, failedTreeLevel >= fullFailedTree);
   myTree->Book("METy", METy, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMETTau", PFMETTau, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMETPhiTau", PFMETPhiTau, failedTreeLevel >= fullFailedTree);
-  myTree->Book("METxTau", METxTau, failedTreeLevel >= fullFailedTree);
-  myTree->Book("METyTau", METyTau, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMETJet", PFMETJet, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMETPhiJet", PFMETPhiJet, failedTreeLevel >= fullFailedTree);
-  myTree->Book("METxJet", METxJet, failedTreeLevel >= fullFailedTree);
-  myTree->Book("METyJet", METyJet, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMETRaw", PFMETRaw, failedTreeLevel >= fullFailedTree);
-  myTree->Book("PFMETPhiRaw", PFMETPhiRaw, failedTreeLevel >= fullFailedTree);
-  myTree->Book("METxRaw", METxRaw, failedTreeLevel >= fullFailedTree);
-  myTree->Book("METyRaw", METyRaw, failedTreeLevel >= fullFailedTree);
-  myTree->Book("Pzeta", Pzeta, failedTreeLevel >= fullFailedTree);
+  // myTree->Book("PFMETTau", PFMETTau, failedTreeLevel >= fullFailedTree);
+  // myTree->Book("PFMETPhiTau", PFMETPhiTau, failedTreeLevel >= fullFailedTree);
+  // myTree->Book("METxTau", METxTau, failedTreeLevel >= fullFailedTree);
+  // myTree->Book("METyTau", METyTau, failedTreeLevel >= fullFailedTree);
+  // myTree->Book("PFMETJet", PFMETJet, failedTreeLevel >= fullFailedTree);
+  // myTree->Book("PFMETPhiJet", PFMETPhiJet, failedTreeLevel >= fullFailedTree);
+  // myTree->Book("METxJet", METxJet, failedTreeLevel >= fullFailedTree);
+  // myTree->Book("METyJet", METyJet, failedTreeLevel >= fullFailedTree);
+  // myTree->Book("PFMETRaw", PFMETRaw, failedTreeLevel >= fullFailedTree);
+  // myTree->Book("PFMETPhiRaw", PFMETPhiRaw, failedTreeLevel >= fullFailedTree);
+  // myTree->Book("METxRaw", METxRaw, failedTreeLevel >= fullFailedTree);
+  // myTree->Book("METyRaw", METyRaw, failedTreeLevel >= fullFailedTree);
+  myTree->Book("PFMETRecoil", PFMETRecoil, failedTreeLevel >= fullFailedTree);
+  myTree->Book("PFMETPhiRecoil", PFMETPhiRecoil, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METxRecoil", METxRecoil, failedTreeLevel >= fullFailedTree);
+  myTree->Book("METyRecoil", METyRecoil, failedTreeLevel >= fullFailedTree);
+  myTree->Book("Pzeta1", Pzeta1, failedTreeLevel >= fullFailedTree);
+  myTree->Book("Pzeta2", Pzeta2, failedTreeLevel >= fullFailedTree);
+  myTree->Book("MtLMET", MtLMET, failedTreeLevel >= fullFailedTree);
+
+  myTree->Book("DeltaEtaJJ", DeltaEtaJJ, failedTreeLevel >= fullFailedTree);
+  myTree->Book("DiJetMass", DiJetMass, failedTreeLevel >= fullFailedTree);
+  myTree->Book("VBFJetIdx1", VBFJetIdx1, failedTreeLevel >= fullFailedTree);
+  myTree->Book("VBFJetIdx2", VBFJetIdx2, failedTreeLevel >= fullFailedTree);
 
   // myTree->Book("METxUPTES", METxUPTES, failedTreeLevel >= fullFailedTree);
   // myTree->Book("METyUPTES", METyUPTES, failedTreeLevel >= fullFailedTree);
@@ -2762,6 +3479,7 @@ void LLNtupleMaker::BookAllBranches(){
   myTree->Book("nCleanedJetsPt30_jerDn",nCleanedJetsPt30_jerDn, failedTreeLevel >= minimalFailedTree);
   myTree->Book("nCleanedJetsPt30BTagged",nCleanedJetsPt30BTagged, failedTreeLevel >= minimalFailedTree);
   myTree->Book("nCleanedJetsPt30BTagged_bTagSF",nCleanedJetsPt30BTagged_bTagSF, failedTreeLevel >= minimalFailedTree);
+  myTree->Book("nCleanedJetsPt25BTagged_bTagSF",nCleanedJetsPt25BTagged_bTagSF, failedTreeLevel >= minimalFailedTree);
   myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesUp",nCleanedJetsPt30BTagged_bTagSF_jesUp, failedTreeLevel >= minimalFailedTree);
   myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesUp_Total",nCleanedJetsPt30BTagged_bTagSF_jesUp_Total, failedTreeLevel >= fullFailedTree);
   myTree->Book("nCleanedJetsPt30BTagged_bTagSF_jesUp_Abs",nCleanedJetsPt30BTagged_bTagSF_jesUp_Abs, failedTreeLevel >= fullFailedTree);
@@ -2807,6 +3525,7 @@ void LLNtupleMaker::BookAllBranches(){
   myTree->Book("LLPt",LLPt, false);
   myTree->Book("LLEta",LLEta, false);
   myTree->Book("LLPhi",LLPhi, false);
+  myTree->Book("LLDR",LLDR, false);
   myTree->Book("LLFlav",LLFlav, false);
   myTree->Book("LLisGoodTau",LLisGoodTau, false);
 
@@ -2816,6 +3535,20 @@ void LLNtupleMaker::BookAllBranches(){
     myTree->Book("LLSVEta",LLSVEta, false);
     myTree->Book("LLSVPhi",LLSVPhi, false);
     myTree->Book("LLGoodMass",LLGoodMass, false);
+
+    if (theChannel==SR) {
+      myTree->Book("LLSVMass_up",LLSVMass_up, false);
+      myTree->Book("LLSVPt_up",LLSVPt_up, false);
+      myTree->Book("LLSVEta_up",LLSVEta_up, false);
+      myTree->Book("LLSVPhi_up",LLSVPhi_up, false);
+      myTree->Book("LLGoodMass_up",LLGoodMass_up, false);
+      myTree->Book("LLSVMass_dn",LLSVMass_dn, false);
+      myTree->Book("LLSVPt_dn",LLSVPt_dn, false);
+      myTree->Book("LLSVEta_dn",LLSVEta_dn, false);
+      myTree->Book("LLSVPhi_dn",LLSVPhi_dn, false);
+      myTree->Book("LLGoodMass_dn",LLGoodMass_dn, false);
+      // myTree->Book("Names_shift",Names_shift, false);
+    }
       
     // myTree->Book("Z2Mass_TESup",Z2Mass_TESup, false);
     // myTree->Book("Z2SVMass_TESup",Z2SVMass_TESup, false);
@@ -2900,16 +3633,48 @@ void LLNtupleMaker::BookAllBranches(){
   myTree->Book("LepTime",LepTime, false);
   myTree->Book("LepisID",LepisID, false);
   myTree->Book("LepisLoose",LepisLoose, false);
-  myTree->Book("LepBDT",LepBDT, false);
+  // myTree->Book("LepBDT",LepBDT, false);
   myTree->Book("LepisCrack",LepisCrack, false);
-  myTree->Book("LepMissingHit",LepMissingHit, false);
+  myTree->Book("LepMissingHit",LepMissingHit, false);  
+  myTree->Book("LepConversionVeto",LepConversionVeto, false);
   myTree->Book("LepChargedHadIso",LepChargedHadIso, false);
   myTree->Book("LepNeutralHadIso",LepNeutralHadIso, false);
   myTree->Book("LepPhotonIso",LepPhotonIso, false);
   myTree->Book("LepPUIsoComponent",LepPUIsoComponent, false);
   myTree->Book("LepCombRelIsoPF",LepCombRelIsoPF, false);
+
   myTree->Book("LepSF",LepSF, false);
-  myTree->Book("LepSF_Unc",LepSF_Unc, false);
+  myTree->Book("LepSF_UncUp",LepSF_UncUp, false);
+  myTree->Book("LepSF_UncDn",LepSF_UncDn, false);
+  myTree->Book("LepSF_UncUp_RECO_syst",LepSF_UncUp_RECO_syst, false);
+  myTree->Book("LepSF_UncUp_RECO_stat",LepSF_UncUp_RECO_stat, false);
+  myTree->Book("LepSF_UncUp_ID_syst",LepSF_UncUp_ID_syst, false);
+  myTree->Book("LepSF_UncUp_ID_stat",LepSF_UncUp_ID_stat, false);
+  myTree->Book("LepSF_UncUp_ISO_syst",LepSF_UncUp_ISO_syst, false);
+  myTree->Book("LepSF_UncUp_ISO_stat",LepSF_UncUp_ISO_stat, false);
+  myTree->Book("LepSF_UncDn_RECO_syst",LepSF_UncDn_RECO_syst, false);
+  myTree->Book("LepSF_UncDn_RECO_stat",LepSF_UncDn_RECO_stat, false);
+  myTree->Book("LepSF_UncDn_ID_syst",LepSF_UncDn_ID_syst, false);
+  myTree->Book("LepSF_UncDn_ID_stat",LepSF_UncDn_ID_stat, false);
+  myTree->Book("LepSF_UncDn_ISO_syst",LepSF_UncDn_ISO_syst, false);
+  myTree->Book("LepSF_UncDn_ISO_stat",LepSF_UncDn_ISO_stat, false);
+
+  myTree->Book("LepSF_UncUp_uncert0",LepSF_UncUp_uncert0, false);
+  myTree->Book("LepSF_UncUp_uncert1",LepSF_UncUp_uncert1, false);
+  myTree->Book("LepSF_UncUp_syst_alleras",LepSF_UncUp_syst_alleras, false);
+  myTree->Book("LepSF_UncUp_syst_year",LepSF_UncUp_syst_year, false);
+  myTree->Book("LepSF_UncUp_syst_dm_year",LepSF_UncUp_syst_dm_year, false);
+  myTree->Book("LepSF_UncUp_fakeEle",LepSF_UncUp_fakeEle, false);
+  myTree->Book("LepSF_UncUp_fakeMu",LepSF_UncUp_fakeMu, false);
+  myTree->Book("LepSF_UncDn_uncert0",LepSF_UncDn_uncert0, false);
+  myTree->Book("LepSF_UncDn_uncert1",LepSF_UncDn_uncert1, false);
+  myTree->Book("LepSF_UncDn_syst_alleras",LepSF_UncDn_syst_alleras, false);
+  myTree->Book("LepSF_UncDn_syst_year",LepSF_UncDn_syst_year, false);
+  myTree->Book("LepSF_UncDn_syst_dm_year",LepSF_UncDn_syst_dm_year, false);
+  myTree->Book("LepSF_UncDn_fakeEle",LepSF_UncDn_fakeEle, false);
+  myTree->Book("LepSF_UncDn_fakeMu",LepSF_UncDn_fakeMu, false);
+
+
   myTree->Book("LepScale_Total_Up",LepScale_Total_Up, false);
   myTree->Book("LepScale_Total_Dn",LepScale_Total_Dn, false);
   myTree->Book("LepScale_Stat_Up",LepScale_Stat_Up, false);
@@ -2930,18 +3695,18 @@ void LLNtupleMaker::BookAllBranches(){
   myTree->Book("TauVSjet",TauVSjet, false);
   myTree->Book("TauDecayMode",TauDecayMode, false);
   myTree->Book("TauGenMatch",TauGenMatch, false);
-  // myTree->Book("TauTES_p_Up",TauTES_p_Up, false);
-  // myTree->Book("TauTES_p_Dn",TauTES_p_Dn, false);
-  // myTree->Book("TauTES_m_Up",TauTES_m_Up, false);
-  // myTree->Book("TauTES_m_Dn",TauTES_m_Dn, false);
-  // myTree->Book("TauTES_e_Up",TauTES_e_Up, false);
-  // myTree->Book("TauTES_e_Dn",TauTES_e_Dn, false);
-  // myTree->Book("TauFES_p_Up",TauFES_p_Up, false);
-  // myTree->Book("TauFES_p_Dn",TauFES_p_Dn, false);
-  // myTree->Book("TauFES_m_Up",TauFES_m_Up, false);
-  // myTree->Book("TauFES_m_Dn",TauFES_m_Dn, false);
-  // myTree->Book("TauFES_e_Up",TauFES_e_Up, false);
-  // myTree->Book("TauFES_e_Dn",TauFES_e_Dn, false);
+  myTree->Book("TauTES_p_Up",TauTES_p_Up, false);
+  myTree->Book("TauTES_p_Dn",TauTES_p_Dn, false);
+  myTree->Book("TauTES_m_Up",TauTES_m_Up, false);
+  myTree->Book("TauTES_m_Dn",TauTES_m_Dn, false);
+  myTree->Book("TauTES_e_Up",TauTES_e_Up, false);
+  myTree->Book("TauTES_e_Dn",TauTES_e_Dn, false);
+  myTree->Book("TauFES_p_Up",TauFES_p_Up, false);
+  myTree->Book("TauFES_p_Dn",TauFES_p_Dn, false);
+  myTree->Book("TauFES_m_Up",TauFES_m_Up, false);
+  myTree->Book("TauFES_m_Dn",TauFES_m_Dn, false);
+  myTree->Book("TauFES_e_Up",TauFES_e_Up, false);
+  myTree->Book("TauFES_e_Dn",TauFES_e_Dn, false);
 
   myTree->Book("fsrPt",fsrPt, false);
   myTree->Book("fsrEta",fsrEta, false);
@@ -3075,6 +3840,13 @@ void LLNtupleMaker::BookAllBranches(){
     myTree->Book("L1prefiringWeight", L1prefiringWeight, false);
     myTree->Book("L1prefiringWeightUp", L1prefiringWeightUp, false);
     myTree->Book("L1prefiringWeightDn", L1prefiringWeightDn, false);
+    myTree->Book("L1prefiringWeight_ECAL", L1prefiringWeight_ECAL, false);
+    myTree->Book("L1prefiringWeightUp_ECAL", L1prefiringWeightUp_ECAL, false);
+    myTree->Book("L1prefiringWeightDn_ECAL", L1prefiringWeightDn_ECAL, false);
+    myTree->Book("L1prefiringWeight_Mu", L1prefiringWeight_Mu, false);
+    myTree->Book("L1prefiringWeightUp_Mu", L1prefiringWeightUp_Mu, false);
+    myTree->Book("L1prefiringWeightDn_Mu", L1prefiringWeightDn_Mu, false);
+
     myTree->Book("xsec", xsection, failedTreeLevel >= minimalFailedTree);
     myTree->Book("genxsec", genxsection, failedTreeLevel >= minimalFailedTree);
     myTree->Book("genBR", genbranchingratio, failedTreeLevel >= minimalFailedTree);
@@ -3148,7 +3920,7 @@ void LLNtupleMaker::BookAllBranches(){
 	myTree->Book("ggH_NNLOPS_weight", ggH_NNLOPS_weight, failedTreeLevel >= minimalFailedTree);
 	myTree->Book("ggH_NNLOPS_weight_unc", ggH_NNLOPS_weight_unc, failedTreeLevel >= minimalFailedTree);
 	myTree->Book("qcd_ggF_uncertSF", qcd_ggF_uncertSF, failedTreeLevel >= minimalFailedTree);
-      }	  
+      }
 
     myTree->Book("PythiaWeight_isr_muR4", PythiaWeight_isr_muR4, failedTreeLevel >= minimalFailedTree);
     myTree->Book("PythiaWeight_isr_muR2", PythiaWeight_isr_muR2, failedTreeLevel >= minimalFailedTree);

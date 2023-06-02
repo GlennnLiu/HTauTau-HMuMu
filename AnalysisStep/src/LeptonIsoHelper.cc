@@ -52,16 +52,16 @@ InputTag LeptonIsoHelper::getEleRhoTag(int sampleType, int setup) {
 float LeptonIsoHelper::combRelIsoPF(int sampleType, int setup, double rho, const pat::Muon& l, float fsr, int correctionType) {
 
   // for cone size R=0.4 :
-  //float PFChargedHadIso   = l.chargedHadronIso();
-  //float PFNeutralHadIso   = l.neutralHadronIso();
-  //float PFPhotonIso       = l.photonIso();
-  //float PFPUChargedHadIso = l.puChargedHadronIso();
+  float PFChargedHadIso   = l.chargedHadronIso();
+  float PFNeutralHadIso   = l.neutralHadronIso();
+  float PFPhotonIso       = l.photonIso();
+  float PFPUChargedHadIso = l.puChargedHadronIso();
 
   // for cone size R=0.3 :
-  float PFChargedHadIso   = l.pfIsolationR03().sumChargedHadronPt;
-  float PFNeutralHadIso   = l.pfIsolationR03().sumNeutralHadronEt;
-  float PFPhotonIso       = l.pfIsolationR03().sumPhotonEt;
-  float PFPUChargedHadIso = l.pfIsolationR03().sumPUPt;
+  // float PFChargedHadIso   = l.pfIsolationR03().sumChargedHadronPt;
+  // float PFNeutralHadIso   = l.pfIsolationR03().sumNeutralHadronEt;
+  // float PFPhotonIso       = l.pfIsolationR03().sumPhotonEt;
+  // float PFPUChargedHadIso = l.pfIsolationR03().sumPUPt;
     
   if (correctionType==0) {
     return  (PFChargedHadIso + PFNeutralHadIso + PFPhotonIso - fsr)/l.pt();

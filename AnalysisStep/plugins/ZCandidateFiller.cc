@@ -532,10 +532,8 @@ void ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
   iEvent.getByToken(softLeptonToken, softleptoncoll);
   vector<reco::CandidatePtr> goodisoleptonPtrs;
   for( View<reco::Candidate>::const_iterator lep = softleptoncoll->begin(); lep != softleptoncoll->end(); ++ lep ){
-    if((bool)userdatahelpers::getUserFloat(&*lep,"isGood")
-       && (bool)userdatahelpers::getUserFloat(&*lep,"passCombRelIsoPFFSRCorr") // FSR-corrected iso
-       && abs(lep->pdgId())!=15
-       ){
+    if(abs(lep->pdgId())!=15 && (bool)userdatahelpers::getUserFloat(&*lep,"isGood")
+       && (userdatahelpers::getUserFloat(&*lep,"combRelIsoPFFSRCorr")<0.5) ){
       const reco::CandidatePtr lepPtr(softleptoncoll,lep-softleptoncoll->begin());
       goodisoleptonPtrs.push_back(lepPtr);
     }
@@ -546,26 +544,47 @@ void ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
   float tau1Pt = -1;
   int tau2Iso = -1;
   float tau2Pt = -1;
-  float best_ptSum = -1;
+//   float best_ptSum = -1;
 
   //--- Loop over LL Candidates
   for(unsigned int i = 0; i < LLCands->size(); ++i) {
     const CompositeCandidate& c = (*LLCands)[i];
     pat::CompositeCandidate myCand(c); 
 
-    if (embedDaughterFloats){  
-      userdatahelpers::embedDaughterData(myCand);
-    }
-
     int id0 = myCand.daughter(0)->pdgId();
     int id1 = myCand.daughter(1)->pdgId();
+    //Check the orders: d0 to be the one with smaller pdgid, then to be the one with smaller pt
+    if (abs(id0)>abs(id1)) {
+        const reco::Candidate* d0=myCand.daughter(0)->clone();
+        const reco::Candidate* d1=myCand.daughter(1)->clone();
+        myCand.clearDaughters();
+        myCand.addDaughter(*d1);
+        myCand.addDaughter(*d0);
+    }
+    else if (abs(id0)==abs(id1)) {
+        if (myCand.daughter(0)->pt()>myCand.daughter(1)->pt()) {
+            const reco::Candidate* d0=myCand.daughter(0)->clone();
+            const reco::Candidate* d1=myCand.daughter(1)->clone();
+            myCand.clearDaughters();
+            myCand.addDaughter(*d1);
+            myCand.addDaughter(*d0);
+        }
+    }
+
+    id0 = myCand.daughter(0)->pdgId();
+    id1 = myCand.daughter(1)->pdgId();
+    // cout<<myCand.numberOfDaughters()<<endl;
+
+    if (embedDaughterFloats){
+      userdatahelpers::embedDaughterData(myCand);
+    }
 
     // ------------------------------
     // FSR recovery
     // ------------------------------
     if (FSRMode==2) { // Run II
       float mll = myCand.mass(); // pre-FSR mass
-      for (int dauIdx=0; dauIdx<2; ++dauIdx) { 
+      for (int dauIdx=0; dauIdx<2; ++dauIdx) {
         const Candidate* d = myCand.daughter(dauIdx);
         const PhotonPtrVector* gammas = userdatahelpers::getUserPhotons(d);
         if (gammas==0) continue;
@@ -637,7 +656,7 @@ void ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
     }
     if (nExtraLep > 0) continue;
 
-    //Extra pt and eta cuts
+    //Extra pt and eta cuts, and isolation requirement
     if (abs(id0*id1)==169) {
         if (l1->pt()<20 || l2->pt()<20) continue;
     }
@@ -656,9 +675,11 @@ void ZCandidateFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup
     else if (abs(id0)==15 && abs(id1)==13) {
         if (l1->pt()<30 || l2->pt()<20) continue;
     }
-    else if (abs(id0)==11 && abs(id1)==13) {
+    else if (abs(id0*id1)==143) {
         if (l1->pt()>l2->pt()) {if (l1->pt()<24 || l2->pt()<15) continue;}
         else {if (l1->pt()<15 || l2->pt()<24) continue;}
+        if (abs(id0)==11 && !userdatahelpers::getUserFloat(l1,"ConversionVeto")) continue;
+        if (abs(id1)==11 && !userdatahelpers::getUserFloat(l2,"ConversionVeto")) continue;
     }
 
 

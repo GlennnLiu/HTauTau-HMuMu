@@ -10,6 +10,16 @@ enum Channel {mumu=0,
 			tautau=3,
 			emu=4,
 			ee=5,
+			SR=6,
+			CRTT=7,
+			CRQCD=8,
+			CRWJ=9,
+			CRQCDvSR=10,
+			CRQCDvSROS=11,
+			CRQCDvSRSS=12,
+			CRWJvSR=13,
+			CRAPPOS=14,
+			CRAPPSS=15,
 			NONE = 99, BUGGY=666};
 
 //Return string corresponding to integer code 

@@ -8,6 +8,8 @@
 <use name="TrackingTools/Records"/>
 <use name="RecoVertex/KinematicFit"/>
 <use name="CondFormats/BTauObjects"/>
+<use name="HTT-utilities/RecoilCorrections"/>
+<use name="TauPOG/TauIDSFs"/>
 <use name="root"/>
 <use name="roofit"/>
 <use name="CLHEP"/>

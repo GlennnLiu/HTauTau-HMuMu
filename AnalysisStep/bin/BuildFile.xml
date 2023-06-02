@@ -5,7 +5,7 @@
 <use name="rootrflx"/>
 <use name="roofitcore"/>
 
-<library   file="../test/ZpXEstimation/src/*.cpp" name="HTauTauHMuMuAnalysisStepTestZpXEstimationSrc">
+<!-- <library   file="../test/ZpXEstimation/src/*.cpp" name="HTauTauHMuMuAnalysisStepTestZpXEstimationSrc">
 </library>
 
 <library   file="../test/Plotter/src/*.cpp" name="HTauTauHMuMuAnalysisStepTestPlotterSrc">
@@ -37,4 +37,4 @@
 <bin   name="CreateDatacards" file="../test/Datacards/CreateDatacards.cpp">
    <lib   name="HTauTauHMuMuAnalysisStepTestDatacardsSrc"/>
 </bin>
-
+ -->

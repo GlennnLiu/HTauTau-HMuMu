@@ -94,20 +94,12 @@ void ShiftMETcentral::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     int itau=0;
     for(pat::TauCollection::const_iterator inputTau = tauCorrectedHandle->begin(); inputTau != tauCorrectedHandle->end(); ++inputTau, ++itau)
     {
-      //cout << "-----> iTau " << itau << endl;
-
-      //---Clone the corrected and uncorrected pat::Tau
       pat::Tau tauCorrected(*inputTau);
       pat::Tau tauUncorrected(*((*tauUncorrectedHandle)[itau].get()));
 
       // cast to reco::Candidate*
       const reco::Candidate* l_Uncorrected = (const reco::Candidate*)&tauUncorrected;
       const reco::Candidate* l_Corrected   = (const reco::Candidate*)&tauCorrected;
-      //cout << "   --> reco cand Uncorrected: " << LorentzVectorE(l_Uncorrected->p4()) << endl;
-      //cout << "   --> reco cand Uncorrected: " << l_Uncorrected->px() << " " << l_Uncorrected->py() << " " << l_Uncorrected->pz() << endl;
-      //cout << "   --> reco cand Corrected  : " << LorentzVectorE(l_Corrected->p4()) << endl;
-      //cout << "   --> reco cand Corrected  : " << l_Corrected->px() << " " << l_Corrected->py() << " " << l_Corrected->pz() << endl;
-        
       // Unshifted tau
       TLorentzVector pfour;
       pfour.SetPxPyPzE(l_Uncorrected->px(), l_Uncorrected->py(), l_Uncorrected->pz(), l_Uncorrected->energy());
@@ -118,11 +110,6 @@ void ShiftMETcentral::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
       // Compute delta
       deltaTaus += ( pfourShifted - pfour );
-
-      //cout << "---> pfour       : " << pfour.Px() << " / " << pfour.Py() << endl;
-      //cout << "---> pfourShifted: " << pfourShifted.Px() << " / " << pfourShifted.Py() << endl;
-      //cout << "---> deltaTaus   : " << deltaTaus.Px() << " / " << deltaTaus.Py() << endl;
-
     } // end loop on taus
 
     for(auto jet = jetHandle->begin(); jet != jetHandle->end(); ++jet) {
@@ -132,8 +119,17 @@ void ShiftMETcentral::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       TLorentzVector pfour, pfourShifted;
       pfourShifted.SetPxPyPzE(j.px(),j.py(),j.pz(),j.energy());
       
-      if (j.pt()>0) deltaJets += pfourShifted*(1-j.userFloat("RawPt")/j.pt());
+      if (j.pt()>0) deltaJets += pfourShifted*(1-j.userFloat("pt_JEC_noJER")/j.pt());
     }
+    
+    // //MET recoil correction
+    // TString fileName;
+    // if (setup==2016) fileName="RecoilCorrections/data/TypeI-PFMet_Run2016_legacy.root";
+    // else if (setup==2017) fileName="RecoilCorrections/data/Type1_PFMET_2017.root";
+    // else fileName="RecoilCorrections/data/TypeI-PFMet_Run2018.root";
+
+    // raw one
+    out_MET_ptr->push_back(patMET);
     
     // Calculate the correction
     float shiftMetPx = patMET.px() - deltaTaus.Px() - deltaJets.Px();
@@ -161,9 +157,6 @@ void ShiftMETcentral::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     corrMEtJet.setP4(shiftedMetP4Jet);
     corrMEtJet.setSignificanceMatrix(patMET.getSignificanceMatrix());
     out_MET_ptr->push_back(corrMEtJet);
-
-    // raw one
-    out_MET_ptr->push_back(patMET);
 
     iEvent.put(std::move(out_MET_ptr));
 }

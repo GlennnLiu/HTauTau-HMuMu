@@ -148,8 +148,8 @@ int MCHistoryTools::getParentCode(const reco::GenParticle* genLep) {
   const Candidate* particle = getParent(genLep);
   
   if (particle) {
-    parentId = particle->pdgId();
-    if ((parentId == 23 || abs(parentId == 24)) && particle->mother()!=0) {
+    parentId = abs(particle->pdgId());
+    if ((parentId == 23 || parentId == 24) && particle->mother()!=0) {
       if (getParent((reco::GenParticle*)particle)->pdgId() == 25) parentId = 25;
     }
   }
@@ -193,26 +193,26 @@ MCHistoryTools::init() {
       if (theGenH==0) theGenH = &*p; // Consider only the first one in the chain
     }
   }
-
+  std::vector<const reco::Candidate *> backupLepts;
   for( View<Candidate>::const_iterator p = particles->begin(); p != particles->end(); ++ p ) {
     int id = abs(p->pdgId());
-    if (id==23) {
+    if (id==23 || id==24) {
       if (theGenH!=0) {
         if (getParentCode((const GenParticle*)&*p)==25) {
-          theGenZ.push_back(&*p);
+          theGenV.push_back(&*p);
         }
         else theAssociatedV.push_back(&*p);
       }
-      else theGenZ.push_back(&*p);
+      else theGenV.push_back(&*p);
     }
 
-    // W/Z from associated production (ie not from H)
-    else if (id==24) {
-        if (p->mother()!=0 && p->mother()->pdgId()!=id) {
-	      int pid = getParentCode((const GenParticle*)&*p);
-	      if (pid!=25) theAssociatedV.push_back(&*p);
-      }
-    }
+    // // W/Z from associated production (ie not from H)
+    // else if (id==24) {
+    //   if (p->mother()!=0 && p->mother()->pdgId()!=id) {
+	  //     int pid = getParentCode((const GenParticle*)&*p);
+	  //     if (pid!=25) theAssociatedV.push_back(&*p);
+    //   }
+    // }
     
     // Prompt leptons
     else if ((id== 13 || id==11 || id==15) && (p->mother()!=0)) {
@@ -225,8 +225,8 @@ MCHistoryTools::init() {
       else {
         // cout<<"mid: "<<mid<<"; pid: "<<id<<"."<<endl;
         if (mid == 23) theGenLeps.push_back(&*p);
-        else if (mid == 1 || mid == 2 || mid == 3 || mid == 4 || mid == 5 || mid == 6 || mid == 21) {
-          if (theGenLeps.size()<2) theGenLeps.push_back(&*p);
+        else if (mid == 1 || mid == 2 || mid == 3 || mid == 4 || mid == 5 || mid == 6 || mid == 7 || mid == 8 || mid == 9 || mid == 21 || mid == 24) {
+          if (backupLepts.size()<2) backupLepts.push_back(&*p);
         }
         else theAssociatedLeps.push_back(&*p);
       }
@@ -265,6 +265,7 @@ MCHistoryTools::init() {
       }
     }
   } // end loop on particles
+  if (theGenLeps.size()==0) theGenLeps=backupLepts;
 
   //FIXME just check consistency of FSR
   for (unsigned j=0; j<theGenFSRParents.size(); ++j) {
@@ -319,12 +320,12 @@ MCHistoryTools::init() {
     bool do_SF_OS_check = true;
     
     if (processID == 900104 || processID == 900105 || processID == 900106) do_SF_OS_check = false;
-    if ( do_SF_OS_check && (iZ22==-1 || theGenLeps[iZ21]->pdgId()+theGenLeps[iZ22]->pdgId()!=0) ) {  //Test remaining conditions: Z2 is found and SF, OS
-      cout << "MCHistoryTools: Cannot sort leptons ";
-      for (int i=0; i<4; ++i) cout << theGenLeps[i]->pdgId() << " ";
-      cout << iZ11 << " " << iZ12 << " " << iZ21 << " " << iZ22 << endl;
-      abort();
-    }    
+    // if ( do_SF_OS_check && (iZ22==-1 || theGenLeps[iZ21]->pdgId()+theGenLeps[iZ22]->pdgId()!=0) ) {  //Test remaining conditions: Z2 is found and SF, OS
+    //   cout << "MCHistoryTools: Cannot sort leptons ";
+    //   for (int i=0; i<4; ++i) cout << theGenLeps[i]->pdgId() << " ";
+    //   cout << iZ11 << " " << iZ12 << " " << iZ21 << " " << iZ22 << endl;
+    //   abort();
+    // }    
     if( (iZ11 != iZ12 && iZ21 != iZ22) || do_SF_OS_check) {// if do_SF_OS_check and same indexes something has gone bad, let's crash and check
        // Sort leptons by sign
        if (theGenLeps[iZ11]->pdgId() < 0 ) {
@@ -524,6 +525,19 @@ MCHistoryTools::genFinalState(){
     }
   }
   // cout<<gen_finalState<<endl;
+  // if (gen_finalState==BUGGY || gen_finalState==NONE) {
+  //   cout<<"Wrong gen_finalState"<<endl;
+  //   for( View<Candidate>::const_iterator p = particles->begin(); p != particles->end(); ++ p ) {
+  //     int id = abs(p->pdgId());
+  //     if ((id== 13 || id==11 || id==15) && (p->mother()!=0)) {
+  //       int mid = abs(p->mother()->pdgId());
+  //       int pid = abs(getParentCode((const GenParticle*)&*p));
+  //       // if (theGenH==0) {
+  //         cout<<"id: "<<id<<"; mid: "<<mid<<"; final mid: "<<pid<<"."<<endl;
+  //       // }
+  //     }
+  //   }
+  // }
   return gen_finalState;
 }
 

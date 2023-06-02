@@ -117,7 +117,7 @@ EleFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     float PFPhotonIso       = l.pfIsolationVariables().sumPhotonEt;
 
     float SCeta = l.superCluster()->eta(); 
-    float fSCeta = fabs(SCeta);
+    // float fSCeta = fabs(SCeta);
 
     float combRelIsoPF = LeptonIsoHelper::combRelIsoPF(sampleType, setup, rho, l);
 
@@ -129,56 +129,41 @@ EleFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     float dz  = std::abs(l.dB(pat::Electron::PVDZ));;      
 
 	  
-    // Load correct RunII BDT ID+iso
-    float BDT = -99;
-    if      ( setup == 2016 ) BDT = l.userFloat("ElectronMVAEstimatorRun2Summer16ULIdIsoValues");
-    else if ( setup == 2017 ) BDT = l.userFloat("ElectronMVAEstimatorRun2Summer17ULIdIsoValues");
-    else if ( setup == 2018 ) BDT = l.userFloat("ElectronMVAEstimatorRun2Summer18ULIdIsoValues");
-//    cout << "BDT = " << BDT << endl;
+    // // Load correct RunII BDT ID+iso
+    // float BDT = -99;
+    // if      ( setup == 2016 ) BDT = l.userFloat("ElectronMVAEstimatorRun2Summer16ULIdIsoValues");
+    // else if ( setup == 2017 ) BDT = l.userFloat("ElectronMVAEstimatorRun2Summer17ULIdIsoValues");
+    // else if ( setup == 2018 ) BDT = l.userFloat("ElectronMVAEstimatorRun2Summer18ULIdIsoValues");
     
-    float pt = l.pt();
+    float isEleID80         = l.electronID("mvaEleID_Fall17_iso_V2_wp80");
+    float isEleNoIsoID80    = l.electronID("mvaEleID_Fall17_noIso_V2_wp80");
+    float isEleID90         = l.electronID("mvaEleID_Fall17_iso_V2_wp90");
+    float isEleNoIsoID90    = l.electronID("mvaEleID_Fall17_noIso_V2_wp90");
+    float isEleIDLoose      = l.electronID("mvaEleID_Fall17_iso_V2_wpLoose");
+    float isEleNoIsoIDLoose = l.electronID("mvaEleID_Fall17_noIso_V2_wpLoose");
+    // float isEleID80         = l.electronID("mvaEleID-Fall17-iso-V2-wp80");
+    // float isEleNoIsoID80    = l.electronID("mvaEleID-Fall17-noIso-V2-wp80");
+    // float isEleID90         = l.electronID("mvaEleID-Fall17-iso-V2-wp90");
+    // float isEleNoIsoID90    = l.electronID("mvaEleID-Fall17-noIso-V2-wp90");
+    // float isEleIDLoose      = l.electronID("mvaEleID-Fall17-iso-V2-wpLoose");
+    // float isEleNoIsoIDLoose = l.electronID("mvaEleID-Fall17-noIso-V2-wpLoose");
+    
+    // float pt = l.pt();
 
-	  
-    bool isBDT = false;
+    l.addUserFloat("isEleID80",isEleID80);
+    l.addUserFloat("isEleNoIsoID80",isEleNoIsoID80);
+    l.addUserFloat("isEleID90",isEleID90);
+    l.addUserFloat("isEleNoIsoID90",isEleNoIsoID90);
+    l.addUserFloat("isEleIDLoose",isEleIDLoose);
+    l.addUserFloat("isEleNoIsoIDLoose",isEleNoIsoIDLoose);
 
-    if ( setup==2016 )
-    {
-       //WP taken from https://github.com/asculac/cmssw/blob/Electron_XGBoost_MVA_16UL_17UL/RecoEgamma/ElectronIdentification/python/Identification/mvaElectronID_Summer16UL_ID_ISO_cff.py#L27-L34 and transfered with https://github.com/cms-sw/cmssw/blob/CMSSW_9_4_X/RecoEgamma/EgammaTools/interface/MVAValueMapProducer.h#L145 so that they are between -1 and 1
-       isBDT         = (pt<=10 && ((fSCeta<0.8                  && BDT >  0.9557993256) ||
-                                   (fSCeta>=0.8 && fSCeta<1.479 && BDT >  0.9475406570) ||
-                                   (fSCeta>=1.479               && BDT >  0.9285158721)))
-                    || (pt>10  && ((fSCeta<0.8                  && BDT >  0.3272075608) ||
-                                   (fSCeta>=0.8 && fSCeta<1.479 && BDT >  0.2468345995) ||
-                                   (fSCeta>=1.479               && BDT >  -0.5955762814)));
-    }
-	 else if (setup==2017)
-	 {
-	   //WP taken from https://github.com/asculac/cmssw/blob/Electron_XGBoost_MVA_16UL_17UL/RecoEgamma/ElectronIdentification/python/Identification/mvaElectronID_Summer17UL_ID_ISO_cff.py#L27-L34 and transfered with https://github.com/cms-sw/cmssw/blob/CMSSW_9_4_X/RecoEgamma/EgammaTools/interface/MVAValueMapProducer.h#L145 so that they are between -1 and 1
-       isBDT         = (pt<=10 && ((fSCeta<0.8                  && BDT >  0.9128577458) ||
-                                   (fSCeta>=0.8 && fSCeta<1.479 && BDT >  0.9056792368) ||
-                                   (fSCeta>=1.479               && BDT >  0.9439440575)))
-                    || (pt>10  && ((fSCeta<0.8                  && BDT >  0.1559788054) ||
-                                   (fSCeta>=0.8 && fSCeta<1.479 && BDT >  0.0273863727) ||
-                                   (fSCeta>=1.479               && BDT >  -0.5532483665)));
-	 }
-    else if ( setup==2018 )
-    {
-       //WP taken from https://github.com/asculac/cmssw/blob/e379e4dd45bb70374cae460a44caff784da92e94/RecoEgamma/ElectronIdentification/python/Identification/mvaElectronID_Summer18UL_ID_ISO_cff.py#L27-L34 and transfered with https://github.com/cms-sw/cmssw/blob/CMSSW_9_4_X/RecoEgamma/EgammaTools/interface/MVAValueMapProducer.h#L145 so that they are between -1 and 1
-       isBDT         = (pt<=10 && ((fSCeta<0.8                  && BDT >  0.9044286167) ||
-                                   (fSCeta>=0.8 && fSCeta<1.479 && BDT >  0.9094166886) ||
-                                   (fSCeta>=1.479               && BDT >  0.9443653660)))
-                    || (pt>10  && ((fSCeta<0.8                  && BDT >  0.1968600840) ||
-                                   (fSCeta>=0.8 && fSCeta<1.479 && BDT >  0.0759172100) ||
-                                   (fSCeta>=1.479               && BDT >  -0.5169136775)));
-     }
-	 else
-	 {
-	  	 std::cerr << "[ERROR] EleFiller: no BDT setup for: " << setup << " year!" << std::endl;
-	 }
+    //Addtional information
+    l.addUserFloat("ConversionVeto",l.passConversionVeto());
+    // l.addUserFloat("")
 
     //-- Missing hit  
-	 int missingHit;
-	 missingHit = l.gsfTrack()->hitPattern().numberOfAllHits(HitPattern::MISSING_INNER_HITS);
+	  int missingHit;
+	  missingHit = l.gsfTrack()->hitPattern().numberOfAllHits(HitPattern::MISSING_INNER_HITS);
 	 
     //-- Flag for crack electrons (which use different efficiency SFs)
     bool isCrack = l.isGap();
@@ -220,8 +205,6 @@ EleFiller::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     l.addUserFloat("SIP",SIP);
     l.addUserFloat("dxy",dxy);
     l.addUserFloat("dz",dz);
-    l.addUserFloat("BDT",BDT);    
-    l.addUserFloat("isBDT",isBDT);
     l.addUserFloat("isCrack",isCrack);
     l.addUserFloat("missingHit", missingHit);
     l.addUserFloat("uncorrected_pt",uncorrected_pt);

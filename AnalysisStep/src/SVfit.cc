@@ -66,7 +66,7 @@ SVfit::SVfit (int verbosity, TLorentzVector tau1, TLorentzVector tau2, TLorentzV
     mass1  = 0.51100e-3;
     decay1 = -1;
     l2Type = classic_svFit::MeasuredTauLepton::kTauToMuDecay;
-    mass2  = 0.51100e-3;
+    mass2  = 105.658e-3;
     decay2 = -1;
     kappa_ = 3.;
   }

@@ -68,8 +68,8 @@ CMSSWVERSION = int(CMSSW_VERSION.split("_")[1])
 #     BESTCANDCOMPARATOR = "byBestZ1bestZ2"
 
 # The isolation cuts for electrons and muons. FIXME: there is an hardcoded instance of these values in src/LeptonIsoHelper.cc !!
-ELEISOCUT = 99999. # [FIXME] Remove isolation cuts from the code completely
-MUISOCUT  = 0.35 # [FIXME] Remove isolation cuts from the code completely
+ELEISOCUT = 0.15 # [FIXME] Remove isolation cuts from the code completely
+MUISOCUT  = 0.15 # [FIXME] Remove isolation cuts from the code completely
 
 ### ----------------------------------------------------------------------
 ### Set the GT
@@ -307,11 +307,10 @@ if(IsMC):
 ### ----------------------------------------------------------------------
 ### ----------------------------------------------------------------------
 
-DXY_DZ = "abs(dB('PV2D'))<0.5 && abs(dB('PVDZ'))<1." #dxy, dz cuts
+DXY_DZ = "abs(dB('PV2D'))<0.045 && abs(dB('PVDZ'))<0.2" #dxy, dz cuts
 SIP =  "abs(dB('PV3D')/edB('PV3D')) < 4"
-GOODELECTRON = "userFloat('ID') && " + SIP
-GOODMUON     = "userFloat('ID') && " + SIP
-TIGHTMUON    = "isPFMuon || (passed('CutBasedIdTrkHighPt') && pt>200)"
+GOODELECTRON = "userFloat('isEleNoIsoID90') && " + SIP
+GOODMUON     = "userFloat('mediumID') && " + SIP
 
 APPLYTESCORRECTION = True
 
@@ -381,11 +380,10 @@ process.softMuons = cms.EDProducer("MuFiller",
     src = cms.InputTag("bareSoftMuons"),
     sampleType = cms.int32(SAMPLE_TYPE),
     setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
-    cut = cms.string(DXY_DZ), #dxy, dz cuts
+    cut = cms.string('pt>10 && abs(eta) < 2.5 &&'+ DXY_DZ), #dxy, dz cuts
     # TriggerResultsLabel = cms.InputTag('TriggerResults','','HLT'),
     # TriggerSet = cms.InputTag(TRIGGERSET),
     flags = cms.PSet(
-        ID = cms.string(TIGHTMUON), #"userFloat('isBDT')"), # muonMVA ID
         isSIP = cms.string(SIP),
         isGood = cms.string(GOODMUON),
         isIsoFSRUncorr  = cms.string("userFloat('combRelIsoPF')<" + str(MUISOCUT)),
@@ -429,34 +427,34 @@ if (LEPTON_SETUP == 2016):
     from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
     if ( DATA_TAG == 'ULAPV'):
         setupEgammaPostRecoSeq(process,
-                              runEnergyCorrections=True,
-                              runVID=True,
-                              eleIDModules=['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Summer16UL_ID_ISO_cff','RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV70_cff'],
-                              phoIDModules=['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Fall17_94X_V2_cff'],
+                            #   runEnergyCorrections=True,
+                            #   runVID=True,
+                            #   eleIDModules=['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Summer16UL_ID_ISO_cff','RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV70_cff'],
+                            #   phoIDModules=['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Fall17_94X_V2_cff'],
                               era='2016preVFP-UL')
     else:
         setupEgammaPostRecoSeq(process,
-                              runEnergyCorrections=True,
-                              runVID=True,
-                              eleIDModules=['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Summer16UL_ID_ISO_cff','RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV70_cff'],
-                              phoIDModules=['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Fall17_94X_V2_cff'],
+                            #   runEnergyCorrections=True,
+                            #   runVID=True,
+                            #   eleIDModules=['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Summer16UL_ID_ISO_cff','RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV70_cff'],
+                            #   phoIDModules=['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Fall17_94X_V2_cff'],
                               era='2016postVFP-UL')
 if (LEPTON_SETUP == 2017):
     from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
     setupEgammaPostRecoSeq(process,
-                          runEnergyCorrections=True,
-                          runVID=True,
-                          eleIDModules=['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Summer17UL_ID_ISO_cff', 'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV70_cff'],
-                          phoIDModules=['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Fall17_94X_V2_cff'],
+                        #   runEnergyCorrections=True,
+                        #   runVID=True,
+                        #   eleIDModules=['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Summer17UL_ID_ISO_cff', 'RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV70_cff'],
+                        #   phoIDModules=['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Fall17_94X_V2_cff'],
                           era='2017-UL')
 
 if (LEPTON_SETUP == 2018):
     from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
     setupEgammaPostRecoSeq(process,
-                          runEnergyCorrections=True,
-                          runVID=True,
-                          eleIDModules=['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Summer18UL_ID_ISO_cff','RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV70_cff','RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Fall17_iso_V2_cff'],
-                          phoIDModules=['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Fall17_94X_V2_cff'],
+                        #   runEnergyCorrections=True,
+                        #   runVID=True,
+                        #   eleIDModules=['RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Summer18UL_ID_ISO_cff','RecoEgamma.ElectronIdentification.Identification.heepElectronID_HEEPV70_cff','RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Fall17_iso_V2_cff'],
+                        #   phoIDModules=['RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Fall17_94X_V2_cff'],
                           era='2018-UL')
 
 process.bareSoftElectrons = cms.EDFilter("PATElectronRefSelector",
@@ -470,13 +468,11 @@ process.softElectrons = cms.EDProducer("EleFiller",
 #    TriggerSet = cms.InputTag(TRIGGERSET),
    sampleType = cms.int32(SAMPLE_TYPE),
    setup = cms.int32(LEPTON_SETUP), # define the set of effective areas, rho corrections, etc.
-   cut = cms.string("pt>10 && abs(eta) < 2.5 &&"+ DXY_DZ),
+   cut = cms.string('pt>10 && abs(eta) < 2.5 &&'+ DXY_DZ),
    flags = cms.PSet(
-        ID = cms.string("userFloat('isBDT')"),
         isSIP = cms.string(SIP),
         isGood = cms.string(GOODELECTRON),
         isIsoFSRUncorr  = cms.string("userFloat('combRelIsoPF')<"+str(ELEISOCUT))
-#       Note: passCombRelIsoPFFSRCorr is currently set in LeptonPhotonMatcher for new FSR strategy; in ZZCandidateFiller for the old one
         ),
    )
 
@@ -550,10 +546,11 @@ process.cleanSoftElectrons = cms.EDProducer("PATElectronCleaner",
 
 TAUCUT       = "pt>30 & abs(eta)<2.3"#"tauID('byCombinedIsolationDeltaBetaCorrRaw3Hits') < 1000.0 && pt>18"
 SOSOTAU      = "decayMode()!=5 && decayMode()!=6 && tauID('decayModeFindingNewDMs') == 1 && userFloat('dz') < 1"
-GOODTAU      = SOSOTAU# + " && tauID('byVVVLooseDeepTau2017v2p1VSjet') == 1 && tauID('byVVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byVLooseDeepTau2017v2p1VSmu') == 1"
-GOODTAU_MU   = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
-GOODTAU_ELE  = SOSOTAU + " && tauID('byVLooseDeepTau2017v2p1VSmu') == 1 && tauID('byTightDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
-GOODTAU_TAU  = SOSOTAU + " && tauID('byVLooseDeepTau2017v2p1VSmu') == 1 && tauID('byVVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
+GOODTAU      = SOSOTAU + " && tauID('byVVVLooseDeepTau2017v2p1VSjet') == 1 && tauID('byVVVLooseDeepTau2017v2p1VSe') == 1 && tauID('byVLooseDeepTau2017v2p1VSmu') == 1"
+GOODTAU_MU   = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVVLooseDeepTau2017v2p1VSe') == 1"
+GOODTAU_ELE  = SOSOTAU + " && tauID('byVLooseDeepTau2017v2p1VSmu') == 1 && tauID('byTightDeepTau2017v2p1VSe') == 1"
+GOODTAU_TAU  = SOSOTAU + " && tauID('byVLooseDeepTau2017v2p1VSmu') == 1 && tauID('byVVLooseDeepTau2017v2p1VSe') == 1"
+ISOTAU       = "tauID('byMediumDeepTau2017v2p1VSjet') == 1"
 
 # GOODTAU_MU   = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byVLooseDeepTau2017v2p1VSe') == 1 && tauID('byTightDeepTau2017v2p1VSjet') == 1"
 # GOODTAU_ELE  = SOSOTAU + " && tauID('byTightDeepTau2017v2p1VSmu') == 1 && tauID('byMediumDeepTau2017v2p1VSe') == 1 && tauID('byMediumDeepTau2017v2p1VSjet') == 1"
@@ -630,8 +627,8 @@ process.softTaus = cms.EDProducer("TauFiller",
    ApplyTESCentralCorr = cms.bool(APPLYTESCORRECTION),
    flags = cms.PSet(
         isSIP = cms.string(""),
-        ID = cms.string(GOODTAU),
         isGood = cms.string(GOODTAU),
+        passCombRelIsoPFFSRCorr = cms.string(ISOTAU),
         isGood_Mu  = cms.string(GOODTAU_MU),
         isGood_Ele = cms.string(GOODTAU_ELE),
         isGood_Tau = cms.string(GOODTAU_TAU)
@@ -802,11 +799,11 @@ process.ShiftMETforJER = cms.EDProducer ("ShiftMETforJER",
 
 process.METSequence += process.METSignificance
 process.METSequence += process.ShiftMETcentral
-process.METSequence += process.ShiftMETforTES
-process.METSequence += process.ShiftMETforEES
-process.METSequence += process.ShiftMETforMES
+# process.METSequence += process.ShiftMETforTES
+# process.METSequence += process.ShiftMETforEES
+# process.METSequence += process.ShiftMETforMES
 process.METSequence += process.ShiftMETforJES
-process.METSequence += process.ShiftMETforJER
+# process.METSequence += process.ShiftMETforJER
 #process.METSequence += process.PuppiMETSignificance
 #process.METSequence += process.ShiftPuppiMETcentral
 metTag=uncorrPFMetTag
@@ -853,6 +850,10 @@ process.ecalBadCalibReducedMINIAODFilter = cms.EDFilter(
 ###            Embed additional user variables into final collections
 ### ----------------------------------------------------------------------
 TWOGOODLEPTONS = "( userFloat('d0.isGood') && userFloat('d1.isGood') && userFloat('isGoodTau') )" # Z made of 2 good leptons (ISO not yet applied)
+ISOLEPTON1 = "userFloat('d0.passCombRelIsoPFFSRCorr')"
+ISOLEPTON2 = "userFloat('d1.passCombRelIsoPFFSRCorr')"
+OS = "daughter(0).pdgId()*daughter(1).pdgId() < 0"
+SS = "daughter(0).pdgId()*daughter(1).pdgId() > 0"
 TWOISOLEPTONS = "( userFloat('d0.passCombRelIsoPFFSRCorr') && userFloat('d1.passCombRelIsoPFFSRCorr') )"
 TWOSFLEPTONS = "(abs(daughter(0).pdgId())==15 || abs(daughter(1).pdgId())==15 || abs(daughter(0).pdgId()*daughter(1).pdgId())==143 || abs(daughter(0).pdgId()*daughter(1).pdgId())==169)"
 ### NOTE: Isolation cut has been moved to ZZ candidates as we now correct for FSR of all four photons.
@@ -863,27 +864,33 @@ TWOSFLEPTONS = "(abs(daughter(0).pdgId())==15 || abs(daughter(1).pdgId())==15 ||
 ### ----------------------------------------------------------------------
 
 # l+l- (SFOS, e and mu and tau)
-process.bareZCand = cms.EDProducer("PATCandViewShallowCloneCombiner",
-    decay = cms.string('softLeptons@+ softLeptons@-'),
-    cut = cms.string("True"), # see below
-    checkCharge = cms.bool(True)
+# process.bareZCand = cms.EDProducer("PATCandViewShallowCloneCombiner",
+#     decay = cms.string('softLeptons@+ softLeptons@-'),
+#     cut = cms.string("True"), # see below
+#     checkCharge = cms.bool(True)
+# )
+process.bareZCand = cms.EDProducer("CandViewShallowCloneCombiner",
+    decay = cms.string('softLeptons softLeptons'),
+    #cut = cms.string('deltaR(daughter(0).eta, daughter(0).phi, daughter(1).eta, daughter(1).phi)>0.02'), # protect against ghosts
+    cut = cms.string("True"),
+    checkCharge = cms.bool(False)
 )
 
 if KEEPLOOSECOMB:
     process.bareZCand.cut = cms.string('mass > 0 && '+TWOSFLEPTONS) # Propagate also combinations of loose leptons (for debugging)
 else:
     if FSRMODE == "RunII" : # Just keep combinations of tight leptons (passing ID, SIP and ISO)
-        process.bareZCand.cut = cms.string("mass > 0 && "+TWOSFLEPTONS+" && daughter(0).masterClone.userFloat('isGood') && daughter(1).masterClone.userFloat('isGood') && daughter(0).masterClone.userFloat('passCombRelIsoPFFSRCorr') &&  daughter(1).masterClone.userFloat('passCombRelIsoPFFSRCorr')")
+        process.bareZCand.cut = cms.string("deltaR(daughter(0).eta, daughter(0).phi, daughter(1).eta, daughter(1).phi)>0.02 && mass > 0 && "+TWOSFLEPTONS+" && daughter(0).masterClone.userFloat('isGood') && daughter(1).masterClone.userFloat('isGood') && daughter(0).masterClone.userFloat('passLooseCombRelIsoPFFSRCorr') && daughter(1).masterClone.userFloat('passLooseCombRelIsoPFFSRCorr')")
     else : # Just keep combinations of tight leptons (passing ID and SIP; iso cannot be required at this point if FSRMode is "skip")
         process.bareZCand.cut = cms.string("mass > 0 && "+TWOSFLEPTONS+" && daughter(0).masterClone.userFloat('isGood') && daughter(1).masterClone.userFloat('isGood')")
         
 
 #FLAVOUR     = "((daughter(0).pdgId()*daughter(1).pdgId()==-121 && userFloat('eleHLTMatch')) ||  (daughter(0).pdgId()*daughter(1).pdgId()==-169 && userFloat('muHLTMatch')))"
 
-BESTZ_AMONG = ( TWOGOODLEPTONS + "&&" + TWOISOLEPTONS + "&& userFloat('DR')>0.5" )
+# BESTZ_AMONG = ( TWOGOODLEPTONS + "&&" + TWOISOLEPTONS + "&& userFloat('DR')>0.5" )
+BESTZ_AMONG = ( TWOGOODLEPTONS + "&& userFloat('DR')>0.5" )
 
 TWOGOODISOLEPTONS = ( TWOGOODLEPTONS + "&&" + TWOISOLEPTONS )
-
 
 process.ZCand = cms.EDProducer("ZCandidateFiller",
     src	       = cms.InputTag("bareZCand"),
@@ -897,7 +904,12 @@ process.ZCand = cms.EDProducer("ZCandidateFiller",
     FSRMode = cms.string(FSRMODE), # "skip", "RunII"
     flags = cms.PSet(
         GoodLeptons = cms.string(TWOGOODLEPTONS),
+        IsoLeptons = cms.string(TWOISOLEPTONS),
         GoodIsoLeptons = cms.string(TWOGOODISOLEPTONS),
+        OS = cms.string(OS),
+        SS = cms.string(SS),
+        IsoLepton1 = cms.string(ISOLEPTON1),
+        IsoLepton2 = cms.string(ISOLEPTON2)
         # Z1Presel = cms.string(Z1PRESEL),
     )
 )
@@ -1391,7 +1403,7 @@ process.cleanJets = cms.EDProducer("JetsWithLeptonsRemover",
                                    Diboson   = cms.InputTag(""),
                                    JetPreselection      = cms.string("pt>20 && abs(eta)<4.7 && userFloat('JetID') && (userFloat('PUjetID') || pt>50)"),
                                    MuonPreselection = cms.string("userFloat('isGood') && userFloat('passCombRelIsoPFFSRCorr')"),
-                                   ElectronPreselection = cms.string("userFloat('isGood')"),
+                                   ElectronPreselection = cms.string("userFloat('isGood') && userFloat('passCombRelIsoPFFSRCorr')"),
                                    DiBosonPreselection  = cms.string(""),
                                    MatchingType = cms.string("byDeltaR"),
                                    cleanFSRFromLeptons = cms.bool(True),
@@ -1437,7 +1449,7 @@ if (RECORRECTMET and SAMPLE_TYPE == 2017):
 #                                                                                                                                                                      
 #    ### somehow MET recorrection gets this lost again...                                                                                                                 
     process.patJetsReapplyJEC.userData.userFloats.src += ['pileupJetIdUpdated:fullDiscriminant']
-    process.patJetsReapplyJEC.userData.userInts.src += ['pileupJetIdUpdated:fullId']                                                                              
+    process.patJetsReapplyJEC.userData.userInts.src +=['pileupJetIdUpdated:fullId']                                                                              
 
 if (RECORRECTMET and SAMPLE_TYPE == 2018):
 

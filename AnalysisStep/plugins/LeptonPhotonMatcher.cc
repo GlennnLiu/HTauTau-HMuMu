@@ -365,12 +365,13 @@ LeptonPhotonMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
         const pat::PFParticle* gamma = g->get();
         double dR = ROOT::Math::VectorUtil::DeltaR(gamma->momentum(),m->momentum());
         // Check if the photon is in the lepton's iso cone and not vetoed
-        if (dR<0.3 && dR > 0.01) {
+        if (dR<0.4 && dR > 0.01) {
           fsrCorr += gamma->pt();
         }
       } 
       float combRelIsoPFCorr =  LeptonIsoHelper::combRelIsoPF(sampleType, setup, rhoForMu, *m, fsrCorr);
       m->addUserFloat("combRelIsoPFFSRCorr", combRelIsoPFCorr);
+      m->addUserFloat("passLooseCombRelIsoPFFSRCorr",combRelIsoPFCorr < 0.5);
       m->addUserFloat("passCombRelIsoPFFSRCorr",combRelIsoPFCorr < muon_iso_cut);
     }
 
@@ -386,6 +387,7 @@ LeptonPhotonMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
       float combRelIsoPFCorr =  LeptonIsoHelper::combRelIsoPF(sampleType, setup, rhoForEle, *e, fsrCorr);
       e->addUserFloat("combRelIsoPFFSRCorr", combRelIsoPFCorr);
+      e->addUserFloat("passLooseCombRelIsoPFFSRCorr",combRelIsoPFCorr < 0.5);
       e->addUserFloat("passCombRelIsoPFFSRCorr",combRelIsoPFCorr < electron_iso_cut);
     }
 
@@ -404,6 +406,7 @@ LeptonPhotonMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
         float combRelIsoPFCorr = LeptonIsoHelper::combRelIsoPF(sampleType, setup, rhoForEle, *e, fsrCorr);
         e->addUserFloat("combRelIsoPFFSRCorr", combRelIsoPFCorr);
         // Isolation is included in TLE ID
+        e->addUserFloat("passLooseCombRelIsoPFFSRCorr",combRelIsoPFCorr < 0.5);
         e->addUserFloat("passCombRelIsoPFFSRCorr",combRelIsoPFCorr < electron_iso_cut);
       }
     }
@@ -422,6 +425,7 @@ LeptonPhotonMatcher::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
         }
         float combRelIsoPFCorr = LeptonIsoHelper::combRelIsoPF(sampleType, setup, rhoForEle, *e, fsrCorr);
         e->addUserFloat("combRelIsoPFFSRCorr", combRelIsoPFCorr);
+        e->addUserFloat("passLooseCombRelIsoPFFSRCorr",combRelIsoPFCorr < 0.5);
         e->addUserFloat("passCombRelIsoPFFSRCorr",combRelIsoPFCorr < electron_iso_cut);
       }
     }
