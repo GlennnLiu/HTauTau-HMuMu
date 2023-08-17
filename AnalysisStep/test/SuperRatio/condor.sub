@@ -1,0 +1,6 @@
+executable = $(directory).sh
+output = $(directory).$(ClusterId).out
+error = $(directory).$(ClusterId).err
+log = $(directory).$(ClusterId).log
+periodic_remove = False
++JobFlavour = "tomorrow"

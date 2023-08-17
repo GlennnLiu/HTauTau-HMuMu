@@ -1,0 +1,14 @@
+[INFO] Get histos from /eos/home-g/geliu/LepUni/Histos/UL2016/DistributionPlots/CRQCDTree.diBoson.root
+[INFO] Get histos from /eos/home-g/geliu/LepUni/Histos/UL2016/DistributionPlots/CRQCDTree.triBoson.root
+[INFO] Get histos from /eos/home-g/geliu/LepUni/Histos/UL2016/DistributionPlots/CRQCDTree.top.root
+[INFO] Get histos from /eos/home-g/geliu/LepUni/Histos/UL2016/DistributionPlots/CRQCDTree.EWKZee.root
+[INFO] Get histos from /eos/home-g/geliu/LepUni/Histos/UL2016/DistributionPlots/CRQCDTree.EWKZtt.root
+[INFO] Get histos from /eos/home-g/geliu/LepUni/Histos/UL2016/DistributionPlots/CRQCDTree.EWKZmm.root
+[INFO] Get histos from /eos/home-g/geliu/LepUni/Histos/UL2016/DistributionPlots/CRQCDTree.DYee.root
+[INFO] Get histos from /eos/home-g/geliu/LepUni/Histos/UL2016/DistributionPlots/CRQCDTree.DYtt.root
+[INFO] Get histos from /eos/home-g/geliu/LepUni/Histos/UL2016/DistributionPlots/CRQCDTree.DYmm.root
+[INFO] Get histos from /eos/home-g/geliu/LepUni/Histos/UL2016/DistributionPlots/CRQCDTree.Wjet.root
+[INFO] Get histos from /eos/home-g/geliu/LepUni/Histos/UL2016/DistributionPlots/CRQCDTree.TTfake.root
+[INFO] Get histos from /eos/home-g/geliu/LepUni/Histos/UL2016/DistributionPlots/CRQCDTree.Data.root
+[INFO] Total MC summed
+[INFO] Saved Histos to /eos/home-g/geliu/LepUni/Histos/UL2016/DistributionPlots/CRQCDTree.TotalMC.root

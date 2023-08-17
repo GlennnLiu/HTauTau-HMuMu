@@ -1,7 +1,7 @@
 import os,glob
 
 i=1
-log="8845175"
+log="9468244"
 f=open("leftJobs.txt","w")
 for l in glob.glob("*Chunk*"):
 	os.system("grep 'terminated' {0}/log/{1}.log > tmp.txt".format(l,log))
@@ -20,7 +20,7 @@ for l in glob.glob("*Chunk*"):
         nfinish=len(open("tmp.txt").readlines())
 	os.system("{1} 'FileReadError' /eos/home-g/geliu/LepUni/BigTrees/UL/2016/{0}/log* > tmp.txt".format(l,"zgrep" if not os.path.exists("/eos/home-g/geliu/LepUni/BigTrees/UL/2016/{0}/log.txt".format(l)) else "grep"))
         os.system("{1} 'FileOpenError' /eos/home-g/geliu/LepUni/BigTrees/UL/2016/{0}/log* >> tmp.txt".format(l,"zgrep" if not os.path.exists("/eos/home-g/geliu/LepUni/BigTrees/UL/2016/{0}/log.txt".format(l)) else "grep"))
-	#os.system("{1} 'fatal' /eos/home-g/geliu/LepUni/BigTrees/UL/2016/{0}/log* >> tmp.txt".format(l,"zgrep" if not os.path.exists("/eos/home-g/geliu/LepUni/BigTrees/UL/2016/{0}/log.txt".format(l)) else "grep"))
+	os.system("{1} 'A fatal system signal has occurred' /eos/home-g/geliu/LepUni/BigTrees/UL/2016/{0}/log* >> tmp.txt".format(l,"zgrep" if not os.path.exists("/eos/home-g/geliu/LepUni/BigTrees/UL/2016/{0}/log.txt".format(l)) else "grep"))
 	nerror=len(open("tmp.txt").readlines())
 	#print(l,nter,nerror,os.path.exists("/eos/home-g/geliu/LepUni/BigTrees/UL/2016/{0}/log.txt".format(l)))
 	if nter>0 and nsucc>0 and nfinish>0 and nerr==0 and nerror==0:

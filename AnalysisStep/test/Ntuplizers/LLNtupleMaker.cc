@@ -1627,12 +1627,13 @@ void LLNtupleMaker::analyze(const edm::Event& event, const edm::EventSetup& eSet
   Float_t best_DiJetMass=0;
   for (unsigned i=0; i<cleanedJets.size(); ++i) {
     for (unsigned j=i+1; j<cleanedJets.size(); ++j) {
-      Float_t DeltaEtaJJ, DiJetMass;
-      DeltaEtaJJ=fabs(cleanedJets[i]->eta()-cleanedJets[j]->eta());
-      DiJetMass=(cleanedJets[i]->p4()+cleanedJets[j]->p4()).M();
-      if (DeltaEtaJJ<2.5 || DiJetMass<350) continue;
-      if (DiJetMass>best_DiJetMass) {
-        best_DiJetMass=DiJetMass;
+      Float_t _DeltaEtaJJ, _DiJetMass;
+      _DeltaEtaJJ=fabs(cleanedJets[i]->eta()-cleanedJets[j]->eta());
+      _DiJetMass=(cleanedJets[i]->p4()+cleanedJets[j]->p4()).M();
+      if (_DeltaEtaJJ<2.5 || _DiJetMass<350) continue;
+      if (_DiJetMass>DiJetMass) {
+        DiJetMass=_DiJetMass;
+        DeltaEtaJJ=_DeltaEtaJJ;
         VBFJetIdx1=i;
         VBFJetIdx2=j;
       }

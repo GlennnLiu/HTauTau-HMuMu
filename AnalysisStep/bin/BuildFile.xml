@@ -5,36 +5,25 @@
 <use name="rootrflx"/>
 <use name="roofitcore"/>
 
-<!-- <library   file="../test/ZpXEstimation/src/*.cpp" name="HTauTauHMuMuAnalysisStepTestZpXEstimationSrc">
+<library   file="../test/SuperRatio/src/*.cpp" name="HTauTauHMuMuAnalysisStepTestSuperRatioSrc">
 </library>
+
+<bin   name="LTauFakeRate" file="../test/SuperRatio/LTauFakeRate.cpp">
+   <lib   name="HTauTauHMuMuAnalysisStepTestSuperRatioSrc"/>
+</bin>
+
+<bin   name="TauTauFakeRate" file="../test/SuperRatio/TauTauFakeRate.cpp">
+   <lib   name="HTauTauHMuMuAnalysisStepTestSuperRatioSrc"/>
+</bin>
+
+<bin   name="LLFakeRate" file="../test/SuperRatio/LLFakeRate.cpp">
+   <lib   name="HTauTauHMuMuAnalysisStepTestSuperRatioSrc"/>
+</bin>
 
 <library   file="../test/Plotter/src/*.cpp" name="HTauTauHMuMuAnalysisStepTestPlotterSrc">
 </library>
-
-<library   file="../test/Datacards/src/*.cpp" name="HTauTauHMuMuAnalysisStepTestDatacardsSrc">
-</library>
-
-<bin   name="run_OS" file="../test/ZpXEstimation/run_OS.cpp">
-   <lib   name="HTauTauHMuMuAnalysisStepTestZpXEstimationSrc"/>
-</bin>
-
-<bin   name="run_SS" file="../test/ZpXEstimation/run_SS.cpp">
-   <lib   name="HTauTauHMuMuAnalysisStepTestZpXEstimationSrc"/>
-</bin>
 
 <bin   name="DistributionPlots" file="../test/Plotter/DistributionPlots.cpp">
    <lib   name="HTauTauHMuMuAnalysisStepTestPlotterSrc"/>
 </bin>
 
-<bin   name="PlotterTest" file="../test/Plotter/Test.cpp">
-   <lib   name="HTauTauHMuMuAnalysisStepTestPlotterSrc"/>
-</bin>
-
-<bin   name="CRPlots" file="../test/Plotter/CRPlots.cpp">
-   <lib   name="HTauTauHMuMuAnalysisStepTestPlotterSrc"/>
-</bin>
-
-<bin   name="CreateDatacards" file="../test/Datacards/CreateDatacards.cpp">
-   <lib   name="HTauTauHMuMuAnalysisStepTestDatacardsSrc"/>
-</bin>
- -->

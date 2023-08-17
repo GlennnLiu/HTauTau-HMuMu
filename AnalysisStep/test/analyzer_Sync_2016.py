@@ -20,7 +20,7 @@ PROCESS_CRWJ = True
 #OLDPATTRIGGER = False#True
 #For DATA: 
 IsMC = False
-PD = "SingleMuon"
+PD = "MuonEG"
 
 # Get absolute path
 import os
@@ -51,7 +51,10 @@ process.source.fileNames = cms.untracked.vstring(
 #"/store/mc/RunIISummer20UL16MiniAODv2/VBFHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mcRun2_asymptotic_v17-v2/230000/00C065D5-4429-EB4B-9F43-28AE1A146705.root"
 #"/store/mc/RunIISummer20UL16MiniAODv2/VBFHToMuMu_M125_TuneCP5_withDipoleRecoil_13TeV-powheg-pythia8/MINIAODSIM/106X_mcRun2_asymptotic_v17-v1/70000/19F81AB8-D7F9-9F4D-8EE5-33E37F67E10D.root"
 #"/store/mc/RunIISummer20UL16MiniAODv2/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mcRun2_asymptotic_v17-v1/120000/038D9F5E-C340-FD45-B613-DD495181C237.root"
-'/store/data/Run2016H/SingleMuon/MINIAOD/UL2016_MiniAODv2-v2/120000/DA9B9166-C273-E54C-8957-7E54DACC6999.root'
+#"/store/mc/RunIISummer20UL16MiniAODv2/ttHToTauTau_M125_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mcRun2_asymptotic_v17-v2/100000/F57A13F1-6532-6B48-9EEA-FFAD83A577FB.root"
+
+'/store/test/xrootd/T1_US_FNAL/store/data/Run2016H/MuonEG/MINIAOD/UL2016_MiniAODv2-v2/270000/C28ACFB8-C88C-9042-B0A2-869DC0B3FC39.root'
+#'/store/data/Run2016H/SingleMuon/MINIAOD/UL2016_MiniAODv2-v2/120000/DA9B9166-C273-E54C-8957-7E54DACC6999.root'
 ### APV ###
 # "/store/mc/RunIISummer20UL16MiniAODAPVv2/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/120000/008E4139-6019-CE4C-B83C-A849F56F57B3.root"
 )

@@ -230,6 +230,10 @@ process.CRQCDvSRTree = TreeSetup.clone()
 process.CRQCDvSRTree.channel = 'CRQCDvSR'
 process.CRQCDvSRTree.cut = cms.string('userFloat("SS") && !userFloat("IsoLepton1") && userFloat("NmedB")<1')
 
+process.CRQCDvSROS1Tree = TreeSetup.clone()
+process.CRQCDvSROS1Tree.channel = 'CRQCDvSROS1'
+process.CRQCDvSROS1Tree.cut = cms.string('userFloat("OS") && !userFloat("IsoLepton1") && userFloat("IsoLepton2") && userFloat("NmedB")<1')
+
 process.CRQCDvSROSTree = TreeSetup.clone()
 process.CRQCDvSROSTree.channel = 'CRQCDvSROS'
 process.CRQCDvSROSTree.cut = cms.string('userFloat("OS") && !userFloat("IsoLepton1") && !userFloat("IsoLepton2") && userFloat("NmedB")<1')
@@ -312,36 +316,11 @@ process.dumpUserData =  cms.EDAnalyzer("dumpUserData",
     jetSrc = cms.InputTag("cleanJets"),
 )
 
-process.trees = cms.EndPath(process.SRTree)
-if PROCESS_CR:
-   process.trees += cms.Sequence( process.CRQCDTree + process.CRWJTree + process.CRQCDvSRTree + process.CRQCDvSROSTree + process.CRQCDvSRSSTree + process.CRAPPOSTree + process.CRAPPSSTree)
-if PROCESS_CRTT:
-   process.trees += process.CRTTTree
-if PROCESS_CRWJ:
-   process.trees += process.CRWJvSRTree
-
-# if (PROCESS_CR or not IsMC):
-#     process.CRPath = cms.Path(process.CR)
-#     if (not IsMC):
-#         process.dump = cms.Path(process.ZZFiltered + process.ZZSelection + process.dumpUserData)
-#         process.dumpCR = cms.Path(process.CRFiltered + process.CRSelection + process.dumpUserData)
-#     process.trees = cms.EndPath( process.ZZTree + process.CRZLLTree + process.CRZLTree)
-# else:
-# #    process.CRPath = cms.Path(process.CRZl) #still needed by the plotter
-#     process.trees = cms.EndPath(process.ZZTree)
-
-# process.plots = cms.EndPath(process.PlotsZZ)
-
-
-# if (ADDLOOSEELE) :
-#     if (PROCESS_CR or not IsMC):
-#         process.CRPath += process.CRlooseEle
-#         process.trees += cms.Sequence( process.ZZTreelooseEle + process.CRZLLTreelooseEle + process.CRZLTreelooseEle + process.CRZLLTreeZ1RSE)
-#         #process.CRPath += process.CRtle
-#         #process.trees += cms.Sequence( process.ZZTreetle + process.CRZLLTreetle + process.CRZLTreetle)
-#     else:
-#         process.trees += cms.Sequence(process.ZZTreelooseEle)
-#         #process.trees += cms.Sequence(process.ZZTreetle)
-
-# if (ADDZTREE) :
-#      process.trees += cms.Sequence(process.ZTree)
+process.trees = cms.EndPath(process.CRQCDvSROS1Tree)
+# process.trees = cms.EndPath(process.SRTree)
+# if PROCESS_CR:
+#    process.trees += cms.Sequence( process.CRQCDTree + process.CRWJTree + process.CRQCDvSRTree + process.CRQCDvSROS1Tree + process.CRQCDvSROSTree + process.CRQCDvSRSSTree + process.CRAPPOSTree + process.CRAPPSSTree)
+# if PROCESS_CRTT:
+#    process.trees += process.CRTTTree
+# if PROCESS_CRWJ:
+#    process.trees += process.CRWJvSRTree
