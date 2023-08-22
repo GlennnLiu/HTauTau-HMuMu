@@ -976,16 +976,15 @@ int TauTau::FindCategory()
     int category=-1;
     int njet = NumberOfJets();
     if (njet == 0) {
-        if (LLPt<=10) category = 0;
-        else category = 1;
+        category = 0;
     }
     else if (VBFJetIdx1>=0) {
-        if (LLPt<=200) category = 2;
-        else category = 3;
+        if ((LLSVPt>0?LLSVPt:LLPt)<=200) category = 1;
+        else category = 2;
     }
     else {
-        if (njet == 1) category = 4;
-        else category = 5;
+        if (njet == 1) category = 3;
+        else category = 4;
     }
     return category;
 }

@@ -56,6 +56,8 @@ public :
    Float_t         LLPhi;
    Short_t         LLFlav;
    Float_t         LLDR;
+   Float_t         LLSVPt;
+
 
    Float_t         MtLMET;
    Float_t         Pzeta1;
@@ -185,6 +187,7 @@ public :
    TBranch        *b_LLPhi;
    TBranch        *b_LLFlav;
    TBranch        *b_LLDR;
+   TBranch        *b_LLSVPt;
 
    TBranch        *b_MtLMET;
    TBranch        *b_Pzeta1;
@@ -411,6 +414,7 @@ void Tree::Init(TTree *tree, TString input_file_name, bool notZLregion)
    fChain->SetBranchAddress("LLPhi", &LLPhi, &b_LLPhi);
    fChain->SetBranchAddress("LLFlav", &LLFlav, &b_LLFlav);
    fChain->SetBranchAddress("LLDR", &LLDR, &b_LLDR);
+   fChain->SetBranchAddress("LLSVPt", &LLSVPt, &b_LLSVPt);
 
    fChain->SetBranchAddress("MtLMET", &MtLMET, &b_MtLMET);
    fChain->SetBranchAddress("Pzeta1", &Pzeta1, &b_Pzeta1);

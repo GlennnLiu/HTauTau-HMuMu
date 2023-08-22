@@ -112,6 +112,9 @@ class MCHistoryTools {
 
   static int fsrMatch(const reco::Candidate* recoFSR, const std::vector<const reco::Candidate*>& genFSRs);
 
+  Float_t getHTAll();
+  Float_t getHTJet();
+
  private:
   edm::Handle<edm::View<reco::Candidate> > particles;
   edm::Handle<edm::View<pat::PackedGenParticle> > packed; //ATbbf

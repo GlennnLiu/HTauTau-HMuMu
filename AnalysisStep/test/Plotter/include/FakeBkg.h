@@ -32,7 +32,7 @@ class FakeBkg {
     const TF1 *LTau_fClosure_FR[3/*#fakeBkg*/][2/*#finalState*/][3/*#ntauptBin*/];
     const TF1 *LTau_fQCDvsSR_FR[2/*#finalState*/];
     const TF1 *LTau_fWJvsSR_FR[2/*#finalState*/];
-    TH1F *LTau_hFrac_FR[3/*#fakeBkg*/][2/*#finalState*/][6/*#category*/];
+    TH1F *LTau_hFrac_FR[3/*#fakeBkg*/][2/*#finalState*/][5/*#category*/];
 
     TFile *f_TauTau_FR, *f_TauTau_Closure_FR, *f_TauTau_QCDvsSR_FR;
     const TF1 *TauTau_f_FR[3/*#njetBin*/];
@@ -43,7 +43,7 @@ class FakeBkg {
     const TF1 *LL_f_FR[2/*#fakeBkg*/];
     TH2F *LL_hClosure_FR[2/*#fakeBkg*/];
     TH2F *LL_hQCDvsSR_FR;
-    TH1F *LL_hFrac_FR[2/*#fakeBkg*/][6/*#category*/];
+    TH1F *LL_hFrac_FR[2/*#fakeBkg*/][5/*#category*/];
 
     void disabled() const{
       std::cerr << std::endl << "ERROR! Method has been disabled!"<< std::endl;

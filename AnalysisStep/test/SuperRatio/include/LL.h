@@ -39,7 +39,7 @@
 using namespace std;
 
 const int num_of_final_states      = 1;
-const int num_of_categories        = 6;
+const int num_of_categories        = 5;
 const int num_of_fr_variations     = Settings::num_of_fr_variations;
 const int num_of_njet_bins         = 3;
 const int num_of_fake_bkg          = 2;

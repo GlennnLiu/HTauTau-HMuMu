@@ -46,9 +46,11 @@ public:
 	enum _category
 	{
 		catGGH = 0,
-		catVBF = 1,
-		catBoost = 2,
-		catAll = 3,
+		catVBF_ptHl200 = 1,
+		catVBF_ptHg200 = 2,
+		catBoost_1j = 3,
+		catBoost_2j = 4,
+		catAll = 5,
 		MAX_NUM_OF_CATEGORIES
 	};
 

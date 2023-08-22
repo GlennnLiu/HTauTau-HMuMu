@@ -35,8 +35,10 @@ TreeToHist::TreeToHist():Tree()
     _s_final_state.push_back("2l");
     
     _s_category.push_back("GGH");
-    _s_category.push_back("VBF");
-    _s_category.push_back("Boost");
+    _s_category.push_back("VBF_ptHl200");
+    _s_category.push_back("VBF_ptHg200");
+    _s_category.push_back("Boost_1j");
+    _s_category.push_back("Boost_2j");
     _s_category.push_back("All");
     
     _lumi=16.8;
@@ -100,7 +102,7 @@ void TreeToHist::ToHistos(string* process, int n_proc, int i_proc)
                 _current_process = FindProcess(i_proc);
             } 
 
-            _current_category=FindCategory(NumberOfJets(),false);
+            _current_category=FindCategory(NumberOfJets(),true);
 
             TLorentzVector l1,l2,MET;
             l1.SetPtEtaPhiM(LepPt->at(0),LepEta->at(0),LepPhi->at(0),LepM->at(0));
@@ -165,7 +167,7 @@ void TreeToHist::ToHistosFake(string* data, int n_data, string* bkg, int n_bkg, 
 
             _current_final_state = FindFinalState();
             int njet = NumberOfJets();
-            _current_category=FindCategory(njet,false);
+            _current_category=FindCategory(njet,true);
 
             TLorentzVector l1,l2,MET;
             l1.SetPtEtaPhiM(LepPt->at(0),LepEta->at(0),LepPhi->at(0),LepM->at(0));
@@ -230,7 +232,7 @@ void TreeToHist::ToHistosFake(string* data, int n_data, string* bkg, int n_bkg, 
 
             _current_final_state = FindFinalState();
             int njet = NumberOfJets();
-            _current_category=FindCategory(njet,false);
+            _current_category=FindCategory(njet,true);
 
             TLorentzVector l1,l2,MET;
             l1.SetPtEtaPhiM(LepPt->at(0),LepEta->at(0),LepPhi->at(0),LepM->at(0));
@@ -298,7 +300,7 @@ void TreeToHist::ToHistosFake(string* data, int n_data, string* bkg, int n_bkg, 
 
             _current_final_state = FindFinalState();
             int njet = NumberOfJets();
-            _current_category=FindCategory(njet,false);
+            _current_category=FindCategory(njet,true);
 
             if (_current_final_state==Settings::fsemu) {
                 int cat=FindCategory(njet,true);
@@ -362,7 +364,7 @@ void TreeToHist::ToHistosFake(string* data, int n_data, string* bkg, int n_bkg, 
 
             _current_final_state = FindFinalState();
             int njet = NumberOfJets();
-            _current_category=FindCategory(njet,false);
+            _current_category=FindCategory(njet,true);
 
             if (_current_final_state==Settings::fsemu) {
                 int cat=FindCategory(njet,true);
@@ -811,6 +813,7 @@ void TreeToHist::ToPlotsRatio(bool addSignal, bool setLog)
                 c->SetLeftMargin(0.12);
                 c->SetBottomMargin(0.25);
                 c->SetRightMargin(0);
+                gPad->RedrawAxis();
                 c->SaveAs(_savepath+_directory+".Plots/"+name+".png");
                 // c->SaveAs(_savepath+_directory+".Plots/"+name+".pdf","pdf");
             }
@@ -908,16 +911,15 @@ int TreeToHist::FindCategory(int njet, bool fine)
     int category=-1;
     if (fine) {
         if (njet == 0) {
-            if (LLPt<=10) category = 0;
-            else category = 1;
+            category = 0;
         }
         else if (VBFJetIdx1>=0) {
-            if (LLPt<=200) category = 2;
-            else category = 3;
+            if ((LLSVPt>0?LLSVPt:LLPt)<=200) category = 1;
+            else category = 2;
         }
         else {
-            if (njet == 1) category = 4;
-            else category = 5;
+            if (njet == 1) category = 3;
+            else category = 4;
         }
     }
     else {

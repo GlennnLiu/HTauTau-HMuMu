@@ -34,8 +34,7 @@ LL::LL():Tree()
     // _s_final_state.push_back("emu");
     // _s_final_state.push_back("2l");
     
-    _s_categories.push_back("GGH_ptHl10");
-    _s_categories.push_back("GGH_ptHg10");
+    _s_categories.push_back("GGH");
     _s_categories.push_back("VBF_ptHl200");
     _s_categories.push_back("VBF_ptHg200");
     _s_categories.push_back("Boost_1j");
@@ -1250,16 +1249,15 @@ int LL::FindCategory()
     int category=-1;
     int njet = NumberOfJets();
     if (njet == 0) {
-        if (LLPt<=10) category = 0;
-        else category = 1;
+        category = 0;
     }
     else if (VBFJetIdx1>=0) {
-        if (LLPt<=200) category = 2;
-        else category = 3;
+        if ((LLSVPt>0?LLSVPt:LLPt)<=200) category = 1;
+        else category = 2;
     }
     else {
-        if (njet == 1) category = 4;
-        else category = 5;
+        if (njet == 1) category = 3;
+        else category = 4;
     }
     return category;
 }

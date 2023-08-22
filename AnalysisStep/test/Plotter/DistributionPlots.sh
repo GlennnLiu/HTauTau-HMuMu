@@ -7,5 +7,6 @@ source /cvmfs/cms.cern.ch/cmsset_default.sh
 cd /afs/cern.ch/user/g/geliu/LepUni_incl/CMSSW_10_6_26/src/
 cmsenv
 ulimit -s unlimited
+cd /eos/home-g/geliu/LepUni/Histos/UL2016/DistributionPlots/
 mkdir /eos/home-g/geliu/LepUni/Histos/UL2016/DistributionPlots/Plots
 DistributionPlots --region

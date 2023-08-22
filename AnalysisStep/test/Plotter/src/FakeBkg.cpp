@@ -50,8 +50,7 @@ FakeBkg::FakeBkg(const std::string& year, const std::string& path) {
     _s_final_state.push_back("tautau");
     _s_final_state.push_back("emu");
 
-    _s_categories.push_back("GGH_ptHl10");
-    _s_categories.push_back("GGH_ptHg10");
+    _s_categories.push_back("GGH");
     _s_categories.push_back("VBF_ptHl200");
     _s_categories.push_back("VBF_ptHg200");
     _s_categories.push_back("Boost_1j");
@@ -99,7 +98,7 @@ FakeBkg::FakeBkg(const std::string& year, const std::string& path) {
     f_LTau_Frac=ensureTFile(path+"LTau.Step4_Fraction.root");
     for (int i_bkg=0;i_bkg<2+1;i_bkg++) {
         for (int i_fs=0;i_fs<2;i_fs++) {
-            for (int i_cat=0;i_cat<6;i_cat++) {
+            for (int i_cat=0;i_cat<5;i_cat++) {
                 _histo_name="hFrac_FR_"+_s_fake_bkg.at(i_bkg)+"_"+_s_final_state.at(i_fs)+"_"+_s_categories.at(i_cat);
                 LTau_hFrac_FR[i_bkg][i_fs][i_cat]=extractTH1(f_LTau_Frac,_histo_name);
             }
@@ -138,7 +137,7 @@ FakeBkg::FakeBkg(const std::string& year, const std::string& path) {
 
     f_LL_Frac=ensureTFile(path+"LL.Step4_Fraction.root");
     for (int i_bkg=0;i_bkg<2;i_bkg++) {
-        for (int i_cat=0;i_cat<6;i_cat++) {
+        for (int i_cat=0;i_cat<5;i_cat++) {
             _histo_name="hFrac_FR_"+_s_fake_bkg.at(i_bkg==0?0:2)+"_"+_s_final_state.at(3)+"_"+_s_categories.at(i_cat);
             LL_hFrac_FR[i_bkg][i_cat]=extractTH1(f_LL_Frac,_histo_name);
         }

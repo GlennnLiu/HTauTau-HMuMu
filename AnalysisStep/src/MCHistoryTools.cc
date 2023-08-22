@@ -591,3 +591,19 @@ int MCHistoryTools::fsrMatch(const reco::Candidate* recoFSR,
 
   return matchIdx;
 }
+
+Float_t MCHistoryTools::getHTAll() {
+  Float_t HT=0.;
+  for( View<pat::PackedGenParticle>::const_iterator p = packed->begin(); p != packed->end(); ++ p ) {
+    HT+=p->pt();
+  }
+  return HT;
+}
+
+Float_t MCHistoryTools::getHTJet() {
+  Float_t HT=0.;
+  for( View<GenJet>::const_iterator p = jets->begin(); p != jets->end(); ++ p ) {
+    HT+=p->pt();
+  }
+  return HT;
+}

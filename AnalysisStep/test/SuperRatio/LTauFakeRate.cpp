@@ -62,19 +62,19 @@ int main( int argc, char *argv[] )
     cout<<"---------------------------------------------------"<<endl;
     cout<<"----------Step 1: compute fake rates---------------"<<endl;
     cout<<"---------------------------------------------------"<<endl;
-    ltau->Step1_FakeRate_DeclareHistos();
-    ltau->Step1_FakeRate_FillHistos();
-    ltau->Step1_FakeRate_Compute();
-    ltau->Step1_FakeRate_SaveHistos();
-    ltau->Step1_FakeRate_GetHistos();
+    // ltau->Step1_FakeRate_DeclareHistos();
+    // ltau->Step1_FakeRate_FillHistos();
+    // ltau->Step1_FakeRate_Compute();
+    // ltau->Step1_FakeRate_SaveHistos();
+    // ltau->Step1_FakeRate_GetHistos();
 
     cout<<"---------------------------------------------------"<<endl;
     cout<<"----------Step 2: compute closure factors----------"<<endl;
     cout<<"---------------------------------------------------"<<endl;
-    ltau->Step2_Closure_DeclareHistos();
-    ltau->Step2_Closure_FillHistos();
-    ltau->Step2_Closure_Compute();
-    ltau->Step2_Closure_SaveHistos();
+    // ltau->Step2_Closure_DeclareHistos();
+    // ltau->Step2_Closure_FillHistos();
+    // ltau->Step2_Closure_Compute();
+    // ltau->Step2_Closure_SaveHistos();
 
     cout<<"---------------------------------------------------"<<endl;
     cout<<"----------Step 3.1: Diff vs SR for QCD-------------"<<endl;
